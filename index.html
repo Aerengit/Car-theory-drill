@@ -110,7 +110,7 @@ summary::-webkit-details-marker{display:none}
 </div></header>
 <main class="wrap" id="app"></main>
 <script>
-window.AVAIL=["en", "nl"];
+window.AVAIL=["en", "nl", "tr"];
 const YN=["Yes","No"], HZ=["Brake","Release accelerator","Do nothing"];
 const STR={
 lang:"en",kmh:"km/h",you:"YOU",sceneAria:"Top view of the intersection",signAria:"Traffic sign",
@@ -118,6 +118,7 @@ yn:YN,
 kinds:{car:"car",bike:"cyclist",moped:"moped rider",tram:"tram"},
 topics:{priority:"Right of way",hazard:"Hazard perception",signs:"Signs & markings",speed:"Speed limits",parking:"Stopping & parking",motorway:"Motorways",overtake:"Overtaking & lanes",people:"Vulnerable road users",safety:"Alcohol, phone & safety",vehicle:"Distance, lights & vehicle",rules:"General rules & licence"},
 ui:{
+ loop:"Endless loop",loopD:"All topics mixed at random. When every question has come up, it reshuffles and starts again",loopProg:(r,i,n)=>`Round ${r} · ${i}/${n}`,
  readiness:"Exam readiness",answers:n=>`${n} answers so far`,lastExam:s=>` · last mock exam ${s}/50`,aim:"Aim for 85%+ before booking.",start:"Start practising and this number will grow as you master each topic.",
  smart:"Smart practice",smartD:"Adapts to you: more of what you get wrong, missed questions come back",
  weak:"Fix my mistakes",weakD:n=>n?`${n} question${n>1?"s":""} to fix`:"No mistakes yet",
@@ -879,6 +880,90 @@ const GEN=[
 ];
 const genCount=()=>GEN.reduce((s,g)=>s+g.params.length,0);
 
+/* ---------- Pictures for written sign / marking questions ---------- */
+const BLK="#111",WH="#fff",ASP="#4A525C",YEL="#F2C200",GRN="#1E8A4C";
+const sq=(fill,inner="")=>`<rect x="10" y="10" width="100" height="100" rx="8" fill="${fill}"/>${inner}`;
+const rect=(fill,inner="")=>`<rect x="6" y="24" width="108" height="72" rx="6" fill="${fill}"/>${inner}`;
+const person=(x,y,c,s=1)=>`<g transform="translate(${x} ${y}) scale(${s})" stroke="${c}" stroke-width="5" stroke-linecap="round" fill="none"><circle cx="0" cy="-22" r="6" fill="${c}" stroke="none"/><path d="M0,-14 V6 M0,6 L-8,22 M0,6 L8,22 M-10,-6 L10,-6"/></g>`;
+const bike=(x,y,c,s=1)=>`<g transform="translate(${x} ${y}) scale(${s})" stroke="${c}" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="-22" cy="12" r="12"/><circle cx="22" cy="12" r="12"/><path d="M-22,12 L-8,-8 L14,-8 L22,12 M-8,-8 L0,12 L-22,12 M-12,-16 H-2 M14,-8 L10,-18"/></g>`;
+const road=(inner)=>`<rect x="0" y="0" width="120" height="120" fill="${ASP}"/>${inner}`;
+const matrix=(inner)=>`<rect x="14" y="14" width="92" height="92" rx="6" fill="#0d0d0d"/>${inner}`;
+const tcar=(x,y,c,s=1)=>`<g transform="translate(${x} ${y}) scale(${s})" fill="${c}"><rect x="-22" y="-6" width="44" height="14" rx="4"/><path d="M-14,-6 L-8,-16 H8 L14,-6 Z"/><circle cx="-12" cy="10" r="5"/><circle cx="12" cy="10" r="5"/></g>`;
+const PICS={
+ stop:SIGNS.find(s=>s.id==="stop").svg,giveway:SIGNS.find(s=>s.id==="giveway").svg,noentry:SIGNS.find(s=>s.id==="noentry").svg,
+ closed:SIGNS.find(s=>s.id==="closed").svg,oneway:SIGNS.find(s=>s.id==="oneway").svg,mright:SIGNS.find(s=>s.id==="mright").svg,
+ nopark:SIGNS.find(s=>s.id==="nopark").svg,nostop:SIGNS.find(s=>s.id==="nostop").svg,prio:SIGNS.find(s=>s.id==="prio").svg,
+ prioend:SIGNS.find(s=>s.id==="prioend").svg,cycle:SIGNS.find(s=>s.id==="cycle").svg,noovertake:SIGNS.find(s=>s.id==="noovertake").svg,
+ height:SIGNS.find(s=>s.id==="height").svg,deadend:SIGNS.find(s=>s.id==="deadend").svg,park:SIGNS.find(s=>s.id==="park").svg,
+ wprio:SIGNS.find(s=>s.id==="wprio").svg,wcross:SIGNS.find(s=>s.id==="wcross").svg,wlights:SIGNS.find(s=>s.id==="wlights").svg,
+ wdanger:SIGNS.find(s=>s.id==="wdanger").svg,rail:SIGNS.find(s=>s.id==="rail").svg,
+ teeth:road(`<line x1="60" y1="0" x2="60" y2="120" stroke="${WH}" stroke-width="3" stroke-dasharray="12 10"/>`+[10,30,50,70,90].map(x=>`<polygon points="${x},40 ${x+16},40 ${x+8},58" fill="${WH}"/>`).join("")),
+ truck:disc("#fff",1,`<g fill="${BLK}"><rect x="30" y="44" width="40" height="28"/><path d="M70,52 H82 L90,62 V72 H70 Z"/><circle cx="42" cy="76" r="6"/><circle cx="80" cy="76" r="6"/></g>`),
+ autoweg:sq(BLU,tcar(60,64,WH,1.5)),
+ motorway:sq(BLU,`<g stroke="${WH}" stroke-width="6" fill="none" stroke-linecap="round"><path d="M40,100 L52,52 M80,100 L68,52 M60,100 V88 M60,78 V68"/><path d="M26,46 H94" stroke-width="9"/><path d="M34,46 V32 M86,46 V32"/></g>`),
+ roundabout:tri(`<g stroke="${BLK}" stroke-width="5" fill="none"><path d="M60,52 A16,16 0 0 1 75,72"/><path d="M71,82 A16,16 0 0 1 46,78"/><path d="M45,70 A16,16 0 0 1 52,55"/></g><g fill="${BLK}"><polygon points="77,64 80,76 69,72"/><polygon points="50,84 41,76 52,74"/><polygon points="47,52 58,48 54,59"/></g>`),
+ bump:tri(`<path d="M28,88 H44 Q60,62 76,88 H92" stroke="${BLK}" stroke-width="6" fill="none" stroke-linejoin="round"/>`),
+ barrier:tri(`<g fill="${BLK}"><rect x="30" y="74" width="60" height="6"/><rect x="34" y="62" width="6" height="26"/><rect x="80" y="62" width="6" height="26"/><rect x="57" y="62" width="6" height="26"/><rect x="30" y="64" width="60" height="5"/></g>`),
+ lineBroken:road(`<line x1="30" y1="0" x2="30" y2="120" stroke="${WH}" stroke-width="5"/><line x1="40" y1="0" x2="40" y2="120" stroke="${WH}" stroke-width="5" stroke-dasharray="16 12"/><path d="M84,96 V52 M74,64 L84,50 L94,64" stroke="#8fb4ff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`),
+ lineSolid:road(`<line x1="60" y1="0" x2="60" y2="120" stroke="${WH}" stroke-width="6"/>`),
+ lineDashed:road(`<line x1="60" y1="0" x2="60" y2="120" stroke="${WH}" stroke-width="6" stroke-dasharray="18 14"/>`),
+ hatched:road(`<defs><clipPath id="hc"><polygon points="60,6 92,114 28,114"/></clipPath></defs><polygon points="60,6 92,114 28,114" fill="none" stroke="${WH}" stroke-width="4"/><g clip-path="url(#hc)" stroke="${WH}" stroke-width="4">${[0,14,28,42,56,70,84,98,112,126].map(y=>`<line x1="20" y1="${y}" x2="100" y2="${y+40}"/>`).join("")}</g>`),
+ blocks:road(`<g fill="${WH}">${[4,32,60,88].map(y=>`<rect x="56" y="${y}" width="10" height="20"/>`).join("")}</g>`),
+ yellowSolid:`<rect width="120" height="120" fill="#9aa1a8"/><rect x="0" y="0" width="80" height="120" fill="${ASP}"/><line x1="74" y1="0" x2="74" y2="120" stroke="${YEL}" stroke-width="6"/>`,
+ yellowBroken:`<rect width="120" height="120" fill="#9aa1a8"/><rect x="0" y="0" width="80" height="120" fill="${ASP}"/><line x1="74" y1="0" x2="74" y2="120" stroke="${YEL}" stroke-width="6" stroke-dasharray="14 10"/>`,
+ roadworks:road(`<line x1="40" y1="0" x2="40" y2="120" stroke="${WH}" stroke-width="5" opacity=".55"/><path d="M80,0 C80,40 50,70 50,120" stroke="${YEL}" stroke-width="6" fill="none"/>`),
+ bus:road(`<line x1="20" y1="0" x2="20" y2="120" stroke="${WH}" stroke-width="5"/><line x1="100" y1="0" x2="100" y2="120" stroke="${WH}" stroke-width="5"/>${txt("BUS",34,WH,64)}`),
+ mxCross:matrix(`<path d="M36,36 L84,84 M84,36 L36,84" stroke="#ff3b30" stroke-width="10" stroke-linecap="round"/>`),
+ mxDiag:matrix(`<path d="M38,82 L80,40 M56,40 H80 V64" stroke="#fff" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`),
+ mxEnd:matrix(`<circle cx="60" cy="60" r="30" fill="none" stroke="#fff" stroke-width="5"/><path d="M44,76 L76,44 M50,82 L82,50 M38,70 L70,38" stroke="#fff" stroke-width="4"/>`),
+ mx70:matrix(`<circle cx="60" cy="60" r="34" fill="none" stroke="#ff3b30" stroke-width="7"/>${txt("70",34,"#fff",61)}`),
+ mx50:matrix(`<circle cx="60" cy="60" r="30" fill="none" stroke="#ff3b30" stroke-width="7"/>${txt("50",30,"#fff",61)}<circle cx="24" cy="24" r="6" fill="#ffb800"/><circle cx="96" cy="24" r="6" fill="#ffb800"/>`),
+ mxGreen:matrix(`<path d="M60,32 V84 M40,64 L60,86 L80,64" stroke="#2fd16a" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`),
+ ptLight:`<rect x="38" y="10" width="44" height="100" rx="8" fill="#151515"/><rect x="46" y="28" width="28" height="7" fill="#fff"/><circle cx="60" cy="60" r="5" fill="#fff"/><rect x="56" y="76" width="7" height="24" fill="#fff"/>`,
+ arrowLight:`<rect x="38" y="10" width="44" height="100" rx="8" fill="#151515"/><circle cx="60" cy="34" r="14" fill="#2a0000"/><path d="M68,34 H50 M56,26 L48,34 L56,42" stroke="#ff3b30" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="60" cy="62" r="12" fill="#2a2200"/><circle cx="60" cy="88" r="12" fill="#002a10"/>`,
+ fietsstraat:`<rect x="6" y="20" width="108" height="80" rx="6" fill="#C8102E"/>${bike(60,46,WH,.7)}<text x="60" y="80" text-anchor="middle" font-family="Arial" font-weight="800" font-size="14" fill="#fff">fietsstraat</text><text x="60" y="95" text-anchor="middle" font-family="Arial" font-weight="700" font-size="11" fill="#fff">auto te gast</text>`,
+ zebraSign:sq(BLU,`<g fill="${WH}">${[0,1,2,3,4].map(i=>`<rect x="${24+i*15}" y="84" width="9" height="16"/>`).join("")}</g>${person(60,66,WH,1.1)}`),
+ info:sq(BLU,`${txt("i",72,WH,62)}`),
+ placeEnd:rect(BLU,`<text x="60" y="66" text-anchor="middle" font-family="Arial" font-weight="700" font-size="20" fill="#fff">Haren</text><line x1="14" y1="88" x2="106" y2="32" stroke="#C8102E" stroke-width="5"/>`),
+ zone30:`<rect x="10" y="6" width="100" height="108" rx="6" fill="#fff" stroke="#333" stroke-width="2"/><text x="60" y="30" text-anchor="middle" font-family="Arial" font-weight="800" font-size="20" fill="${BLK}">ZONE</text><circle cx="60" cy="72" r="30" fill="#fff" stroke="${RED}" stroke-width="8"/>${txt("30",28,BLK,73)}`,
+ zone60:`<rect x="10" y="6" width="100" height="108" rx="6" fill="#fff" stroke="#333" stroke-width="2"/><text x="60" y="30" text-anchor="middle" font-family="Arial" font-weight="800" font-size="20" fill="${BLK}">ZONE</text><circle cx="60" cy="72" r="30" fill="#fff" stroke="${RED}" stroke-width="8"/>${txt("60",28,BLK,73)}`,
+ advisory:`<polygon points="60,4 102,74 18,74" fill="#fff" stroke="${RED}" stroke-width="7" stroke-linejoin="round"/>${txt("!",34,BLK,52)}<rect x="30" y="82" width="60" height="34" fill="#fff" stroke="#333" stroke-width="2"/>${txt("70",24,BLK,100)}`,
+ wcyclist:tri(bike(60,72,BLK,.62)),
+ wzebra:tri(`<g fill="${BLK}">${[0,1,2,3].map(i=>`<rect x="${36+i*13}" y="86" width="8" height="10"/>`).join("")}</g>${person(60,72,BLK,.8)}`),
+ wnarrow:tri(`<path d="M42,96 L50,72 V56 M78,96 L70,72 V56" stroke="${BLK}" stroke-width="6" fill="none"/>`),
+ wtwoway:tri(`<g stroke="${BLK}" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M48,94 V56 M40,64 L48,54 L56,64"/><path d="M72,52 V90 M64,82 L72,92 L80,82"/></g>`),
+ wbend:tri(`<path d="M52,96 V74 Q52,60 72,56" stroke="${BLK}" stroke-width="7" fill="none" stroke-linecap="round"/><polygon points="70,48 82,56 70,64" fill="${BLK}"/>`),
+ wskid:tri(tcar(60,62,BLK,.7)+`<path d="M44,80 q4,6 0,12 M60,80 q4,6 0,12 M76,80 q4,6 0,12" stroke="${BLK}" stroke-width="3.5" fill="none"/>`),
+ wtram:tri(`<g fill="${BLK}"><rect x="40" y="52" width="40" height="34" rx="4"/><rect x="52" y="44" width="16" height="6"/><rect x="44" y="88" width="8" height="5"/><rect x="68" y="88" width="8" height="5"/></g><g fill="#fff"><rect x="45" y="58" width="12" height="12"/><rect x="63" y="58" width="12" height="12"/></g>`),
+ weight:disc("#fff",1,txt("7,5t",30)),
+ trailer:disc("#fff",1,tcar(48,62,BLK,.7)+`<rect x="70" y="56" width="20" height="12" fill="${BLK}"/><rect x="64" y="62" width="8" height="2" fill="${BLK}"/><circle cx="80" cy="70" r="4" fill="${BLK}"/>`),
+ nobike:disc("#fff",1,bike(60,58,BLK,.62)),
+ footpath:disc(BLU,0,person(60,66,WH,1.3)),
+ cyclemoped:disc(BLU,0,bike(60,46,WH,.5)+`<g fill="${WH}"><circle cx="46" cy="88" r="7"/><circle cx="74" cy="88" r="7"/><path d="M44,80 H70 L76,70 H82 L78,84 Z"/></g>`),
+ parkZone:`<rect x="10" y="6" width="100" height="108" rx="6" fill="#fff" stroke="#333" stroke-width="2"/><text x="60" y="30" text-anchor="middle" font-family="Arial" font-weight="800" font-size="20" fill="${BLK}">ZONE</text><circle cx="60" cy="72" r="28" fill="${BLU}" stroke="${RED}" stroke-width="7"/><line x1="42" y1="54" x2="78" y2="90" stroke="${RED}" stroke-width="7"/>`,
+ roadArrows:road(`<path d="M60,104 V40 M48,54 L60,38 L72,54 M60,72 H84 M76,62 L88,72 L76,82" stroke="${WH}" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`),
+ roadLeft:road(`<path d="M68,104 V60 H40 M50,48 L36,60 L50,72" stroke="${WH}" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`),
+ stopLine:road(`<rect x="10" y="66" width="100" height="12" fill="${WH}"/>`),
+ parkPlug:sq(BLU,txt("P",50,WH,44)+`<g stroke="${WH}" stroke-width="5" fill="none" stroke-linecap="round"><path d="M50,76 V70 M70,76 V70 M44,76 H76 V86 Q76,96 60,96 Q44,96 44,86 Z M60,96 V104"/></g>`),
+ park2h:`<rect x="20" y="4" width="80" height="80" rx="6" fill="${BLU}"/>${txt("P",56,WH,46)}<rect x="20" y="88" width="80" height="28" rx="4" fill="#fff" stroke="#333" stroke-width="2"/><text x="60" y="108" text-anchor="middle" font-family="Arial" font-weight="700" font-size="14" fill="${BLK}">max 2 uur</text>`,
+ parkPermit:`<rect x="20" y="4" width="80" height="80" rx="6" fill="${BLU}"/>${txt("P",56,WH,46)}<rect x="8" y="88" width="104" height="28" rx="4" fill="#fff" stroke="#333" stroke-width="2"/><text x="60" y="107" text-anchor="middle" font-family="Arial" font-weight="700" font-size="11" fill="${BLK}">vergunninghouders</text>`
+};
+const PICMAP={
+ "speed-3":"autoweg","speed-9":"placeEnd","speed-12":"zone30","speed-13":"zone60","speed-14":"mx70","speed-15":"advisory",
+ "priority-15":"giveway","priority-33":"prio","priority-37":"stop",
+ "signs-1":"stop","signs-2":"giveway","signs-3":"teeth","signs-4":"noentry","signs-5":"closed","signs-6":"oneway","signs-7":"mright",
+ "signs-8":"nopark","signs-9":"nostop","signs-10":"prio","signs-11":"prioend","signs-16":"cycle","signs-17":"cyclemoped","signs-18":"noovertake",
+ "signs-19":"truck","signs-20":"height","signs-23":"autoweg","signs-24":"motorway","signs-25":"deadend","signs-26":"park",
+ "signs-28":"wprio","signs-29":"wcross","signs-30":"roundabout","signs-31":"wlights","signs-32":"wdanger","signs-34":"bump","signs-35":"barrier","signs-36":"rail",
+ "signs-37":"lineBroken","signs-38":"lineSolid","signs-39":"lineDashed","signs-40":"hatched","signs-41":"blocks","signs-42":"yellowSolid","signs-43":"yellowBroken",
+ "signs-44":"roadworks","signs-45":"bus","signs-46":"mxCross","signs-47":"mxDiag","signs-48":"mxEnd","signs-50":"ptLight","signs-52":"fietsstraat","signs-53":"zebraSign",
+ "signs-54":"stopLine","signs-55":"wcyclist","signs-56":"wzebra","signs-57":"wnarrow","signs-58":"wtwoway","signs-59":"wbend","signs-60":"wskid","signs-61":"wtram",
+ "signs-65":"zone30","signs-66":"weight","signs-67":"trailer","signs-68":"nobike","signs-69":"footpath","signs-70":"parkZone","signs-71":"roadArrows",
+ "parking-15":"yellowSolid","parking-16":"yellowBroken","parking-18":"bus","parking-22":"hatched","parking-23":"parkPlug","parking-25":"park2h","parking-26":"parkPermit",
+ "motorway-19":"mxGreen","motorway-27":"mx50","overtake-4":"lineSolid","overtake-8":"noovertake",
+ "rules-21":"arrowLight","rules-34":"stop","rules-35":"roadLeft","rules-39":"info"
+};
+
 /* ---------- pool ---------- */
 const EXAM_MIX={priority:8,hazard:7,signs:5,speed:4,parking:4,motorway:4,overtake:3,people:4,safety:4,vehicle:4,rules:3};
 const PASS=35,TARGET=44,DAILY=30;
@@ -889,6 +974,7 @@ function inst(p,pi){
  let q;
  if(p.fam){const i=pi??Math.floor(Math.random()*p.fam.params.length);q={...p,...p.fam.make(p.fam.params[i]),pi:i}}
  else q={...p};
+ if(!q.svg&&PICMAP[q.id])q.svg=signSVG(PICS[PICMAP[q.id]]);
  if(q.o&&(q.shuffle||(q.o.length>2&&q.t!=="hazard"))){
   const idx=q.o.map((_,i)=>i).sort(()=>Math.random()-.5);
   q={...q,o:idx.map(i=>q.o[i]),a:idx.indexOf(q.a)};
@@ -937,7 +1023,7 @@ const cls=v=>v<.5?"lo":v<.8?"mid":"hi";
 const pct=v=>Math.round(v*100)+"%";
 const H=(s)=>{app.innerHTML=s;window.scrollTo(0,0)};
 const LANGS=[["en","English","./"],["nl","Nederlands","nl.html"],["tr","Türkçe","tr.html"]];
-const langLinks=()=>/github\.io$|localhost/.test(location.hostname)?`<div class="row langs">${LANGS.filter(l=>l[0]!==STR.lang&&(window.AVAIL||["en","nl"]).includes(l[0])).map(l=>`<a class="btn ghost" href="${l[2]}" lang="${l[0]}">${l[1]}</a>`).join("")}</div>`:"";
+const langLinks=()=>/github\.io$|localhost/.test(location.hostname)?`<div class="row langs">${LANGS.filter(l=>l[0]!==STR.lang&&(window.AVAIL||["en"]).includes(l[0])).map(l=>`<a class="btn ghost" href="${l[2]}" lang="${l[0]}">${l[1]}</a>`).join("")}</div>`:"";
 function home(){
  sess=null;hstat.textContent="";
  const rd=readiness(),m=mistakes().length,ans=Object.values(S.q).reduce((s,r)=>s+r.s,0);
@@ -952,6 +1038,7 @@ function home(){
  </section>
  <section class="modes">
   <button class="mode primary" data-go="smart"><b>${U.smart}</b><span>${U.smartD}</span></button>
+  <button class="mode primary loop" data-go="loop"><b>${U.loop}</b><span>${U.loopD}</span></button>
   <button class="mode" data-go="weak" ${m?"":"disabled"}><b>${U.weak}</b><span>${U.weakD(m)}</span></button>
   <button class="mode" data-go="exam"><b>${U.exam}</b><span>${U.examD}</span></button>
   <button class="mode" data-go="scenes"><b>${U.scenes}</b><span>${U.scenesD}</span></button>
@@ -973,17 +1060,20 @@ function go(m){
  if(m==="weak"){pool=mistakes();label=U.weak;if(!pool.length)return home()}
  if(m==="scenes"){pool=POOL.filter(p=>p.fam&&p.t==="priority");label=U.scenes}
  if(m==="signs"){pool=POOL.filter(p=>p.t==="signs");label=U.signsM}
+ if(m==="loop"){sess={mode:m,loop:shuf(POOL),li:0,round:1,label:U.loop,n:0,ok:0,missedT:{},last:null};return next()}
  if(m.startsWith("topic:")){const t=m.slice(6);pool=byTopic(t);label=TOPICS[t]}
  sess={mode:m,pool,label,n:0,ok:0,missedT:{},last:null};
  next();
 }
 function next(){
  if(sess.mode==="weak"){sess.pool=mistakes();if(!sess.pool.length)return summary()}
+ if(sess.loop){if(sess.li>=sess.loop.length){sess.loop=shuf(POOL);sess.li=0;sess.round++}
+  const p=sess.loop[sess.li++];sess.last=p.id;sess.cur=inst(p);return render(sess.cur,false)}
  const [p,pi]=pick(sess.pool,sess.last);sess.last=p.id;
  const again=S.q[p.id]&&S.q[p.id].w>0&&S.q[p.id].b===0;
  sess.cur=inst(p,pi);render(sess.cur,again);
 }
-function head(){hstat.textContent=sess.exam?U.examProg(sess.i+1):U.counter(sess.ok,sess.n)}
+function head(){hstat.textContent=sess.exam?U.examProg(sess.i+1):sess.loop?U.loopProg(sess.round,sess.li,sess.loop.length):U.counter(sess.ok,sess.n)}
 function render(q,again){
  head();
  const opts=q.o?(q.t==="hazard"?`<div class="hz">${q.o.map((o,i)=>`<button class="opt" data-i="${i}">${o}</button>`).join("")}</div>`

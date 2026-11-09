@@ -100,6 +100,11 @@ summary::-webkit-details-marker{display:none}
 .rev{border-top:1px solid var(--line);padding-top:12px;margin-top:12px}
 .big{font-family:var(--display);font-weight:900;font-size:2.6rem;font-variant-numeric:tabular-nums}
 .langs .btn{text-decoration:none;font-size:.9rem;padding:8px 14px}
+.catgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;margin-top:12px}
+.catgrid figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;font-size:.82rem;min-width:0}
+.catimg{width:72px;height:72px;object-fit:contain}
+.opt-sign{width:76px;height:76px;object-fit:contain;display:block}
+img.sign{width:130px;height:130px;object-fit:contain;display:block;margin:4px auto}
 .pass{color:var(--ok)}.fail{color:var(--bad)}
 @media (prefers-reduced-motion:no-preference){.opt,.mode{transition:border-color .15s,background .15s}}
 </style>
@@ -118,6 +123,7 @@ yn:YN,
 kinds:{car:"car",bike:"cyclist",moped:"moped rider",tram:"tram"},
 topics:{priority:"Right of way",hazard:"Hazard perception",signs:"Signs & markings",speed:"Speed limits",parking:"Stopping & parking",motorway:"Motorways",overtake:"Overtaking & lanes",people:"Vulnerable road users",safety:"Alcohol, phone & safety",vehicle:"Distance, lights & vehicle",rules:"General rules & licence"},
 ui:{
+ catH:"All official traffic signs",catP:n=>`${n} signs from the Dutch traffic regulations (RVV 1990), grouped by letter.`,
  loop:"Endless loop",loopD:"All topics mixed at random. When every question has come up, it reshuffles and starts again",loopProg:(r,i,n)=>`Round ${r} · ${i}/${n}`,
  readiness:"Exam readiness",answers:n=>`${n} answers so far`,lastExam:s=>` · last mock exam ${s}/50`,aim:"Aim for 85%+ before booking.",start:"Start practising and this number will grow as you master each topic.",
  smart:"Smart practice",smartD:"Adapts to you: more of what you get wrong, missed questions come back",
@@ -193,6 +199,7 @@ g:{
  threeE:{none:"B is on your right, so you wait for B. You are on C's right, so C waits for you. B and C don't cross each other. Order: B, you, C.",teethMine:"You have shark teeth, so you wait for both. B and C don't cross each other, so they can go together. Then you.",teethTheirs:"B and C have shark teeth, so you go first. Then B and C, who don't cross each other."},
  turnQ:(w,k)=>w==="youLeft"?`Equal intersection. You (blue) turn left. The oncoming ${k} B goes straight on. Must you let B go first?`:`Equal intersection. You (blue) go straight on. The oncoming ${k} B turns left. Must you let B go first?`,
  turnE:w=>w==="youLeft"?"Turning traffic gives way to oncoming straight-on traffic.":"B is turning and you go straight on along the same road, so B waits for you.",
+ signRevQ:m=>`Which sign means: ${m}?`,
  signQ:"What does this sign mean?",
  distQ:(v,t)=>`You drive ${v} km/h. How many metres do you travel in ${t} second${t>1?"s":""}?`,
  distE:(v,t,m)=>`Metres per second = km/h ÷ 3.6. ${v} ÷ 3.6 × ${t} ≈ ${m} m.`,
@@ -907,8 +914,6 @@ const GEN=[
   const v=who==="youLeft"?[{...YOU,turn:"L"},{arm:"N",kind,l:"B"}]:[YOU,{arm:"N",kind,l:"B",turn:"L"}];
   return {svg:scene({rot,v}),q:STR.g.turnQ(who,KIND(kind)),o:STR.yn,a:who==="youLeft"?0:1,e:STR.g.turnE(who)};
  }},
-{id:"g:sign",t:"signs",params:SIGNS.map(s=>[s]),
- make:([s])=>({svg:pic(s.id),q:STR.g.signQ,o:[s.m,...s.d],a:0,shuffle:1,e:s.m+"."})},
 {id:"g:dist",t:"vehicle",params:cart([20,30,40,50,60,70,80,90,100,110,120,130],[1,2,3]),
  make:([v,t])=>({q:STR.g.distQ(v,t),a:Math.round(v/3.6*t),tol:Math.max(2,Math.round(v/3.6*t*.05)),u:"m",e:STR.g.distE(v,t,Math.round(v/3.6*t))})},
 {id:"g:brake",t:"vehicle",params:cart([30,40,50,60],[6,8,10,12,15],[2,3,0.5]),
@@ -1013,6 +1018,196 @@ const PICMAP={
  "rules-21":"arrowLight","rules-34":"stop","rules-35":"roadLeft","rules-39":"info"
 };
 
+/* Official Dutch traffic signs (RVV 1990, Bijlage 1). Images: Wikimedia Commons, public domain (PD-NL-verkeersbord).
+   [code, path, English, Nederlands, Türkçe] */
+const CAT=[
+["A1","7/70","Maximum speed","Maximumsnelheid","Azami hız"],
+["A2","7/7a","End of maximum speed","Einde maximumsnelheid","Azami hız sonu"],
+["A3","3/30","Maximum speed on an electronic sign","Maximumsnelheid op een elektronisch signaleringsbord","Elektronik tabelada azami hız"],
+["A4","f/f9","Advisory speed","Adviessnelheid","Tavsiye edilen hız"],
+["A5","d/d4","End of advisory speed","Einde adviessnelheid","Tavsiye edilen hızın sonu"],
+["B1","8/8b","Priority road","Voorrangsweg","Ana yol (öncelikli yol)"],
+["B2","1/1d","End of priority road","Einde voorrangsweg","Ana yolun sonu"],
+["B3","d/da","Intersection ahead where you have priority","Voorrangskruispunt","İleride önceliğinin olduğu kavşak"],
+["B4","5/52","Priority junction: side road from the left","Voorrangskruispunt, zijweg links","Öncelikli kavşak: soldan yan yol"],
+["B5","7/71","Priority junction: side road from the right","Voorrangskruispunt, zijweg rechts","Öncelikli kavşak: sağdan yan yol"],
+["B6","f/f1","Give way to traffic on the crossing road","Verleen voorrang aan bestuurders op de kruisende weg","Kesişen yoldaki trafiğe yol ver"],
+["B7","6/66","Stop and give way to traffic on the crossing road","Stop; verleen voorrang aan bestuurders op de kruisende weg","Dur ve kesişen yoldaki trafiğe yol ver"],
+["C1","3/31","Closed to vehicles, riders and livestock in both directions","Gesloten in beide richtingen voor voertuigen, ruiters en vee","İki yönde araçlara, atlılara ve hayvanlara kapalı"],
+["C2","4/4a","One-way road: no entry from this direction","Eenrichtingsweg, in deze richting gesloten","Tek yönlü yol: bu yönden girilmez"],
+["C3","f/f5","One-way road (straight ahead)","Eenrichtingsweg (rechtdoor)","Tek yönlü yol (ileri)"],
+["C4","d/dc","One-way road in the direction of the arrow (crossing road)","Eenrichtingsweg in de richting van de pijl (kruisende weg)","Ok yönünde tek yönlü yol (kesişen yol)"],
+["C5","1/19","Entry allowed (two-way here)","Inrijden toegestaan","Girmek serbest (burada çift yön)"],
+["C6","9/96","Closed to motor vehicles with more than two wheels","Gesloten voor motorvoertuigen op meer dan twee wielen","İkiden fazla tekerlekli motorlu araçlara kapalı"],
+["C7","f/f9","Closed to trucks","Gesloten voor vrachtauto's","Kamyonlara kapalı"],
+["C7a","d/d5","Closed to buses","Gesloten voor autobussen","Otobüslere kapalı"],
+["C7b","1/14","Closed to buses and trucks","Gesloten voor autobussen en vrachtauto's","Otobüs ve kamyonlara kapalı"],
+["C8","0/09","Closed to motor vehicles that cannot or may not go faster than 25 km/h","Gesloten voor motorvoertuigen die niet sneller dan 25 km/h kunnen of mogen","25 km/s'den hızlı gidemeyen motorlu araçlara kapalı"],
+["C9","3/30","Closed to riders, livestock, carts, slow motor vehicles, bicycles and mopeds","Gesloten voor ruiters, vee, wagens, langzame motorvoertuigen, fietsen en bromfietsen","Atlılara, hayvanlara, arabalara, yavaş motorlu araçlara, bisiklet ve mopetlere kapalı"],
+["C10","e/ed","Closed to motor vehicles with a trailer","Gesloten voor motorvoertuigen met aanhangwagen","Römorklu motorlu araçlara kapalı"],
+["C11","6/6b","Closed to motorcycles","Gesloten voor motorfietsen","Motosikletlere kapalı"],
+["C12","5/5f","Closed to all motor vehicles","Gesloten voor alle motorvoertuigen","Tüm motorlu araçlara kapalı"],
+["C13","1/14","Closed to mopeds and motorised mobility vehicles with engine running","Gesloten voor bromfietsen, snorfietsen en gehandicaptenvoertuigen met draaiende motor","Motoru çalışan mopet ve engelli araçlarına kapalı"],
+["C14","d/df","Closed to bicycles","Gesloten voor fietsen (en gehandicaptenvoertuigen zonder motor)","Bisikletlere kapalı"],
+["C15","e/e5","Closed to bicycles, mopeds and mobility vehicles","Gesloten voor fietsen, bromfietsen en gehandicaptenvoertuigen","Bisiklet, mopet ve engelli araçlarına kapalı"],
+["C16","e/ed","Closed to pedestrians","Gesloten voor voetgangers","Yayalara kapalı"],
+["C17","7/7c","Closed to vehicles longer than shown","Gesloten voor voertuigen die langer zijn dan aangegeven","Gösterilenden uzun araçlara kapalı"],
+["C18","c/c7","Closed to vehicles wider than shown","Gesloten voor voertuigen die breder zijn dan aangegeven","Gösterilenden geniş araçlara kapalı"],
+["C19","d/dc","Closed to vehicles higher than shown","Gesloten voor voertuigen die hoger zijn dan aangegeven","Gösterilenden yüksek araçlara kapalı"],
+["C20","9/98","Closed to vehicles with an axle load above the limit shown","Gesloten voor voertuigen met een hogere aslast dan aangegeven","Dingil yükü gösterilenden fazla olan araçlara kapalı"],
+["C21","f/f4","Closed to vehicles heavier (total mass) than shown","Gesloten voor voertuigen met een hogere totaalmassa dan aangegeven","Toplam ağırlığı gösterilenden fazla olan araçlara kapalı"],
+["C22","e/ee","Closed to vehicles carrying certain dangerous goods","Gesloten voor voertuigen met bepaalde gevaarlijke stoffen","Belirli tehlikeli madde taşıyan araçlara kapalı"],
+["D1","4/40","Roundabout: follow the direction of the arrows","Rotonde; verplichte rijrichting","Döner kavşak: okların yönünde git"],
+["D2","a/a4","Pass the sign on the side the arrow shows","Bord voorbijgaan aan de zijde die de pijl aangeeft","Tabelayı okun gösterdiği taraftan geç"],
+["D3","e/ed","You may pass the sign on either side","Bord mag aan beide zijden worden voorbijgegaan","Tabelayı iki taraftan da geçebilirsin"],
+["D4","f/f4","Mandatory direction: straight ahead","Verplichte rijrichting: rechtdoor","Mecburi yön: ileri"],
+["D5","1/11","Mandatory direction: turn right","Verplichte rijrichting: rechtsaf","Mecburi yön: sağa"],
+["D6","2/23","Mandatory: straight ahead or right","Verplicht rechtdoor of rechtsaf","Mecburi: ileri veya sağa"],
+["D7","0/03","Mandatory: left or right","Verplicht linksaf of rechtsaf","Mecburi: sola veya sağa"],
+["E1","8/8b","No parking","Parkeerverbod","Park yasağı"],
+["E2","5/5c","No stopping","Verbod stil te staan","Durma yasağı"],
+["E3","2/24","No leaving bicycles or mopeds here","Verbod fietsen en bromfietsen te plaatsen","Buraya bisiklet veya mopet bırakmak yasak"],
+["E4","7/78","Parking place","Parkeergelegenheid","Park yeri"],
+["E5","8/81","Taxi rank","Taxistandplaats","Taksi durağı"],
+["E6","7/7a","Disabled parking place","Gehandicaptenparkeerplaats","Engelli park yeri"],
+["E7","c/ca","Place for loading and unloading goods","Laad- en losplaats","Yük indirme-bindirme yeri"],
+["E8","a/a6","Parking only for the vehicle type shown","Parkeren alleen voor de aangegeven voertuigcategorie","Sadece gösterilen araç türü için park yeri"],
+["E9","b/bd","Parking only for permit holders","Parkeren alleen voor vergunninghouders","Sadece izin sahipleri için park yeri"],
+["E10","4/4c","Blue zone: parking disc required for the time shown","Parkeerschijfzone met verplicht gebruik van de parkeerschijf","Mavi bölge: gösterilen süre için park diski zorunlu"],
+["E11","b/b3","End of blue zone","Einde parkeerschijfzone","Mavi bölgenin sonu"],
+["E12","5/5c","Park and ride (P+R)","Parkeren voor overstappers op het openbaar vervoer (P+R)","Park et-devam et (P+R)"],
+["E13","9/9d","Carpool parking","Carpoolparkeerplaats","Araç paylaşımı (carpool) park yeri"],
+["F1","a/af","No overtaking of motor vehicles","Inhaalverbod voor motorvoertuigen","Motorlu araçları sollamak yasak"],
+["F2","a/a1","End of no overtaking","Einde inhaalverbod","Sollama yasağının sonu"],
+["F3","8/83","No overtaking for trucks","Inhaalverbod voor vrachtauto's","Kamyonlar için sollama yasağı"],
+["F4","8/83","End of no overtaking for trucks","Einde inhaalverbod voor vrachtauto's","Kamyonlar için sollama yasağının sonu"],
+["F5","9/9e","Give way to oncoming traffic (narrow passage)","Tegenliggers voor laten gaan (verbod door te gaan bij nadering van tegenliggers)","Karşıdan gelen trafiğe yol ver (dar geçit)"],
+["F6","5/53","Oncoming traffic must give way to you","Tegenliggers moeten jou voor laten gaan","Karşıdan gelen trafik sana yol vermeli"],
+["F7","7/7a","No U-turn","Keerverbod","U dönüşü yasak"],
+["F8","4/42","End of all prohibitions shown by signs","Einde van alle door verkeersborden aangegeven verboden","Tabelalarla gösterilen tüm yasakların sonu"],
+["F9","7/71","End of all prohibitions and advice on an electronic sign","Einde van alle verboden en adviezen op een elektronisch signaleringsbord","Elektronik tabeladaki tüm yasak ve tavsiyelerin sonu"],
+["F10","5/5d","Stop (e.g. police or customs check)","Stop (bijvoorbeeld politie of douane)","Dur (ör. polis veya gümrük kontrolü)"],
+["F11","6/6a","Mandatory lane for slow vehicles (e.g. tractors)","Verplichte rijbaan of -strook voor langzaam verkeer (bijv. landbouwvoertuigen)","Yavaş araçlar (ör. traktör) için zorunlu şerit"],
+["F12","2/2b","End of mandatory lane for slow vehicles","Einde verplichte rijbaan of -strook voor langzaam verkeer","Yavaş araçlar için zorunlu şeridin sonu"],
+["F13","8/86","Bus lane","Busbaan","Otobüs şeridi"],
+["F14","6/6e","End of bus lane","Einde busbaan","Otobüs şeridinin sonu"],
+["F15","1/12","Tram lane","Trambaan","Tramvay şeridi"],
+["F16","9/90","End of tram lane","Einde trambaan","Tramvay şeridinin sonu"],
+["F17","9/9f","Lane for buses and trams","Rijbaan of -strook voor bussen en trams","Otobüs ve tramvay şeridi"],
+["F18","e/e1","End of lane for buses and trams","Einde rijbaan of -strook voor bussen en trams","Otobüs ve tramvay şeridinin sonu"],
+["F19","c/c3","Lane for trucks and buses","Rijbaan of -strook voor vrachtauto's en bussen","Kamyon ve otobüs şeridi"],
+["F20","3/3f","End of lane for trucks and buses","Einde rijbaan of -strook voor vrachtauto's en bussen","Kamyon ve otobüs şeridinin sonu"],
+["F21","8/88","Mandatory lane for trucks only","Verplichte rijbaan of -strook uitsluitend voor vrachtauto's","Sadece kamyonlar için zorunlu şerit"],
+["F22","6/65","End of mandatory lane for trucks","Einde verplichte rijbaan of -strook voor vrachtauto's","Kamyon zorunlu şeridinin sonu"],
+["G1","2/2c","Motorway","Autosnelweg","Otoyol"],
+["G2","f/f5","End of motorway","Einde autosnelweg","Otoyolun sonu"],
+["G3","b/b6","Autoweg (expressway)","Autoweg","Autoweg (ekspres yol)"],
+["G4","1/1f","End of autoweg","Einde autoweg","Autoweg'in sonu"],
+["G5","3/3b","Erf (residential area, walking pace)","Erf","Erf (yaşam sokağı, yürüme hızı)"],
+["G6","b/b8","End of erf","Einde erf","Erf'in sonu"],
+["G7","0/0a","Footpath","Voetpad","Yaya yolu"],
+["G8","7/7f","End of footpath","Einde voetpad","Yaya yolunun sonu"],
+["G9","a/ac","Bridle path","Ruiterpad","Atlı yolu"],
+["G10","7/7e","End of bridle path","Einde ruiterpad","Atlı yolunun sonu"],
+["G11","c/cd","Compulsory cycle path","Verplicht fietspad","Zorunlu bisiklet yolu"],
+["G12","0/04","End of compulsory cycle path","Einde verplicht fietspad","Zorunlu bisiklet yolunun sonu"],
+["G12a","d/da","Cycle and moped path","Fiets/bromfietspad","Bisiklet ve mopet yolu"],
+["G12b","3/3e","End of cycle and moped path","Einde fiets/bromfietspad","Bisiklet ve mopet yolunun sonu"],
+["G13","b/ba","Non-compulsory cycle path","Onverplicht fietspad","Zorunlu olmayan bisiklet yolu"],
+["G14","b/b3","End of non-compulsory cycle path","Einde onverplicht fietspad","Zorunlu olmayan bisiklet yolunun sonu"],
+["H1","2/29","Start of built-up area","Bebouwde kom","Yerleşim yerinin başlangıcı"],
+["H2","d/da","End of built-up area","Einde bebouwde kom","Yerleşim yerinin sonu"],
+["J1","2/23","Uneven road surface","Slecht wegdek","Bozuk yol"],
+["J2","8/82","Bend to the right","Bocht naar rechts","Sağa viraj"],
+["J3","1/1d","Bend to the left","Bocht naar links","Sola viraj"],
+["J4","8/8e","Double bend, first to the right","S-bocht(en), eerst naar rechts","S viraj, önce sağa"],
+["J5","5/51","Double bend, first to the left","S-bocht(en), eerst naar links","S viraj, önce sola"],
+["J6","1/13","Steep climb","Steile helling","Dik yokuş"],
+["J7","c/cf","Dangerous descent","Gevaarlijke daling","Tehlikeli iniş"],
+["J8","e/eb","Dangerous intersection (right-hand rule)","Gevaarlijk kruispunt","Tehlikeli kavşak (sağdan gelen önceliği)"],
+["J9","6/6f","Roundabout ahead","Rotonde","İleride döner kavşak"],
+["J10","a/ae","Level crossing with barriers","Overweg met slagbomen","Bariyerli hemzemin geçit"],
+["J11","4/4a","Level crossing without barriers","Overweg zonder slagbomen","Bariyersiz hemzemin geçit"],
+["J12","d/d7","Level crossing with a single track","Overweg met enkel spoor","Tek hatlı hemzemin geçit"],
+["J13","0/05","Level crossing with two or more tracks","Overweg met twee of meer sporen","İki veya daha fazla hatlı hemzemin geçit"],
+["J14","2/25","Tram crossing","Tram(kruising)","Tramvay geçidi"],
+["J15","5/56","Movable (opening) bridge","Beweegbare brug","Açılır köprü"],
+["J16","2/20","Roadworks","Werk in uitvoering","Yol çalışması"],
+["J17","a/a2","Road narrows","Rijbaanversmalling","Yol daralıyor"],
+["J18","3/3b","Road narrows on the right","Rijbaanversmalling rechts","Yol sağdan daralıyor"],
+["J19","2/2d","Road narrows on the left","Rijbaanversmalling links","Yol soldan daralıyor"],
+["J20","9/94","Slippery road","Slipgevaar","Kaygan yol"],
+["J21","8/81","Children","Kinderen","Çocuklar"],
+["J22","7/7e","Pedestrian crossing ahead","Voetgangersoversteekplaats","İleride yaya geçidi"],
+["J23","4/45","Pedestrians","Voetgangers","Yayalar"],
+["J24","8/83","Cyclists and moped riders","Fietsers en bromfietsers","Bisikletliler ve mopetliler"],
+["J25","2/2a","Loose stones","Losliggende stenen","Gevşek taşlar"],
+["J26","0/00","Quay or riverbank","Kade of rivieroever","Rıhtım veya nehir kenarı"],
+["J27","f/f1","Large wild animals","Groot wild","Büyük yabani hayvanlar"],
+["J28","f/ff","Livestock","Vee","Çiftlik hayvanları"],
+["J29","0/01","Oncoming traffic (two-way traffic)","Tegenliggers","Karşıdan gelen trafik (çift yön)"],
+["J30","6/6c","Low-flying aircraft","Laagvliegende vliegtuigen","Alçak uçan uçaklar"],
+["J31","8/80","Side wind","Zijwind","Yan rüzgâr"],
+["J32","8/8a","Traffic lights","Verkeerslichten","Trafik ışıkları"],
+["J33","6/6b","Traffic jam","File","Trafik sıkışıklığı"],
+["J34","e/ed","Accident","Ongeval","Kaza"],
+["J35","5/52","Poor visibility (snow, rain or fog)","Slecht zicht door sneeuw, regen of mist","Kötü görüş (kar, yağmur veya sis)"],
+["J36","6/64","Ice or snow","IJzel of sneeuw","Buzlanma veya kar"],
+["J37","f/f4","Danger (see the supplementary sign)","Gevaar (zie onderbord)","Tehlike (alt levhaya bak)"],
+["J38","b/b2","Speed bump","Verkeersdrempel","Kasis"],
+["J39","6/6e","Retractable bollard in the road","Beweegbare paal (poller) in de rijbaan","Yolda inip kalkan direk (poller)"],
+["K1","1/18","Motorway direction sign (straight on)","Wegwijzer langs autosnelweg (doorgaande richting)","Otoyolda yön levhası (düz devam)"],
+["K2","6/6a","Advance sign for a motorway exit","Voorwegwijzer voor een afrit van de autosnelweg","Otoyol çıkışı için ön yön levhası"],
+["K3","a/a4","Sign to a motorway rest area","Wegwijzer naar een verzorgingsplaats","Dinlenme tesisi yön levhası"],
+["K4","a/a9","Overhead motorway sign with lane panels","Hoge wegwijzer langs autosnelweg met rijstrookpanelen","Şerit panelli üst otoyol levhası"],
+["K5","9/91","Advance direction sign (not a motorway)","Voorwegwijzer langs niet-autosnelweg","Ön yön levhası (otoyol dışı)"],
+["K6","4/4d","Direction sign at the junction (not a motorway)","Beslissingswegwijzer langs niet-autosnelweg","Kavşakta yön levhası (otoyol dışı)"],
+["K7","6/64","Signpost for cyclists and moped riders","Wegwijzer voor fietsers en bromfietsers (handwijzer)","Bisikletli ve mopetliler için yön levhası"],
+["K8","e/ed","Stacked signpost for cyclists and moped riders","Wegwijzer voor fietsers en bromfietsers (stapelbord)","Bisikletliler için üst üste yön levhası"],
+["K9","0/01","Diversion route","Omleiding","Yol değişikliği (omleiding)"],
+["K10","3/37","Direction sign inside a built-up area","Voorwegwijzer binnen de bebouwde kom","Yerleşim yeri içinde yön levhası"],
+["K11","4/4c","Lane selection sign (not a motorway)","Voorsorteren op niet-autosnelweg","Şerit seçimi levhası (otoyol dışı)"],
+["K12","2/2a","District sign with district names","Wijkwegwijzer met wijknamen","Semt adlarıyla yön levhası"],
+["K13","5/5d","District sign with district numbers","Wijkwegwijzer met wijknummers","Semt numaralarıyla yön levhası"],
+["K14","f/fc","Route for transporting dangerous goods","Route voor het vervoer van gevaarlijke stoffen","Tehlikeli madde taşıma güzergâhı"],
+["L1","6/61","Clearance height of an underpass","Hoogte onderdoorgang","Alt geçit yüksekliği"],
+["L2","1/1a","Pedestrian crossing","Voetgangersoversteekplaats","Yaya geçidi"],
+["L3a","4/41","Bus and tram stop","Bus- en tramhalte","Otobüs ve tramvay durağı"],
+["L3b","5/58","Bus stop","Bushalte","Otobüs durağı"],
+["L3c","c/c9","Tram stop","Tramhalte","Tramvay durağı"],
+["L4","4/4b","Lane selection ahead","Voorsorteren","İleride şerit seçimi"],
+["L5","9/95","Lane ends","Einde rijstrook","Şerit bitiyor"],
+["L6","3/36","Lanes split","Splitsing","Şeritler ayrılıyor"],
+["L7","a/a2","Number of through lanes","Aantal doorgaande rijstroken","Devam eden şerit sayısı"],
+["L8","8/8c","Dead end","Doodlopende weg","Çıkmaz yol"],
+["L9","0/09","Dead end ahead (side road)","Vooraanduiding doodlopende weg","İleride çıkmaz yol (yan yol)"],
+["L10","0/0d","Advance notice of a rule for the direction shown","Vooraanduiding verkeersmaatregel voor de aangegeven richting","Gösterilen yön için kural ön bildirimi"],
+["L11","3/3f","Sign applies only to the lanes shown","Verkeersbord geldt alleen voor de aangegeven rijstroken","Tabela sadece gösterilen şeritler için geçerli"],
+["L12","b/bb","Sign applies only to the lane shown","Verkeersbord geldt alleen voor de aangegeven rijstrook","Tabela sadece gösterilen şerit için geçerli"],
+["L13","4/4e","Road tunnel","Verkeerstunnel","Trafik tüneli"],
+["L14","0/05","Emergency lay-by","Vluchthaven","Acil durum cebi"],
+["L15","1/1d","Emergency lay-by with emergency phone and fire extinguisher","Vluchthaven met noodtelefoon en brandblusapparaat","Acil telefon ve yangın söndürücülü acil cep"],
+["L16","8/81","Emergency telephone","Noodtelefoon","Acil telefon"],
+["L17","a/a4","Fire extinguisher","Brandblusapparaat","Yangın söndürücü"],
+["L18","6/60","Emergency telephone and fire extinguisher","Noodtelefoon en brandblusapparaat","Acil telefon ve yangın söndürücü"],
+["L19","d/d5","Nearest emergency exit(s): direction and distance","Dichtstbijzijnde nooduitgang(en): richting en afstand","En yakın acil çıkış(lar): yön ve mesafe"],
+["L20","d/dd","Passing place on the right","Uitwijkplaats rechts van de weg","Sağda geçiş cebi"],
+["L21","a/ac","Passing place on the left","Uitwijkplaats links van de weg","Solda geçiş cebi"]
+];
+const CATFILE={C4:"C4_%28rechts%29",D1:"NL_verkeersbord_D1",D2:"NL_verkeersbord_D2",L19:"L19_%28links%29"};
+const LI={en:2,nl:3,tr:4}[STR.lang];
+const catURL=c=>{const r=CAT.find(x=>x[0]===c);const f=CATFILE[c]||c;return `https://upload.wikimedia.org/wikipedia/commons/${r[1]}/${f.startsWith("NL_")?f:"Nederlands_verkeersbord_"+f}.svg`};
+const catImg=(c,cls="sign")=>`<img class="${cls}" src="${catURL(c)}" alt="${c}" loading="lazy">`;
+const catMeaning=c=>CAT.find(x=>x[0]===c)[LI];
+const GROUPS={A:{en:"Speed",nl:"Snelheid",tr:"Hız"},B:{en:"Priority",nl:"Voorrang",tr:"Öncelik"},C:{en:"Closed to / no entry",nl:"Geslotenverklaring",tr:"Kapalı / girilmez"},D:{en:"Mandatory direction",nl:"Rijrichting",tr:"Mecburi yön"},E:{en:"Parking & stopping",nl:"Stilstaan en parkeren",tr:"Durma & park"},F:{en:"Other rules & special lanes",nl:"Overige geboden en verboden",tr:"Diğer kurallar & özel şeritler"},G:{en:"Road types",nl:"Verkeersregels (wegtypes)",tr:"Yol türleri"},H:{en:"Built-up area",nl:"Bebouwde kom",tr:"Yerleşim yeri"},J:{en:"Warning",nl:"Waarschuwing",tr:"Uyarı"},K:{en:"Direction signs",nl:"Bewegwijzering",tr:"Yön levhaları"},L:{en:"Information",nl:"Informatie",tr:"Bilgi"}};
+/* distractors: other meanings, same group first */
+function catOpts(c){const g=c[0].replace(/\d.*/,"");const same=shufA(CAT.filter(x=>x[0]!==c&&x[0][0]===g&&x[LI]!==catMeaning(c)).map(x=>x[0]));const other=shufA(CAT.filter(x=>x[0][0]!==g).map(x=>x[0]));return [c,...[...same,...other].slice(0,2)]}
+function shufA(a){return a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(x=>x[1])}
+GEN.push(
+ {id:"g:cat",t:"signs",params:CAT.map(x=>[x[0]]),make:([c])=>{const o=catOpts(c);return {svg:catImg(c),q:STR.g.signQ,o:o.map(catMeaning),a:0,shuffle:1,e:`${c}: ${catMeaning(c)}.`}}},
+ {id:"g:catRev",t:"signs",params:CAT.filter(x=>x[0][0]!=="K").map(x=>[x[0]]),make:([c])=>{const o=catOpts(c);return {q:STR.g.signRevQ(catMeaning(c)),o:o.map(k=>catImg(k,"opt-sign")),a:0,shuffle:1,e:`${c}: ${catMeaning(c)}.`,revCodes:o}}}
+);
+
 /* ---------- pool ---------- */
 const EXAM_MIX={priority:8,hazard:7,signs:5,speed:4,parking:4,motorway:4,overtake:3,people:4,safety:4,vehicle:4,rules:3};
 const PASS=35,TARGET=44,DAILY=30;
@@ -1059,7 +1254,7 @@ function pick(pool,lastId){
   const r=S.q[p.id];const base=!r||!r.s?2.2:[4,2.5,1.4,.8,.4,.2][r.b];
   const a=acc(p.t);const tf=1+3*(1-(a==null?.5:a));
   const fresh=p.id===lastId?0:(r&&S.tick-r.l<(p.fam?2:6)?.04:1);
-  const w=base*tf*fresh*(p.fam?4:1);tot+=w;return w});
+  const w=base*tf*fresh*(p.fam?Math.max(4,Math.sqrt(p.fam.params.length)):1);tot+=w;return w});
  let x=Math.random()*tot;for(let i=0;i<pool.length;i++){x-=ws[i];if(x<=0)return [pool[i]]}
  return [pool[pool.length-1]];
 }
@@ -1102,6 +1297,7 @@ function home(){
  app.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
  const rs=document.getElementById("reset");rs.onclick=()=>{if(rs.dataset.c){S=blank();save();home()}else{rs.dataset.c=1;rs.textContent=U.resetSure;rs.className="btn warn"}};
 }
+const loopList=()=>shuf(POOL.flatMap(p=>p.fam?p.fam.params.map((_,i)=>({p,pi:i})):[{p}]));
 function go(m){
  if(m==="learn")return learn();
  if(m==="exam")return startExam();
@@ -1109,15 +1305,15 @@ function go(m){
  if(m==="weak"){pool=mistakes();label=U.weak;if(!pool.length)return home()}
  if(m==="scenes"){pool=POOL.filter(p=>p.fam&&p.t==="priority");label=U.scenes}
  if(m==="signs"){pool=POOL.filter(p=>p.t==="signs");label=U.signsM}
- if(m==="loop"){sess={mode:m,loop:shuf(POOL),li:0,round:1,label:U.loop,n:0,ok:0,missedT:{},last:null};return next()}
+  if(m==="loop"){sess={mode:m,loop:loopList(),li:0,round:1,label:U.loop,n:0,ok:0,missedT:{},last:null};return next()}
  if(m.startsWith("topic:")){const t=m.slice(6);pool=byTopic(t);label=TOPICS[t]}
  sess={mode:m,pool,label,n:0,ok:0,missedT:{},last:null};
  next();
 }
 function next(){
  if(sess.mode==="weak"){sess.pool=mistakes();if(!sess.pool.length)return summary()}
- if(sess.loop){if(sess.li>=sess.loop.length){sess.loop=shuf(POOL);sess.li=0;sess.round++}
-  const p=sess.loop[sess.li++];sess.last=p.id;sess.cur=inst(p);return render(sess.cur,false)}
+ if(sess.loop){if(sess.li>=sess.loop.length){sess.loop=loopList();sess.li=0;sess.round++}
+  const it=sess.loop[sess.li++];sess.last=it.p.id;sess.cur=inst(it.p,it.pi);return render(sess.cur,false)}
  const [p,pi]=pick(sess.pool,sess.last);sess.last=p.id;
  const again=S.q[p.id]&&S.q[p.id].w>0&&S.q[p.id].b===0;
  sess.cur=inst(p,pi);render(sess.cur,again);
@@ -1178,6 +1374,7 @@ function learn(){
  hstat.textContent="";
  H(`<h1>${U.learnH}</h1><p class="muted" style="margin:0">${U.learnP}</p>
  <section class="panel">${Object.keys(TOPICS).sort((a,b)=>mastery(a)-mastery(b)).map(t=>{const v=mastery(t);return `<details><summary><span>${TOPICS[t]}</span><div class="bar ${cls(v)}"><i style="width:${pct(v)}"></i></div><span class="pct">${pct(v)}</span></summary><ul>${LESSONS[t].map(x=>`<li>${x}</li>`).join("")}</ul><button class="btn" data-t="${t}">${U.drill(TOPICS[t])}</button></details>`}).join("")}</section>
+ <section class="panel"><h2>${U.catH}</h2><p class="muted small" style="margin:6px 0 10px">${U.catP(CAT.length)}</p>${Object.entries(GROUPS).map(([g,n])=>`<details><summary><span>${g} · ${n[STR.lang]}</span><span></span><span class="pct">${CAT.filter(x=>x[0][0]===g).length}</span></summary><div class="catgrid">${CAT.filter(x=>x[0][0]===g).map(x=>`<figure>${catImg(x[0],"catimg")}<figcaption><b>${x[0]}</b> ${x[LI]}</figcaption></figure>`).join("")}</div></details>`).join("")}</section>
  <div><button class="btn ghost" id="hm">${U.back}</button></div>`);
  app.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>go("topic:"+b.dataset.t));
  document.getElementById("hm").onclick=home;

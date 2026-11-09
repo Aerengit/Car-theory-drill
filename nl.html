@@ -1,0 +1,1081 @@
+<!doctype html><html lang="nl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1F4FA0"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Theory Drill">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" href="icon-192.png">
+<title>Theory Drill NL</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@600;800;900&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* Layout: single-column drill console; Dutch road-sign blue header band, asphalt-grey surfaces, amber priority-diamond accents */
+:root{
+  --bg:#EDF0F3;--surface:#FFFFFF;--ink:#15202B;--muted:#5A6675;--line:#D4DAE1;
+  --blue:#1F4FA0;--blue-ink:#FFFFFF;--amber:#F2B300;--ok:#1E8A4C;--ok-bg:#E3F3EA;--bad:#C8322B;--bad-bg:#FBE7E5;
+  --road:#4A525C;--grass:#CFDDC4;--sand:#C9AE7E;--veh:#E07B24;--bike:#16806B;--moped:#8A4FB8;--tram:#B88A00;--rail:#2E343B;
+  --display:"Overpass","Arial Narrow",Arial,sans-serif;--body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F1419;--surface:#18212A;--ink:#E6EBF0;--muted:#97A3B0;--line:#2B3644;
+  --blue:#2E5FB8;--blue-ink:#FFFFFF;--amber:#F4C33A;--ok:#4CC27E;--ok-bg:#16301F;--bad:#F06A61;--bad-bg:#3A1A18;
+  --road:#3A434E;--grass:#22321F;--sand:#7A6544;--veh:#E88B3A;--bike:#2FB394;--moped:#A774D6;--tram:#D6A92A;--rail:#1A1F25;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1419;--surface:#18212A;--ink:#E6EBF0;--muted:#97A3B0;--line:#2B3644;
+  --blue:#2E5FB8;--blue-ink:#FFFFFF;--amber:#F4C33A;--ok:#4CC27E;--ok-bg:#16301F;--bad:#F06A61;--bad-bg:#3A1A18;
+  --road:#3A434E;--grass:#22321F;--sand:#7A6544;--veh:#E88B3A;--bike:#2FB394;--moped:#A774D6;--tram:#D6A92A;--rail:#1A1F25;color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--blue)}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--blue);color:var(--blue-ink)}
+.hin,.wrap{max-width:640px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.hin{display:flex;align-items:center;gap:12px;padding-block:12px}
+.logo{font-family:var(--display);font-weight:900;font-size:1.25rem;flex:1;cursor:pointer;display:flex;align-items:center;gap:10px}
+.dia{width:20px;height:20px;background:var(--amber);transform:rotate(45deg);border:3px solid #fff;flex:none}
+.hstat{font-family:var(--display);font-weight:800;font-size:.95rem;font-variant-numeric:tabular-nums}
+.wrap{padding-block:20px 48px;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.15}
+h1{font-size:1.7rem;font-weight:900}h2{font-size:1.2rem;font-weight:800}
+.lbl{font-family:var(--display);font-weight:800;font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}.small{font-size:.88rem;margin:0}
+.stack{display:flex;flex-direction:column;gap:14px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px}
+.qpanel{display:flex;flex-direction:column;gap:14px}
+.ready{display:flex;gap:18px;align-items:center}
+.gauge{font-family:var(--display);font-weight:900;font-size:3rem;line-height:1;font-variant-numeric:tabular-nums}
+.gauge small{font-size:1.2rem}
+.daily{display:grid;grid-template-columns:80px minmax(0,1fr);gap:10px;align-items:center;margin-top:8px;font-size:.85rem;font-weight:700}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--blue);border-radius:4px}
+.bar.lo>i{background:var(--bad)}.bar.mid>i{background:var(--amber)}.bar.hi>i{background:var(--ok)}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:420px){.modes{grid-template-columns:1fr}}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:focus-visible,input:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+.mode{text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.mode b{font-family:var(--display);font-weight:800;font-size:1.05rem}
+.mode span{font-size:.88rem;color:var(--muted)}
+.mode.primary{background:var(--blue);color:var(--blue-ink);border-color:var(--blue);grid-column:1/-1}
+.mode.primary span{color:var(--blue-ink);opacity:.88}
+.mode.wide{grid-column:1/-1}
+.mode[disabled]{opacity:.55;cursor:default}
+.trow{display:grid;grid-template-columns:minmax(0,1fr) 100px 44px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:.95rem}
+.trow:last-child{border-bottom:0}
+.pct{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+.chip{display:inline-block;font-family:var(--display);font-weight:800;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;background:var(--amber);color:#1a1400;padding:3px 8px;border-radius:3px}
+.chip.again{background:var(--bad);color:#fff}
+.qtext{font-size:1.2rem;font-weight:700;line-height:1.4}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{text-align:left;background:var(--surface);border:2px solid var(--line);border-radius:10px;padding:13px 14px;font-size:1rem;display:flex;gap:12px;align-items:flex-start}
+.opt .k{font-family:var(--display);font-weight:900;color:var(--muted);flex:none;width:1.1em}
+.opt:hover:not([disabled]){border-color:var(--blue)}
+.opt.ok{border-color:var(--ok);background:var(--ok-bg)}.opt.bad{border-color:var(--bad);background:var(--bad-bg)}
+.opt[disabled]{cursor:default}
+.hz{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.hz .opt{justify-content:center;text-align:center;font-weight:700;font-size:.95rem}
+.num{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.num input{font:inherit;font-size:1.3rem;font-weight:700;width:140px;padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font-variant-numeric:tabular-nums}
+.btn{background:var(--blue);color:var(--blue-ink);border:0;border-radius:10px;padding:12px 18px;font-family:var(--display);font-weight:800;font-size:1rem}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.warn{background:var(--bad);color:#fff}
+.btn[disabled]{opacity:.5}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.fb{border-radius:10px;padding:14px 16px;border-left:5px solid var(--ok);background:var(--ok-bg)}
+.fb.bad{border-color:var(--bad);background:var(--bad-bg)}
+.fb h3{font-size:1.05rem;margin-bottom:4px}
+.lesson{border:2px dashed var(--amber);border-radius:10px;padding:14px 16px}
+.lesson ul,details ul{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:5px}
+.scene{width:100%;max-width:300px;display:block;margin:0 auto;border-radius:10px}
+.sign{width:120px;height:120px;display:block;margin:4px auto}
+.revsvg .scene{max-width:180px;margin:8px 0}.revsvg .sign{width:72px;height:72px;margin:8px 0}
+.revq{font-weight:700;margin:8px 0 4px}
+.prog{display:flex;justify-content:space-between;align-items:center;gap:10px}
+details{border-bottom:1px solid var(--line);padding:12px 0}
+details:last-child{border-bottom:0}
+details .btn{margin-top:10px}
+summary{cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) 90px 44px;gap:10px;align-items:center;font-weight:700;list-style:none}
+summary::-webkit-details-marker{display:none}
+.rev{border-top:1px solid var(--line);padding-top:12px;margin-top:12px}
+.big{font-family:var(--display);font-weight:900;font-size:2.6rem;font-variant-numeric:tabular-nums}
+.langs .btn{text-decoration:none;font-size:.9rem;padding:8px 14px}
+.pass{color:var(--ok)}.fail{color:var(--bad)}
+@media (prefers-reduced-motion:no-preference){.opt,.mode{transition:border-color .15s,background .15s}}
+</style>
+</head><body>
+<header><div class="hin">
+  <div class="logo" id="home" role="button" tabindex="0"><span class="dia"></span>Theory Drill NL</div>
+  <div class="hstat" id="hstat"></div>
+</div></header>
+<main class="wrap" id="app"></main>
+<script>
+window.AVAIL=["en", "nl"];
+const YN=["Ja","Nee"], HZ=["Remmen","Gas loslaten","Niets"];
+const STR={
+lang:"nl",kmh:"km/u",you:"JIJ",sceneAria:"Bovenaanzicht van het kruispunt",signAria:"Verkeersbord",
+yn:YN,
+kinds:{car:"auto",bike:"fietser",moped:"bromfietser",tram:"tram"},
+topics:{priority:"Voorrang",hazard:"Gevaarherkenning",signs:"Borden & markeringen",speed:"Snelheid",parking:"Stilstaan & parkeren",motorway:"Autosnelweg",overtake:"Inhalen & rijstroken",people:"Kwetsbare verkeersdeelnemers",safety:"Alcohol, telefoon & veiligheid",vehicle:"Afstand, verlichting & voertuig",rules:"Algemene regels & rijbewijs"},
+ui:{
+ readiness:"Examenklaar",answers:n=>`${n} antwoorden tot nu toe`,lastExam:s=>` · laatste proefexamen ${s}/50`,aim:"Mik op 85%+ voordat je je examen reserveert.",start:"Begin met oefenen. Dit getal groeit naarmate je elk onderwerp beheerst.",
+ smart:"Slim oefenen",smartD:"Past zich aan: meer van wat je fout doet, gemiste vragen komen terug",
+ weak:"Mijn fouten",weakD:n=>n?`${n} vra${n>1?"gen":"ag"} te verbeteren`:"Nog geen fouten",
+ exam:"Proefexamen",examD:"50 vragen, uitslag aan het eind",learn:"Leren",learnD:"De belangrijkste regels per onderwerp",
+ scenes:"Kruispunttraining",scenesD:"Wie gaat eerst? Getekende situaties",signsM:"Bordentraining",signsD:"Herken Nederlandse verkeersborden",
+ topics:"Onderwerpen",mastery:"beheersing",reset:"Voortgang wissen",resetSure:"Tik nog eens om alles te wissen",
+ today:(n,g)=>`Vandaag: ${n} / ${g}`,streak:n=>n>1?` · ${n} dagen op rij`:"",
+ finish:"Stoppen",stopExam:"Examen stoppen",missed:"Eerder fout",whatDo:"Wat doe je? ",answer:"Antwoord",check:"Controleer",
+ correct:"Goed",wrong:a=>"Niet goed. Antwoord: "+a,next:"Volgende vraag",rulesFor:t=>`Regels: ${t.toLowerCase()}`,
+ quick:t=>`Korte uitleg · ${t}`,quickD:"Je hebt meerdere vragen over dit onderwerp fout. Deze regels dekken de meeste:",
+ done:"Sessie klaar",mostMissed:"Meeste fouten: ",moreOften:"Deze onderwerpen komen de volgende keer vaker terug.",noMiss:"Geen fouten deze sessie.",
+ keep:"Verder oefenen",overview:"Overzicht",learnH:"Leer de regels",learnP:"Zwakste onderwerpen eerst. Tik op een onderwerp voor de regels en oefen het daarna.",
+ drill:t=>`Oefen ${t.toLowerCase()}`,back:"Terug naar overzicht",result:"Uitslag proefexamen",stopped:n=>`Gestopt na ${n} vragen.`,
+ passMargin:"<b>Ruim geslaagd.</b> Je zit in de veilige zone.",passLow:t=>`<b>Geslaagd</b>, maar onder het veilige doel van ${t}. Oefen je zwakke onderwerpen.`,fail:p=>`<b>Niet geslaagd.</b> Je hebt er minstens ${p} nodig. Je fouten staan nu klaar om te oefenen.`,
+ fix:"Deze fouten oefenen",review:"Bekijk je fouten",yours:"Jouw antwoord: ",right:"Goed: ",
+ bank:(h,g)=>`${h} geschreven vragen + ${g} gegenereerde varianten`,install:"Kies 'Zet op beginscherm' in het deelmenu om het als app te gebruiken, ook offline.",
+ disclaimer:"Onafhankelijke oefenapp. Niet verbonden aan het CBR. Kijk op cbr.nl voor officiële examen-informatie.",
+ counter:(o,n)=>`${o} / ${n} goed`,examProg:i=>`${i} / 50`,lang:"English"
+},
+lessons:{
+speed:["Binnen de bebouwde kom (vanaf het blauwe plaatsnaambord): 50 km/u.","Buiten de bebouwde kom: 80 km/u.","Autoweg (blauw bord met witte auto): 100 km/u.","Autosnelweg: 100 km/u van 06:00 tot 19:00. 's Nachts tot 130 km/u, alleen waar borden dat aangeven.","Erf: stapvoets. Zone 30: 30 km/u.","Een limiet is een maximum. Bij regen, mist of drukte rijd je langzamer."],
+priority:["Gelijkwaardig kruispunt: verkeer van rechts gaat voor, ook fietsers en bromfietsers.","Trams hebben voorrang op gelijkwaardige kruispunten, ook van links (behalve als de weg van de tram haaientanden heeft).","Van een onverharde naar een verharde weg: de onverharde weg verleent voorrang.","Uitrit, erf of parkeerterrein verlaten, wegrijden, achteruitrijden, keren of van rijstrook wisselen: verleen iedereen voorrang.","Haaientanden, een voorrangsbord (driehoek) of STOP: verleen verkeer van beide kanten voorrang.","Afslaand verkeer laat rechtdoorgaand verkeer op dezelfde weg voor, ook fietsers naast je.","Volgorde: verkeersregelaar, dan verkeerslichten, dan borden, dan verkeersregels.","Blauw zwaailicht én sirene: maak ruimte."],
+signs:["Rode cirkel: verbod. Blauwe cirkel: gebod. Rode driehoek: waarschuwing. Blauwe rechthoek: informatie.","Rood bord met witte balk: inrijden verboden. Wit bord met rode rand: gesloten in beide richtingen voor alle voertuigen.","Blauw bord met rode rand en één streep: parkeerverbod. Met een rood kruis: verbod stil te staan.","Oranjegele ruit: voorrangsweg. Met een zwarte balk erdoor: einde voorrangsweg.","Doorgetrokken witte streep: niet overschrijden. Onderbroken streep: je mag eroverheen. Verdrijvingsvlak: niet berijden.","Doorgetrokken gele streep langs de stoeprand: verbod stil te staan. Onderbroken gele streep: parkeerverbod. Gele strepen bij wegwerkzaamheden gaan voor witte."],
+parking:["Stilstaan is kort laten in- of uitstappen, of direct laden en lossen. Al het andere is parkeren.","Niet parkeren binnen 5 m van een kruispunt.","Nooit stilstaan op een fietspad, een voetgangersoversteekplaats of een overweg.","Op de autosnelweg mag je alleen in noodgevallen stoppen.","Blauwe zone: leg je parkeerschijf neer.","Niet parkeren voor een uitrit, bij een bushalte of zonder kaart op een gehandicaptenplaats."],
+motorway:["Alleen voertuigen die harder dan 60 km/u kunnen en mogen rijden, mogen erop.","Gebruik de invoegstrook om snelheid te maken. Verkeer op de snelweg heeft voorrang.","Houd rechts. Haal links in.","Rood kruis boven een rijstrook: afgesloten. Schuine pijl: ga naar de aangegeven strook.","Afslag gemist? Rijd door naar de volgende. Nooit achteruitrijden of keren.","Rijstrook loopt dood in langzaam verkeer: ritsen aan het eind van de strook.","Pech: vluchtstrook, alarmlichten, iedereen achter de vangrail, hulp bellen."],
+overtake:["Haal links in. Trams haal je rechts in, tenzij dat niet kan.","Rechts inhalen mag in langzame, parallelle files, of als de voorganger linksaf slaat.","Spiegels, dode hoek, richting aangeven, dan pas gaan.","Steek nooit een doorgetrokken streep over om in te halen.","Word je ingehaald: houd rechts en geef geen gas.","Geef fietsers ruim zijdelingse ruimte."],
+people:["Voetgangers op of bijna op een zebrapad: laat ze oversteken.","Blinde voetgangers (witte stok of geleidehond): laat ze altijd voorgaan.","Kinderen zijn onvoorspelbaar. Rijd langzaam bij scholen, speelplaatsen en geparkeerde auto's.","Rechtsaf: controleer je spiegel en dode hoek op fietsers.","Fietsers mogen met twee naast elkaar rijden als ze het verkeer niet hinderen.","Fietsstraat met 'auto te gast': de auto is te gast.","Open je portier met de verste hand, zodat je achterom kijkt (Dutch reach)."],
+hazard:["CBR-gevaarherkenning heeft drie antwoorden: Remmen, Gas loslaten, Niets.","Remmen: het gevaar is echt en dichtbij. Je moet nu snelheid minderen.","Gas loslaten: er kan iets gebeuren. Anticipeer en neem wat snelheid terug.","Niets: geen gevaar en geen reden om langzamer te gaan. Zonder reden remmen is ook fout.","Kijk ver vooruit, controleer je spiegels en let op wat anderen gaan doen."],
+safety:["Alcohollimiet: 0,5‰. Beginnende bestuurders (eerste 5 jaar met rijbewijs): 0,2‰.","Een telefoon vasthouden tijdens het rijden is verboden, ook als je voor een rood licht wacht.","Iedereen de gordel om. Kinderen kleiner dan 1,35 m in een geschikt kinderzitje.","Medicijnen met een gele sticker kunnen je rijvaardigheid beïnvloeden.","Neem op lange ritten ongeveer elke 2 uur pauze.","Ongeval: maak de plek veilig, bel 112, help. Rij nooit door na een ongeval."],
+vehicle:["Houd minstens 2 seconden afstand tot je voorganger. Meer bij regen of in het donker.","Stopafstand = reactieafstand + remweg.","Twee keer zo snel: reactieafstand twee keer zo lang, remweg ongeveer vier keer zo lang.","In 1 seconde leg je snelheid ÷ 3,6 meter af (50 km/u ≈ 14 m).","Minimale profieldiepte: 1,6 mm.","Mistachterlicht alleen bij zicht minder dan 50 m.","Aquaplaning: gas los, stuur recht houden, niet hard remmen."],
+rules:["Houd zo veel mogelijk rechts.","Geef op tijd richting aan voor afslaan of van rijstrook wisselen.","Geel licht: stoppen als dat veilig kan. Knipperend geel: gewone voorrangsregels.","Overweg met knipperende rode lichten of bellen: stoppen.","Verkeersregelaar met opgeheven arm: al het verkeer stopt.","Rijbewijs B: max 3.500 kg toegestane massa en max 8 passagiers.","2toDrive: rijden vanaf 17 met een coach. Een behaald theorie-examen is 18 maanden geldig."]
+},
+sg:{
+ speed:n=>`Maximumsnelheid ${n} km/u`,advice:n=>`Adviessnelheid ${n} km/u`,minimum:n=>`Minimumsnelheid ${n} km/u`,
+ noentry:{m:"Inrijden verboden (van deze kant)",d:["Gesloten voor alle voertuigen in beide richtingen","Verbod stil te staan"]},
+ closed:{m:"Gesloten voor alle voertuigen in beide richtingen",d:["Inrijden verboden van deze kant","Einde alle verboden"]},
+ nopark:{m:"Parkeerverbod",d:["Verbod stil te staan","Inrijden verboden"]},
+ nostop:{m:"Verbod stil te staan",d:["Parkeerverbod","Weg afgesloten"]},
+ prio:{m:"Voorrangsweg",d:["Gevaar","Voorrang verlenen"]},
+ prioend:{m:"Einde voorrangsweg",d:["Voorrangsweg","Inhaalverbod"]},
+ giveway:{m:"Voorrang verlenen aan verkeer op de kruisende weg",d:["Waarschuwing: gevaar","Stopstreep verderop"]},
+ stop:{m:"Volledig stoppen en voorrang verlenen",d:["Langzaam rijden en voorrang verlenen","Alleen stoppen als er verkeer komt"]},
+ noovertake:{m:"Inhaalverbod voor motorvoertuigen",d:["Verkeer in twee richtingen","Parkeerplaats"]},
+ oneway:{m:"Eenrichtingsweg",d:["Verplicht rechtdoor","Autosnelweg verderop"]},
+ mright:{m:"Verplicht rechtsaf",d:["Eenrichtingsweg naar rechts","Bocht naar rechts"]},
+ mleft:{m:"Verplicht linksaf",d:["Eenrichtingsweg naar links","Verbod rechtsaf"]},
+ mstraight:{m:"Verplicht rechtdoor",d:["Eenrichtingsweg","Voorrangsweg"]},
+ cycle:{m:"Verplicht fietspad (geen auto's)",d:["Fietsers mogen op de rijbaan","Fietsenstalling"]},
+ park:{m:"Parkeergelegenheid",d:["Politie","Voorrang"]},
+ deadend:{m:"Doodlopende weg",d:["Kruispunt verderop","Tunnel"]},
+ wdanger:{m:"Ander gevaar (zie onderbord)",d:["Ongeval, weg afgesloten","Stop"]},
+ wcross:{m:"Kruispunt verderop; verkeer van rechts gaat voor",d:["Kruispunt waar jij voorrang hebt","Overweg"]},
+ wprio:{m:"Kruispunt verderop waar jij voorrang hebt",d:["Gelijkwaardig kruispunt verderop","Rijbaanversmalling"]},
+ wlights:{m:"Verkeerslichten verderop",d:["Verkeerslichten defect","Flitspaal"]},
+ height:{m:"Voertuigen hoger dan 3,5 m mogen er niet in",d:["Minimale hoogte 3,5 m","Breedte van de weg 3,5 m"]},
+ rail:{m:"Overweg (let op treinen)",d:["Inrijden verboden","Kruispunt verderop"]}
+},
+g:{
+ cond:{none:"Gelijkwaardig kruispunt, geen borden.",teethMine:"Er staan haaientanden op jouw weg.",teethTheirs:"Er staan haaientanden op de weg van B.",prioMine:"Jij rijdt op een voorrangsweg (zie het ruitbord).",unpavedMine:"Jouw weg is onverhard; die van B is verhard.",unpavedTheirs:"De weg van B is onverhard; die van jou is verhard."},
+ sceneQ:(c,k)=>`${c} Jij (blauw) gaat rechtdoor. Moet jij voorrang verlenen aan ${k} B?`,
+ sceneE:(c,arm,k)=>({
+  none:arm==="E"?`De ${k} komt van rechts. Op een gelijkwaardig kruispunt gaat verkeer van rechts voor.`:`De ${k} komt van links, dus jij komt voor B van rechts. B verleent jou voorrang.`,
+  teethMine:"Haaientanden op jouw weg: je verleent voorrang aan kruisend verkeer van beide kanten.",
+  teethTheirs:"B heeft haaientanden, dus B verleent jou voorrang, van welke kant ook.",
+  prioMine:"Jij rijdt op de voorrangsweg. B, op de zijweg, verleent voorrang.",
+  unpavedMine:"Onverhard verleent voorrang aan verhard, ook als je van rechts komt.",
+  unpavedTheirs:"B rijdt op de onverharde weg, dus B verleent jou voorrang."})[c],
+ tramQ:t=>t?"Er staan haaientanden op de weg van de tram. Jij (blauw) gaat rechtdoor. Moet jij voorrang verlenen aan tram B?":"Gelijkwaardig kruispunt, geen borden. Jij (blauw) gaat rechtdoor. Moet jij voorrang verlenen aan tram B?",
+ tramE:t=>t?"Borden gaan voor de algemene regels. Met haaientanden op zijn weg verleent de tram voorrang.":"Op gelijkwaardige kruispunten heeft de tram voorrang op al het andere verkeer, van links of rechts.",
+ threeQ:c=>`${c} Iedereen gaat rechtdoor. Wat is de volgorde?`,
+ threeO:["B, dan jij, dan C","Eerst B en C, dan jij","Eerst jij, dan B en C"],
+ threeE:{none:"B komt van rechts, dus jij wacht op B. Jij komt voor C van rechts, dus C wacht op jou. B en C kruisen elkaar niet. Volgorde: B, jij, C.",teethMine:"Jij hebt haaientanden, dus je wacht op allebei. B en C kruisen elkaar niet en kunnen samen gaan. Daarna jij.",teethTheirs:"B en C hebben haaientanden, dus jij gaat eerst. Daarna B en C, die elkaar niet kruisen."},
+ turnQ:(w,k)=>w==="youLeft"?`Gelijkwaardig kruispunt. Jij (blauw) slaat linksaf. De tegemoetkomende ${k} B gaat rechtdoor. Moet jij B laten voorgaan?`:`Gelijkwaardig kruispunt. Jij (blauw) gaat rechtdoor. De tegemoetkomende ${k} B slaat linksaf. Moet jij B laten voorgaan?`,
+ turnE:w=>w==="youLeft"?"Afslaand verkeer laat tegemoetkomend rechtdoorgaand verkeer voor.":"B slaat af en jij gaat rechtdoor op dezelfde weg, dus B wacht op jou.",
+ signQ:"Wat betekent dit bord?",
+ distQ:(v,t)=>`Je rijdt ${v} km/u. Hoeveel meter leg je af in ${t} seconde${t>1?"n":""}?`,
+ distE:(v,t,m)=>`Meter per seconde = km/u ÷ 3,6. ${v} ÷ 3,6 × ${t} ≈ ${m} m.`,
+ brakeQ:(v0,d0,v1)=>`Bij ${v0} km/u is je remweg ${d0} m. Hoe lang is die ongeveer bij ${v1} km/u (zelfde weg)?`,
+ brakeE:(f,d)=>`De remweg verandert met het kwadraat van de snelheidsfactor: ${String(f).replace(".",",")} × ${String(f).replace(".",",")} = ${String(f*f).replace(".",",")}. Dus ongeveer ${String(d).replace(".",",")} m.`,
+ alcQ:(y,p)=>`Je haalde je rijbewijs op je 22e, ${y} jaar geleden. Een blaastest geeft ${String(p).replace(".",",")}‰. Is dat binnen de limiet?`,
+ alcE:(st,l)=>st?"Je bent nog beginnend bestuurder (eerste 5 jaar): de limiet is 0,2‰.":"Na 5 jaar geldt de gewone limiet van 0,5‰.",
+ treadQ:x=>`Je banden hebben nog ${String(x).replace(".",",")} mm profiel. Is dat toegestaan?`,treadE:"Het wettelijk minimum is 1,6 mm. Onder 3 mm wordt de grip bij regen al slechter.",
+ fogQ:x=>`Het zicht in de mist is ongeveer ${x} m. Mag je je mistachterlicht aanzetten?`,fogE:"Het mistachterlicht mag alleen bij zicht minder dan 50 m.",
+ gapQ:x=>`Je rijdt ${String(x).replace(".",",")} seconde achter je voorganger op een droge weg. Is dat genoeg?`,gapE:"Houd minstens 2 seconden aan. Minder geeft te weinig tijd om te reageren.",
+ parkQ:x=>`Mag je ${x} m van een kruispunt parkeren (geen borden)?`,parkE:"Parkeren binnen 5 m van een kruispunt is verboden.",
+ childQ:x=>`Een kind van 10 jaar is ${x} cm lang. Moet het kind een kinderzitje gebruiken?`,childE:"Kinderen kleiner dan 1,35 m moeten een geschikt kinderzitje gebruiken.",
+ massQ:x=>`Een camper heeft een toegestane maximummassa van ${x.toLocaleString("nl")} kg. Mag je die besturen met rijbewijs B?`,massE:"Rijbewijs B geldt voor voertuigen tot 3.500 kg.",
+ passQ:x=>`Mag je met rijbewijs B een voertuig besturen met ${x} passagiers (plus jijzelf)?`,passE:"Met rijbewijs B mag je maximaal 8 passagiers naast de bestuurder vervoeren.",
+ mwQ:h=>`Een bord op de snelweg toont '100 06-19h' en op andere tijden 130. Het is ${h}:00. Wat is je maximumsnelheid?`,mwE:"Tussen 06:00 en 19:00 geldt de daglimiet van 100; daarbuiten de hogere limiet die is aangegeven.",
+ roadQ:r=>`${r} Wat is de maximumsnelheid?`,
+ roads:[["Je rijdt binnen de bebouwde kom zonder snelheidsborden.",50,"Binnen de bebouwde kom geldt 50 km/u."],["Je rijdt buiten de bebouwde kom op een gewone weg zonder borden.",80,"Buiten de bebouwde kom: 80 km/u."],["Je rijdt op een autoweg zonder andere borden.",100,"Autoweg: 100 km/u."],["Je bent net langs een bord 'Zone 30' gereden.",30,"30 km/u tot het einde-zonebord."],["Je bent buiten de stad net langs een bord 'Zone 60' gereden.",60,"60 km/u tot het einde van de zone."],["Je bent net langs een doorgestreept blauw plaatsnaambord gereden. Geen andere borden.",80,"Je hebt de bebouwde kom verlaten: 80 km/u."],["Je bent net langs een blauw plaatsnaambord gereden. Geen andere borden.",50,"Je bent de bebouwde kom binnengereden: 50 km/u."]]
+}
+};
+
+const QB={items:[],n:{},add(t,arr){arr.forEach(r=>{const k=(this.n[t]=(this.n[t]||0)+1);this.items.push({id:t+"-"+k,t,q:r[0],o:r[1],a:r[2],e:r[3],u:r[4]})})}};
+
+QB.add("speed",[
+["Wat is de maximumsnelheid voor een auto binnen de bebouwde kom als er geen bord iets anders aangeeft?",null,50,"Binnen de bebouwde kom is de algemene limiet 50 km/u.","km/u"],
+["Wat is de maximumsnelheid buiten de bebouwde kom op een gewone weg zonder borden?",null,80,"Buiten de bebouwde kom is de algemene limiet 80 km/u.","km/u"],
+["Wat is de maximumsnelheid op een autoweg (blauw bord met witte auto)?",null,100,"Op een autoweg is de limiet 100 km/u, tenzij borden iets anders aangeven.","km/u"],
+["Wat is op de meeste Nederlandse snelwegen de maximumsnelheid tussen 06:00 en 19:00?",null,100,"Sinds 2020 geldt op de meeste snelwegen overdag 100 km/u.","km/u"],
+["Wat is de hoogste limiet die je op een Nederlandse snelweg kunt tegenkomen ('s nachts, waar borden het toestaan)?",null,130,"130 km/u mag alleen 's nachts en alleen waar borden dat aangeven.","km/u"],
+["Hoe hard mag je rijden op een erf?",["Stapvoets","30 km/u","50 km/u"],0,"Op een erf mogen voetgangers de hele straat gebruiken, dus auto's rijden stapvoets."],
+["Waar begint de limiet van 50 km/u van de bebouwde kom?",["Bij het blauwe plaatsnaambord","Bij het eerste huis","Bij de eerste lantaarnpaal"],0,"De bebouwde kom begint bij het blauwe plaatsnaambord."],
+["Je passeert een wit bord met een dorpsnaam, maar geen blauw plaatsnaambord. Geldt nu 50 km/u?",YN,1,"Alleen het blauwe plaatsnaambord geeft de bebouwde kom aan. Een wit naambord verandert de limiet niet."],
+["Een blauw plaatsnaambord heeft een rode schuine streep erdoor. Wat betekent dat?",["Einde bebouwde kom","Inrijden verboden","Dorp gesloten voor auto's"],0,"Het doorgestreepte bord geeft het einde van de bebouwde kom aan. Vanaf daar geldt 80 km/u, tenzij borden iets anders aangeven."],
+["Je rijdt buiten de bebouwde kom (geen blauw plaatsnaambord) langs huizen. Geen snelheidsborden. Wat is de limiet?",null,80,"Zonder blauw plaatsnaambord ben je nog buiten de bebouwde kom: 80 km/u.","km/u"],
+["Het is mistig op een weg met 80 km/u. Mag je nog 80 km/u rijden?",["Alleen als je kunt stoppen binnen de afstand die je vrij kunt overzien","Ja, het bord staat het toe","Nee, de limiet wordt automatisch 50 km/u"],0,"Een limiet is een maximum. Je moet altijd kunnen stoppen binnen de afstand die je vrij kunt overzien."],
+["Je passeert een bord 'Zone 30'. Hoe lang geldt 30 km/u?",["Tot het einde-zonebord","Tot het volgende kruispunt","500 meter lang"],0,"Een zonebord geldt voor alle wegen in de zone tot je het einde-zonebord passeert."],
+["Je passeert buiten de bebouwde kom een bord 'Zone 60'. Wat is de limiet in deze zone?",null,60,"In een 60-zone is de limiet 60 km/u tot de zone eindigt.","km/u"],
+["Boven je rijstrook toont een matrixbord 70 in een rode cirkel. Wat betekent dat?",["Maximaal 70 km/u op die rijstrook","Adviessnelheid 70 km/u","Minimaal 70 km/u"],0,"Een getal in een rode cirkel op een matrixbord is een wettelijk maximum."],
+["Een snelheid op een rechthoekig bord onder een waarschuwingsdriehoek is:",["Een adviessnelheid","Een wettelijk maximum","Een minimumsnelheid"],0,"Een rechthoekig snelheidsbord is een advies. Ronde borden met rode rand zijn het wettelijk maximum."],
+["Een bord op de snelweg toont '100 06-19h'. Het is 14:00. Wat is je maximum?",null,100,"Tussen 06:00 en 19:00 geldt de daglimiet.","km/u"],
+["Een bord op de snelweg toont '100 06-19h' en een apart bord 120 voor andere tijden. Het is 21:00. Wat is je maximum?",null,120,"Buiten 06:00–19:00 geldt de hogere aangegeven limiet.","km/u"],
+["Mag je even te hard rijden om een inhaalactie af te maken?",YN,1,"De limiet geldt altijd, ook tijdens het inhalen. Lukt inhalen niet binnen de limiet, haal dan niet in."],
+["Mag je zonder reden zo langzaam rijden dat je ander verkeer ophoudt?",YN,1,"Onnodig langzaam rijden hindert het verkeer en kan gevaarlijk zijn."],
+["Wat meet een trajectcontrole?",["Je gemiddelde snelheid over een traject","Je snelheid op één punt","Je volgafstand"],0,"Trajectcontrole meet de gemiddelde snelheid tussen twee punten."],
+["Een bromfiets met een geel kenteken mag maximaal:",null,45,"Een bromfiets (geel kenteken) mag maximaal 45 km/u. Houd rekening met grote snelheidsverschillen.","km/u"],
+["Er ligt sneeuw op de weg en de limiet is 80 km/u. Welke snelheid kies je?",["Lager, zodat je veilig kunt stoppen","80 km/u","Minstens 60 km/u voor grip"],0,"Kies een snelheid die past bij de omstandigheden; de limiet is alleen een maximum."],
+["Tot waar geldt de limiet van een snelheidsbord?",["Tot een ander snelheidsbord of een einde-bord","Tot elk kruispunt","1 km lang"],0,"Een snelheidsbord geldt tot een nieuw snelheidsbord of een einde-bord."],
+["Wat is de minimumsnelheid op de autosnelweg?",["Er is geen vaste minimumsnelheid, maar je voertuig moet harder dan 60 km/u kunnen","50 km/u","80 km/u"],0,"Er is geen vaste minimumsnelheid, maar alleen voertuigen die harder dan 60 km/u kunnen en mogen, zijn toegestaan."]
+]);
+
+QB.add("priority",[
+["Gelijkwaardig kruispunt zonder borden. Een auto komt van rechts. Moet jij voorrang verlenen?",YN,0,"Op een gelijkwaardig kruispunt verleen je voorrang aan verkeer van rechts."],
+["Gelijkwaardig kruispunt. Een fietser komt van rechts. Moet jij voorrang verlenen?",YN,0,"Voor fietsers geldt dezelfde regel. Verkeer van rechts gaat voor, welk voertuig het ook is."],
+["Gelijkwaardig kruispunt. Een fietser komt van links. Wie gaat eerst?",["Jij","De fietser"],0,"Jij komt voor de fietser van rechts, dus de fietser verleent jou voorrang."],
+["Gelijkwaardig kruispunt. Een bromfietser komt van rechts. Wie gaat eerst?",["De bromfietser","Jij, omdat een auto sneller is"],0,"De rechtsregel geldt voor alle bestuurders, ook bromfietsers."],
+["Gelijkwaardig kruispunt. Een tram komt van links. Moet jij voorrang verlenen?",YN,0,"Trams hebben voorrang op gelijkwaardige kruispunten, ook van links."],
+["De weg van de tram heeft haaientanden; jouw weg niet. Moet jij de tram voorrang verlenen?",YN,1,"Borden en markeringen gaan voor de algemene regels. Met haaientanden op zijn weg moet de tram voorrang verlenen."],
+["Je rijdt op een onverharde weg naar een verharde weg. Wie heeft voorrang?",["Verkeer op de verharde weg","Jij, als je van rechts komt","Wie het eerst aankomt"],0,"Bestuurders op een onverharde weg verlenen voorrang aan bestuurders op een verharde weg."],
+["Je rijdt een uitrit uit de weg op. Aan wie moet je voorrang verlenen?",["Al het verkeer, ook voetgangers","Alleen auto's","Alleen verkeer van rechts"],0,"Bij het verlaten van een uitrit verleen je iedereen op de weg en de stoep voorrang."],
+["Je rijdt van een tankstation de weg op. Wie heeft voorrang?",["Al het verkeer op de weg","Jij, als het verkeer van links komt","Niemand"],0,"Een uitrit van een tankstation is een uitrit. Je verleent iedereen voorrang."],
+["Je verlaat een erf en rijdt een gewone weg op. Wie heeft voorrang?",["Verkeer op de gewone weg","Jij, als het verkeer van links komt","Wie het snelst is"],0,"Een erf verlaten is net als een uitrit verlaten. Je verleent al het verkeer voorrang."],
+["Je rijdt weg uit een parkeerplaats langs de stoep. Wie heeft voorrang?",["Al het verkeer op de weg","Jij, omdat je richting aangeeft","Alleen verkeer van rechts"],0,"Wegrijden is een bijzondere manoeuvre. Je verleent iedereen voorrang."],
+["Je wilt keren op een rustige weg. Wie heeft voorrang?",["Al het andere verkeer","Jij, zodra je richting aangeeft","Alleen verkeer van rechts"],0,"Keren is een bijzondere manoeuvre. Ander verkeer gaat voor."],
+["Je rijdt achteruit een parkeervak uit. Wie heeft voorrang?",["Al het andere verkeer","Jij","Alleen voetgangers"],0,"Achteruitrijden is een bijzondere manoeuvre: verleen alle andere weggebruikers voorrang."],
+["Je wisselt van rijstrook. Wie heeft voorrang?",["Verkeer dat al op de andere rijstrook rijdt","Jij, omdat je richting aangeeft","Het snelste voertuig"],0,"Bij het wisselen van rijstrook verleen je voorrang aan verkeer op de strook waar je naartoe gaat."],
+["Je nadert een rotonde met haaientanden en een voorrangsbord. Wie heeft voorrang?",["Verkeer dat al op de rotonde rijdt","Jij, omdat je van rechts komt","Wie het snelst is"],0,"Haaientanden betekenen dat je verkeer op de rotonde voorrang verleent. De meeste Nederlandse rotondes werken zo."],
+["Een rotonde heeft helemaal geen voorrangsborden of haaientanden. Wie heeft voorrang?",["Verkeer dat de rotonde oprijdt (van rechts)","Verkeer op de rotonde","Niemand, maak oogcontact"],0,"Zonder borden geldt de rechtsregel. Oprijdend verkeer komt van rechts ten opzichte van verkeer op de rotonde."],
+["Je slaat rechtsaf. Een fietser op het fietspad naast je gaat rechtdoor. Wie gaat eerst?",["De fietser","Jij, omdat je richting aangeeft","Wie voorop rijdt"],0,"Afslaand verkeer laat rechtdoorgaand verkeer op dezelfde weg voorgaan."],
+["Je slaat linksaf op een gelijkwaardig kruispunt. Een tegenligger gaat rechtdoor. Wie gaat eerst?",["De tegenligger","Jij","Wie het eerst aankwam"],0,"Rechtdoorgaand verkeer op dezelfde weg gaat voor afslaand verkeer."],
+["Je slaat linksaf. Een tegemoetkomende fietser gaat rechtdoor. Wie gaat eerst?",["De fietser","Jij"],0,"Rechtdoorgaand verkeer op dezelfde weg, ook fietsers, gaat voor jou."],
+["Je rijdt op een voorrangsweg en slaat linksaf een zijweg in. Een tegenligger op de voorrangsweg gaat rechtdoor. Wie gaat eerst?",["De tegenligger","Jij, omdat je op de voorrangsweg rijdt"],0,"Jullie rijden allebei op de voorrangsweg. Rechtdoorgaand verkeer gaat voor afslaand verkeer."],
+["Je rijdt op een voorrangsweg en slaat rechtsaf een zijstraat in. Een fietser op het fietspad naast de voorrangsweg gaat rechtdoor. Wie gaat eerst?",["De fietser","Jij"],0,"De fietser gaat rechtdoor langs dezelfde weg. Jij verleent voorrang."],
+["Je rijdt op een voorrangsweg. Een fietser komt van rechts uit een zijweg met haaientanden. Wie gaat eerst?",["Jij","De fietser"],0,"De haaientanden betekenen dat de fietser voorrang verleent."],
+["Een fietspad kruist jouw weg. Het fietspad heeft haaientanden. Wie gaat eerst?",["Jij","De fietsers"],0,"Haaientanden op het fietspad betekenen dat fietsers voorrang verlenen."],
+["Gelijkwaardige T-splitsing: jij komt uit de zijweg. Een auto op de doorgaande weg komt van links. Wie gaat eerst?",["Jij","De auto op de doorgaande weg"],0,"In Nederland geldt de rechtsregel ook op gelijkwaardige T-splitsingen. Jij komt voor de andere auto van rechts."],
+["Gelijkwaardige T-splitsing: jij rijdt op de doorgaande weg. Een auto komt van rechts uit de zijweg. Wie gaat eerst?",["De auto uit de zijweg","Jij, omdat je op de doorgaande weg rijdt"],0,"Zonder borden heeft de doorgaande weg geen voorrang. Verkeer van rechts gaat voor."],
+["Een politieagent wenkt je door, maar jouw verkeerslicht is rood. Wat doe je?",["De agent volgen en rijden","Wachten op groen","Stoppen en vragen"],0,"Aanwijzingen van een verkeersregelaar gaan voor verkeerslichten, borden en regels."],
+["Je hebt groen licht, maar er staan haaientanden op jouw weg. Wie heeft voorrang?",["Jij, het groene licht telt","Verkeer op de kruisende weg","Verkeer van rechts"],0,"Verkeerslichten gaan voor borden en markeringen. De haaientanden gelden alleen als de lichten uit zijn."],
+["De verkeerslichten zijn uit. Jouw weg heeft haaientanden. Wie heeft voorrang?",["Verkeer op de kruisende weg","Jij","Alleen verkeer van rechts"],0,"Als de lichten uit zijn, bepalen borden en markeringen de voorrang."],
+["Je licht springt op groen, maar er steekt nog een voetganger voor je over. Wat doe je?",["Wachten tot de voetganger over is","Rijden; je hebt groen","Toeteren"],0,"Groen betekent niet dat je iemand mag aanrijden. Laat hem eerst oversteken."],
+["Een ambulance met blauw zwaailicht en sirene komt achter je aan. Wat moet je doen?",["Ruimte maken","Normaal doorrijden","Harder rijden om voor te blijven"],0,"Voorrangsvoertuigen met blauw zwaailicht en sirene moet je ruimte geven om te passeren."],
+["Binnen de bebouwde kom geeft een bus bij een halte aan dat hij gaat vertrekken. Wat moet je doen?",["Hem de ruimte geven om weg te rijden","Snel passeren voordat hij rijdt","Toeteren"],0,"Binnen de bebouwde kom moet je een bus laten vertrekken als hij richting aangeeft."],
+["Buiten de bebouwde kom geeft een bus aan dat hij van de halte vertrekt. Moet je hem voor laten gaan?",YN,1,"Die verplichting geldt alleen binnen de bebouwde kom. Wees wel voorzichtig."],
+["Naast je weg staat een oranjegeel ruitvormig bord. Wat betekent dat bij het volgende kruispunt?",["Jij hebt voorrang","Je verleent voorrang aan rechts","Je moet stoppen"],0,"De ruit is het voorrangswegbord. Zijwegen verlenen jou voorrang."],
+["Wat is de volgorde van aanwijzingen?",["Verkeersregelaar, verkeerslichten, borden, algemene regels","Borden, lichten, regelaar, regels","Regels, borden, lichten, regelaar"],0,"Een verkeersregelaar gaat voor lichten; lichten gaan voor borden; borden gaan voor algemene regels."],
+["Twee auto's komen tegelijk van tegenovergestelde kanten op een gelijkwaardig kruispunt; beide gaan rechtdoor. Moet een van hen voorrang verlenen?",YN,1,"Hun routes kruisen elkaar niet. Ze kunnen allebei rijden."],
+["Je wilt vanaf een onverhard landweggetje een verharde weg op. Een fietser op de verharde weg komt van links. Wie gaat eerst?",["De fietser","Jij, omdat je van rechts komt"],0,"Onverhard verleent voorrang aan verhard, ongeacht links of rechts."],
+["Je nadert een STOP-bord. Het verkeer op de kruisende weg is nog ver weg. Wat doe je?",["Volledig stoppen en rijden als het veilig is","Afremmen en doorrijden","Doorrijden; er is niemand dichtbij"],0,"Bij STOP moet je altijd volledig stoppen."],
+["Twee rijstroken gaan zonder markering over in één. Jij rijdt op de strook die eindigt. Wie gaat eerst?",["Verkeer op de doorgaande strook","Jij, als je voorligt","Verkeer rechts"],0,"Naar een andere rijstrook gaan betekent voorrang verlenen aan verkeer op die strook. In langzaam verkeer rits je."]
+]);
+
+QB.add("signs",[
+["Wat moet je doen bij een rood achthoekig STOP-bord?",["Volledig stoppen en voorrang verlenen","Afremmen en voorrang verlenen","Alleen stoppen als er verkeer komt"],0,"Bij STOP moet je volledig stoppen, ook als er geen verkeer is, en verkeer van beide kanten voorrang verlenen."],
+["Wat betekent een omgekeerde driehoek met rode rand?",["Voorrang verlenen","Gevaar","Stop"],0,"De omgekeerde driehoek is het voorrangsbord 'voorrang verlenen', vaak samen met haaientanden."],
+["Wat betekenen haaientanden (witte driehoekjes) dwars over je rijstrook?",["Voorrang verlenen aan verkeer op de kruisende weg","Verkeersdrempel","Voetgangersoversteekplaats"],0,"Haaientanden betekenen dat je verkeer op de weg die je oprijdt voorrang verleent, van beide kanten."],
+["Een rond rood bord met een witte horizontale balk betekent:",["Inrijden verboden van deze kant","Weg gesloten voor vrachtauto's","Einde alle verboden"],0,"Dit is het bord 'inrijden verboden', meestal aan het andere eind van een eenrichtingsweg."],
+["Een wit rond bord met rode rand zonder symbool betekent:",["Gesloten voor alle voertuigen in beide richtingen","Parkeerverbod","Einde snelheidslimiet"],0,"Een leeg rond bord met rode rand sluit de weg voor alle voertuigen in beide richtingen."],
+["Een blauw rechthoekig bord met een witte pijl recht omhoog betekent:",["Eenrichtingsweg","Verplicht rechtdoor","Autosnelweg verderop"],0,"Een witte pijl op een blauwe rechthoek geeft een eenrichtingsweg aan."],
+["Een blauw rond bord met een witte pijl naar rechts betekent:",["Verplicht rechtsaf","Eenrichtingsweg naar rechts","Parkeren rechts"],0,"Blauwe ronde borden zijn gebodsborden. Hier moet je de pijl volgen."],
+["Een blauw rond bord met rode rand en één rode schuine streep betekent:",["Parkeerverbod","Verbod stil te staan","Inrijden verboden"],0,"Eén schuine streep: parkeerverbod. Een rood kruis betekent verbod stil te staan."],
+["Een blauw rond bord met rode rand en een rood kruis betekent:",["Verbod stil te staan","Parkeerverbod","Weg afgesloten"],0,"Bij het rode kruis mag je zelfs niet even stilstaan."],
+["Een oranjegele ruit met witte rand betekent:",["Voorrangsweg","Gevaar","Wegwerkzaamheden"],0,"Dit is het voorrangswegbord."],
+["Een oranjegele ruit met een zwarte schuine balk betekent:",["Einde voorrangsweg","Inhaalverbod","Rijbaanversmalling"],0,"De balk streept de voorrangsweg door. Vanaf hier gelden de gewone voorrangsregels."],
+["Een rode driehoek met witte achtergrond is meestal een:",["Waarschuwingsbord","Verbodsbord","Informatiebord"],0,"Driehoeken waarschuwen voor gevaar. Cirkels verbieden of gebieden, rechthoeken informeren."],
+["Ronde borden met rode rand zijn meestal:",["Verboden","Geboden","Informatie"],0,"Rode cirkel: verbod. Blauwe cirkel: gebod."],
+["Blauwe ronde borden zijn meestal:",["Geboden (verplichtingen)","Verboden","Waarschuwingen"],0,"Een blauw rond bord zegt wat je moet doen."],
+["Blauwe rechthoekige borden zijn meestal:",["Informatie","Verboden","Waarschuwingen"],0,"Rechthoeken geven informatie, zoals parkeren, eenrichtingsverkeer of autosnelweg."],
+["Een blauw rond bord met een witte fiets betekent:",["Verplicht fietspad; auto's mogen er niet op","Fietsers toegestaan op de rijbaan","Fietsenstalling"],0,"Dit is een verplicht fietspad. Auto's mogen er niet rijden of parkeren."],
+["Een blauw rond bord met een witte fiets en bromfiets betekent:",["Fiets-/bromfietspad; auto's mogen er niet op","Gedeelde weg voor iedereen","Bromfietsparkeren"],0,"Fietsers en bromfietsers moeten dit pad gebruiken. Auto's mogen er niet op."],
+["Een rond bord met rode rand en twee auto's naast elkaar (linker rood) betekent:",["Inhaalverbod voor motorvoertuigen","Verkeer in twee richtingen","Parkeerplaats vol"],0,"Dit bord verbiedt het inhalen van motorvoertuigen."],
+["Een rond bord met rode rand en een vrachtauto erin betekent:",["Gesloten voor vrachtauto's","Alleen vrachtauto's","Parkeren voor vrachtauto's"],0,"Vrachtauto's mogen er niet in."],
+["Een rond bord met rode rand en een hoogte in meters betekent:",["Hogere voertuigen mogen er niet in","Minimale hoogte","Afstand tot obstakel"],0,"Het geeft een maximale voertuighoogte aan, bijvoorbeeld voor een lage brug of tunnel."],
+["Een blauw bord met een huis, een persoon, een auto en een spelend kind geeft aan:",["Het begin van een erf","Een school","Een parkeerterrein"],0,"Een erf: stapvoets, voetgangers mogen de hele straat gebruiken."],
+["Het erfbord met een rode schuine balk betekent:",["Einde erf","Geen kinderen toegestaan","Parkeerverbod"],0,"Je verlaat het erf. Als je eruit rijdt, verleen je al het verkeer voorrang."],
+["Een blauw bord met een witte auto geeft aan:",["Een autoweg","Een autosnelweg","Een parkeerterrein"],0,"Dit is het autowegbord: 100 km/u, geen langzaam verkeer."],
+["Een blauw bord met een wit symbool van een weg met een viaduct erover geeft aan:",["Een autosnelweg","Een autoweg","Een tunnel"],0,"Dit is het autosnelwegbord."],
+["Een blauw vierkant bord met een witte 'T', waarvan de bovenste balk rood is, betekent:",["Doodlopende weg","Kruispunt verderop","Tunnel"],0,"Het geeft een doodlopende weg aan."],
+["Een blauw vierkant bord met een witte 'P' betekent:",["Parkeergelegenheid","Voorrang","Politie"],0,"Hier mag je parkeren."],
+["Een waarschuwingsdriehoek met kinderen betekent:",["Overstekende kinderen, bijvoorbeeld bij een school","Alleen speelplaats","Klaar-over verplicht"],0,"Verwacht kinderen, vooral rond schooltijden."],
+["Een waarschuwingsdriehoek met een dikke verticale lijn, gekruist door een dunne lijn, betekent:",["Kruispunt verderop waar jij voorrang hebt","Gelijkwaardig kruispunt","Overweg"],0,"De dikke lijn is jouw weg: je hebt voorrang op het volgende kruispunt."],
+["Een waarschuwingsdriehoek met een kruis (X) van twee gelijke lijnen betekent:",["Kruispunt verderop; de rechtsregel geldt","Jij hebt voorrang","Overweg zonder spoorbomen"],0,"Gelijke lijnen betekenen een gelijkwaardig kruispunt: verkeer van rechts gaat voor."],
+["Een waarschuwingsdriehoek met drie gebogen pijlen in een cirkel betekent:",["Rotonde verderop","Omleiding","Inzamelpunt"],0,"Bereid je voor om voorrang te verlenen op de rotonde."],
+["Een waarschuwingsdriehoek met een verkeerslicht betekent:",["Verkeerslichten verderop","Lichten defect","Flitspaal"],0,"Wees klaar om te stoppen bij de lichten."],
+["Een waarschuwingsdriehoek met een uitroepteken betekent:",["Ander gevaar; lees het onderbord","Ongeval verderop","Weg afgesloten"],0,"Een algemene waarschuwing. Meestal legt een onderbord het uit."],
+["Een waarschuwingsdriehoek met een springend hert betekent:",["Overstekend wild","Jachtgebied","Dierentuin in de buurt"],0,"Rijd vooral rond schemering langzamer en let op de bermen."],
+["Een waarschuwingsdriehoek met een bult betekent:",["Oneffen weg of verkeersdrempel","Heuvel","Los grind"],0,"Rem af voor de drempel."],
+["Een waarschuwingsdriehoek met een slagboom betekent:",["Overweg met spoorbomen verderop","Tolpoort","Weg afgesloten"],0,"Wees klaar om te stoppen bij de overweg."],
+["Een wit Andreaskruis (X-vorm) met rode randen staat bij een spoorlijn. Wat betekent het?",["Overweg; wees klaar om te stoppen","Inrijden verboden","Kruispunt verderop"],0,"Het geeft een overweg aan. Let op treinen en signalen."],
+["Naast je ligt een doorgetrokken witte streep, met aan jouw kant een onderbroken streep. Mag je eroverheen?",YN,0,"De onderbroken streep ligt aan jouw kant, dus jij mag eroverheen. Verkeer aan de kant van de doorgetrokken streep niet."],
+["Een enkele doorgetrokken witte streep verdeelt je weg. Mag je eroverheen om in te halen?",YN,1,"Een doorgetrokken streep mag je nooit overschrijden of berijden."],
+["Een onderbroken witte streep verdeelt de weg. Mag je eroverheen?",YN,0,"Onderbroken strepen mag je overschrijden als het veilig is."],
+["Wat betekent een wit gearceerd vlak (schuine strepen met een rand) op de weg?",["Je mag er niet op rijden","Parkeervak","Inhaalvak"],0,"Verdrijvingsvlakken mag je niet berijden."],
+["Korte, brede witte blokken (blokmarkering) langs een rijstrook betekenen:",["Ze markeren de rand van een bijzondere strook, zoals een in- of uitvoegstrook","Parkeerverbod","Voetgangersoversteekplaats"],0,"Blokmarkering scheidt stroken als in- en uitvoegstroken of spitsstroken van de hoofdrijbaan."],
+["Er ligt een doorgetrokken gele streep langs de stoeprand. Wat betekent dat?",["Verbod stil te staan","Parkeerverbod, maar stilstaan mag","Busbaan"],0,"Een doorgetrokken gele streep betekent verbod stil te staan. Een onderbroken gele streep betekent parkeerverbod."],
+["Er ligt een onderbroken gele streep langs de stoeprand. Wat betekent dat?",["Parkeerverbod","Verbod stil te staan","Taxistandplaats"],0,"Een onderbroken gele streep betekent parkeerverbod. Kort stilstaan mag wel."],
+["Bij wegwerkzaamheden liggen gele en witte strepen. Welke volg je?",["De gele strepen","De witte strepen","Wat je zelf wilt"],0,"Tijdelijke gele markering bij wegwerkzaamheden gaat voor witte."],
+["Op een rijstrook staat 'BUS'. Mag je daar rijden?",YN,1,"Busbanen zijn alleen voor bussen (en soms andere voertuigen die op borden staan)."],
+["Op een matrixbord boven je rijstrook staat een rood kruis. Wat doe je?",["Die strook verlaten, hij is afgesloten","Afremmen naar 50 km/u","Hem alleen gebruiken om in te halen"],0,"Een rood kruis betekent dat de rijstrook afgesloten is."],
+["Een matrixbord toont een schuine pijl boven je rijstrook. Wat betekent dat?",["Ga naar de strook waar de pijl naar wijst","Versnellen","Afrit verderop"],0,"Je rijstrook wordt afgesloten. Ga op tijd naar de andere strook."],
+["Een matrixbord toont een witte cirkel met schuine strepen. Wat betekent dat?",["Einde van de eerder aangegeven beperkingen","Rijstrook dicht","Flitspaal"],0,"De vorige matrixbeperkingen eindigen."],
+["Wat doet een klein bord onder een hoofdbord (onderbord)?",["Voegt voorwaarden toe, zoals tijden of uitzonderingen","Heft het hoofdbord op","Toont de code van het bord"],0,"Een onderbord beperkt of verduidelijkt het hoofdbord."],
+["Een verkeerslicht toont witte balken of witte stippen. Voor wie is het?",["Bussen en trams","Auto's","Voetgangers"],0,"Lichten met witte balken of stippen regelen het openbaar vervoer, niet auto's."],
+["Een verkeerslicht toont een fietssymbool. Voor wie is het?",["Alleen voor fietsers","Voor iedereen","Voor auto's die rechtsaf slaan"],0,"Volg het licht dat voor jouw voertuig bedoeld is."],
+["Op een rood bord in een fietsstraat staat 'auto te gast'. Wat betekent dat?",["Auto's zijn te gast; fietsers gaan voor","Alleen autoparkeren","Auto's hebben voorrang"],0,"In een fietsstraat zijn fietsers de hoofdgebruikers. Rijd rustig achter ze."],
+["Een blauw vierkant bord met een persoon op een zebrapad betekent:",["Voetgangersoversteekplaats","Alleen voetpad","Voetgangersgebied"],0,"Voetgangers op of bijna op de oversteekplaats krijgen voorrang."]
+]);
+
+QB.add("parking",[
+["Op welke afstand van een kruispunt mag je minimaal parkeren?",null,5,"Parkeren binnen 5 m van een kruispunt is verboden, omdat het het zicht belemmert.","m"],
+["Wat is het verschil tussen stilstaan en parkeren?",["Stilstaan is kort laten in- of uitstappen of direct laden","Stilstaan is alles korter dan 5 minuten","Er is geen verschil"],0,"Stilstaan is alleen in- en uitstappen of direct laden en lossen. Langer wachten is parkeren."],
+["Je wacht in je auto op een vriend die nog in een winkel is. Sta je stil of parkeer je?",["Parkeren","Stilstaan","Geen van beide"],0,"Wachten op iemand die niet meteen instapt, telt als parkeren."],
+["Je laat een passagier uitstappen en rijdt meteen weer weg. Is dat stilstaan of parkeren?",["Stilstaan","Parkeren"],0,"Iemand direct laten uitstappen is stilstaan."],
+["Mag je even op een fietspad stilstaan om een passagier af te zetten?",YN,1,"Op een fietspad mag je nooit stilstaan of parkeren."],
+["Mag je parkeren op een fietsstrook op de rijbaan?",YN,1,"Parkeren op een fietsstrook is verboden."],
+["Je parkeert in een blauwe zone. Wat moet je doen?",["Een parkeerschijf neerleggen","Betalen bij de automaat","Overdag niets"],0,"In een blauwe zone zet je de parkeerschijf op je aankomsttijd; parkeren is in tijd beperkt."],
+["Mag je parkeren voor iemands uitrit?",YN,1,"Parkeren voor een uitrit is verboden; het blokkeert de eigenaar."],
+["Mag je stilstaan op een zebrapad?",YN,1,"Stilstaan op een voetgangersoversteekplaats is verboden."],
+["Wanneer mag je stoppen op de vluchtstrook van een autosnelweg?",["Alleen bij nood of pech","Om te bellen","Om de route te controleren"],0,"De vluchtstrook is alleen voor noodgevallen."],
+["Mag je 2 minuten op een gehandicaptenparkeerplaats staan zonder gehandicaptenparkeerkaart?",YN,1,"Gehandicaptenparkeerplaatsen zijn alleen voor voertuigen met een geldige kaart."],
+["Mag je stilstaan op een overweg?",YN,1,"Sta nooit stil op een overweg. Rijd er alleen op als je er direct weer af kunt."],
+["Mag je buiten de bebouwde kom parkeren op de rijbaan van een voorrangsweg?",YN,1,"Parkeren op de rijbaan van een voorrangsweg buiten de bebouwde kom is verboden."],
+["Mag je op het trottoir parkeren?",YN,1,"Parkeren op het trottoir mag niet, tenzij een bord het toestaat."],
+["Mag je parkeren langs een doorgetrokken gele streep?",YN,1,"Een doorgetrokken gele streep betekent verbod stil te staan, dus zeker niet parkeren."],
+["Mag je bij een onderbroken gele streep even een passagier laten uitstappen?",YN,0,"Een onderbroken gele streep verbiedt parkeren, maar stilstaan mag."],
+["Aan welke kant van een gewone weg met tweerichtingsverkeer parkeer je?",["Aan de rechterkant","Aan beide kanten","Aan de linkerkant"],0,"Parkeer aan de rechterkant van de weg in je rijrichting."],
+["Mag je parkeren op een busbaan?",YN,1,"Busbanen zijn alleen voor bussen."],
+["Mag je parkeren bij een bushalte?",YN,1,"Parkeren bij een bushalte hindert de bus."],
+["Je parkeert op een helling naar beneden. Welke kant draai je je voorwielen op?",["Naar de stoeprand","Van de stoeprand af","Recht vooruit"],0,"Als de rem het begeeft, houdt de stoeprand de auto tegen."],
+["Wat moet je doen voordat je aan de straatkant uit je geparkeerde auto stapt?",["Kijken of er fietsers of verkeer achter je aankomen","Alarmlichten aanzetten","Links richting aangeven"],0,"Kijk achterom (bijvoorbeeld met de Dutch reach) zodat je je deur niet voor een fietser opent."],
+["Mag je parkeren op een verdrijvingsvlak?",YN,1,"Een verdrijvingsvlak mag je niet berijden en je mag er niet op stilstaan."],
+["Een bord toont een 'P' met een stekker. Wie mag daar parkeren?",["Elektrische voertuigen die aan het laden zijn","Elke auto","Taxi's"],0,"Laadplekken zijn alleen voor elektrische voertuigen tijdens het laden."]
+]);
+
+QB.add("motorway",[
+["Welke voertuigen mogen op de autosnelweg?",["Voertuigen die harder dan 60 km/u kunnen en mogen","Alle motorvoertuigen","Voertuigen die harder dan 40 km/u kunnen"],0,"Alleen motorvoertuigen die harder dan 60 km/u kunnen en mogen rijden, zijn toegestaan."],
+["Mogen bromfietsers en fietsers op de autosnelweg?",YN,1,"Zij mogen niet op autosnelwegen en autowegen."],
+["Hoe voeg je in op de autosnelweg?",["Op de invoegstrook snelheid aanpassen en voorrang verlenen aan verkeer op de snelweg","Stoppen aan het eind van de invoegstrook","Meteen invoegen; invoegend verkeer heeft voorrang"],0,"Gebruik de invoegstrook om op snelheid te komen. Verkeer op de snelweg heeft voorrang."],
+["De invoegstrook is kort en het is druk. Wat doe je?",["Blijven zoeken naar een gat en je snelheid aanpassen","Over de vluchtstrook rijden","Je ertussen dringen"],0,"Pas je snelheid aan om in een gat te passen. Stoppen aan het eind is het laatste redmiddel."],
+["Je rijdt op de snelweg en ziet een auto invoegen. Hoe kun je helpen?",["Een strook naar links gaan als dat veilig kan","Gas geven","Toeteren"],0,"Ruimte maken is hoffelijk en veilig, zolang je anderen niet in gevaar brengt."],
+["Je hebt je afslag gemist. Wat doe je?",["Doorrijden naar de volgende afslag","Achteruitrijden over de vluchtstrook","Keren bij een opening in de vangrail"],0,"Achteruitrijden of keren op de snelweg is verboden en zeer gevaarlijk."],
+["Mag je keren op een autosnelweg?",YN,1,"Keren is verboden op autosnelwegen."],
+["Je rijstrook eindigt en het verkeer rijdt langzaam. Hoe voeg je in?",["Ritsen aan het eind van de strook","Zo vroeg mogelijk invoegen","Stoppen en wachten op een gat"],0,"Rijd door tot het eind van de strook en voeg om en om in (ritsen)."],
+["Welke rijstrook gebruik je op de snelweg als je niet inhaalt?",["De rechterstrook","De middelste strook","Elke strook"],0,"Houd rechts. Gebruik de linkerstroken om in te halen."],
+["Drie rijstroken, de rechter is vrij. Jij rijdt op de middelste. Is dat juist?",YN,1,"Houd zo veel mogelijk rechts. Ga terug naar rechts als die vrij is."],
+["Een spitsstrook toont een rood kruis. Mag je hem gebruiken?",YN,1,"Een rood kruis betekent dat hij gesloten is."],
+["Hoe weet je dat een spitsstrook open is?",["Er staat een snelheid of groene pijl boven","Het is overdag","Er rijdt verkeer op"],0,"Gebruik hem alleen als het matrixbord erboven aangeeft dat hij open is."],
+["Je krijgt pech op de autosnelweg. Wat is de beste volgorde?",["Alarmlichten, vluchtstrook, iedereen achter de vangrail, hulp bellen","In de auto blijven en bellen","Eerst de gevarendriehoek op de weg zetten"],0,"Ga uit de gevarenzone: achter de vangrail is veel veiliger dan in de auto."],
+["Je hebt pech op de snelweg. Waar wachten de passagiers?",["Achter de vangrail","In de auto met de gordel om","Op de vluchtstrook naast de auto"],0,"Verkeer kan een stilstaande auto raken. Achter de vangrail is het veiligst."],
+["Waar rem je af als je de snelweg verlaat?",["Op de uitvoegstrook","Op de hoofdrijbaan voor de afslag","Op de vluchtstrook"],0,"Ga eerst naar de uitvoegstrook en rem daar."],
+["Mag je op de snelweg stoppen om een lifter mee te nemen?",YN,1,"Stoppen op de snelweg mag alleen in noodgevallen."],
+["Mag je achteruitrijden op een op- of afrit van de snelweg?",YN,1,"Achteruitrijden is verboden op de snelweg en de op- en afritten."],
+["Voor je ontstaat plotseling een file op de snelweg. Hoe kun je het verkeer achter je waarschuwen?",["Kort je alarmlichten aanzetten","Meerdere keren hard remmen","Tegenliggers met je lichten waarschuwen"],0,"Alarmlichten mogen kort gebruikt worden om achteropkomend verkeer voor een plotselinge file te waarschuwen."],
+["Wat betekent een groene pijl boven een rijstrook op een matrixbord?",["De rijstrook is open","Je moet de afslag nemen","Strook voor vrachtauto's"],0,"Een groene pijl naar beneden geeft aan dat de strook open is."],
+["Wat is een weefvak?",["Een stuk waar in- en uitvoegend verkeer dezelfde strook gebruikt","Een tunnelingang","Een parkeerplaats"],0,"Let goed op: er rijdt tegelijk verkeer in en uit."],
+["Wat is het grootste gevaar van lange afstanden op de snelweg?",["Vermoeidheid en verslapping van de aandacht","Te veel kruispunten","Voetgangers"],0,"Snelwegrijden is eentonig. Neem regelmatig pauze."],
+["Mag je inhalen op een autoweg?",["Ja, waar het mag en veilig is","Nooit","Alleen rechts"],0,"Inhalen mag op een autoweg, tenzij borden of strepen het verbieden. Er kan tegemoetkomend verkeer zijn."],
+["Een autoweg heeft vaak geen fysieke middenberm. Wat is het grootste risico?",["Frontale botsingen met tegenliggers","Overstekende voetgangers","Trams"],0,"Inhalen op een autoweg met tegemoetkomend verkeer is extra gevaarlijk."],
+["Mogen trekkers op een autoweg?",YN,1,"Langzame voertuigen zoals trekkers mogen niet op een autoweg."],
+["Je nadert een tunnel op de snelweg. Wat doe je?",["Dimlicht aan en afstand houden","Mistlampen aan","Inhalen voor de tunnel"],0,"Gebruik je verlichting in tunnels en houd goed afstand."]
+]);
+
+QB.add("overtake",[
+["Aan welke kant haal je normaal in?",["Links","Rechts","Allebei"],0,"In Nederland haal je links in."],
+["Aan welke kant haal je een tram in?",["Rechts, tenzij dat niet kan","Altijd links","Nooit"],0,"Trams haal je rechts in."],
+["De auto voor je is naar links gegaan en geeft links aan. Mag je hem rechts passeren?",YN,0,"Een voertuig dat linksaf slaat, mag je rechts passeren."],
+["Mag je een doorgetrokken witte streep oversteken om een langzame trekker in te halen?",YN,1,"Een doorgetrokken streep mag je nooit overschrijden."],
+["Je wordt ingehaald. Wat doe je?",["Rechts houden en je snelheid houden","Gas geven","Naar het midden gaan"],0,"Maak inhalen makkelijk: houd rechts en geef geen gas."],
+["Wat is de juiste volgorde voor het inhalen?",["Spiegels, dode hoek, richting aangeven, inhalen","Richting aangeven, inhalen, spiegels","Inhalen, dan richting aangeven"],0,"Eerst kijken, dan richting aangeven, dan pas uitwijken."],
+["In langzame parallelle files op een weg met meerdere stroken gaat jouw rechterstrook sneller. Mag dat?",YN,0,"In parallelle files mag je rechts sneller gaan."],
+["Mag je inhalen als er een bord staat met twee auto's naast elkaar (linker rood)?",["Geen andere motorvoertuigen; fietsers mag je passeren","Ja, voorzichtig","Alleen rechts"],0,"Je mag hier geen andere motorvoertuigen inhalen. Fietsers passeren mag wel."],
+["Je wilt inhalen, maar de auto achter je is al begonnen jou in te halen. Wat doe je?",["Wachten tot hij voorbij is","Toch gaan","Richting aangeven en uitwijken"],0,"Wijk nooit uit als iemand jou aan het inhalen is."],
+["De auto voor je geeft links aan om in te halen. Ga jij ook inhalen?",["Nee, wachten tot hij klaar is","Ja, hem volgen","Hem rechts inhalen"],0,"Een inhalend voertuig inhalen is gevaarlijk."],
+["Mag je inhalen vlak voor de top van een heuvel?",["Nee, je ziet geen tegenliggers","Ja, als je snel bent","Alleen op een autoweg"],0,"Haal alleen in als je ziet dat de weg lang genoeg vrij is."],
+["Mag je inhalen in een bocht waar je niet ver kunt kijken?",YN,1,"Zonder goed zicht is inhalen gevaarlijk."],
+["Wanneer ga je na het inhalen terug naar rechts?",["Als je de ingehaalde auto in je binnenspiegel ziet","Meteen","Na 1 km"],0,"Zie je hem in je binnenspiegel, dan is er genoeg ruimte."],
+["Hoeveel zijdelingse ruimte geef je een fietser bij het inhalen?",["Ruim; buiten de bebouwde kom is ongeveer 1,5 m een goede richtlijn","20 cm","Niet nodig"],0,"Fietsers slingeren en kunnen door zijwind of jouw zuiging opzij worden geblazen."],
+["Je haalt een fietser in en er komt een auto tegemoet. Wat doe je?",["Achter de fietser blijven tot het veilig is","Ertussendoor","Toeteren"],0,"Haal alleen in als je genoeg ruimte kunt geven."],
+["Mag je een voertuig inhalen dat stopt voor een voetgangersoversteekplaats?",YN,1,"Het stopt misschien voor een voetganger die jij niet ziet. Haal het daar niet in."],
+["Mag je inhalen op een kruispunt?",["Alleen als het veilig is en niet verboden; wees zeer voorzichtig","Altijd","Nooit"],0,"Inhalen bij kruispunten is riskant: afslaand en kruisend verkeer."],
+["Mag je op de linkerstrook rijden van een weg met twee stroken in jouw richting als de rechter vrij is?",["Alleen om in te halen","Ja, altijd","Alleen boven 100 km/u"],0,"Houd rechts; de linkerstrook is om in te halen."],
+["Midden op de weg ligt een tramhalte en er stappen mensen uit. Wat doe je?",["Stoppen of afremmen en ze laten oversteken","Snel rechts passeren","Toeteren"],0,"Passagiers kunnen naar de stoep oversteken. Laat ze veilig gaan."],
+["Je wilt een stilstaande bus bij een halte passeren. Wat is het gevaar?",["Voetgangers die voor de bus oversteken","De bus die plots achteruitrijdt","Geen"],0,"Mensen steken vaak voor een stilstaande bus over."],
+["Een trekker rijdt langzaam voor je op een smalle weg. Af en toe komt er verkeer tegemoet. Wat doe je?",["Wachten op een vrij stuk met genoeg zicht","Inhalen in de volgende bocht","De berm gebruiken"],0,"Geduld: haal alleen in met genoeg ruimte en zicht."],
+["Hoe geef je aan dat je gaat inhalen?",["Links aangeven voor het uitwijken, rechts aangeven voor het terugkeren","Geen richting nodig","Lichtsignaal geven"],0,"Geef duidelijk aan als je uitwijkt en als je terugkeert."]
+]);
+
+QB.add("people",[
+["Een voetganger staat op het punt een zebrapad op te stappen. Wat doe je?",["Stoppen en hem laten oversteken","Doorrijden, hij is nog niet begonnen","Toeteren"],0,"Je moet voetgangers laten oversteken die op of bijna op een zebrapad zijn."],
+["Een blinde met een witte stok wil oversteken waar geen zebrapad is. Moet je hem laten gaan?",YN,0,"Blinde voetgangers met een witte stok of geleidehond moet je altijd laten oversteken."],
+["Iemand met een geleidehond wil oversteken. Wat doe je?",["Stoppen en laten oversteken","Langzaam doorrijden","Toeteren om te waarschuwen"],0,"Geleidehondgebruikers behandel je als mensen met een witte stok: laat ze oversteken."],
+["Mogen twee fietsers op een gewone weg naast elkaar rijden?",["Ja, als ze het verkeer niet hinderen","Nee, nooit","Alleen op fietspaden"],0,"Fietsers mogen met twee naast elkaar rijden zolang ze ander verkeer niet hinderen."],
+["Je wilt in de stad rechtsaf. Wat is het grootste gevaar?",["Een fietser in je dode hoek","Tegemoetkomend verkeer","Verkeer achter je"],0,"Fietsers naast je gaan rechtdoor en zie je makkelijk over het hoofd. Controleer spiegel en dode hoek."],
+["Je parkeert en wilt je portier openen. Hoe doe je dat het veiligst?",["Met de verste hand, terwijl je achteromkijkt","Snel, met de dichtstbijzijnde hand","Pas na richting aangeven"],0,"Met de verste hand openen draait je lichaam, zodat je aankomende fietsers ziet."],
+["Je rijdt langs een school als de kinderen uitgaan. Wat doe je?",["Langzamer rijden en klaar zijn om te stoppen","Gewoon 50 km/u aanhouden","Waarschuwend toeteren"],0,"Kinderen doen plotselinge dingen. Lagere snelheid geeft je tijd om te reageren."],
+["Een oudere persoon rijdt in een scootmobiel op het fietspad. Mag dat?",YN,0,"Scootmobielen mogen op het fietspad en stapvoets op het trottoir."],
+["Je nadert geparkeerde auto's en er rolt een bal tussen vandaan. Wat gebeurt er waarschijnlijk?",["Een kind rent erachteraan","Niets","Een auto rijdt weg"],0,"Na een bal komt vaak een kind. Verwacht het en rem af."],
+["In een woonstraat staat een ijscowagen. Wat verwacht je?",["Kinderen die de weg over rennen","Niets bijzonders","Een file"],0,"Kinderen letten op de wagen, niet op het verkeer."],
+["Oudere voetgangers steken langzaam over. Wat doe je?",["Ze de tijd geven en niet opjagen","Eromheen rijden","Toeteren"],0,"Ouderen kunnen slechter lopen, zien en horen."],
+["Wat is typisch voor jonge kinderen in het verkeer?",["Ze kunnen snelheid en afstand slecht inschatten","Ze kijken altijd goed","Ze kennen de regels"],0,"Kinderen zijn klein, impulsief en schatten snelheid verkeerd in."],
+["Een fietser rijdt 's avonds zonder licht. Wat doe je?",["Rekening met hem houden en extra opletten","Hem met je lichten waarschuwen","Hem negeren"],0,"Fietsers zonder licht zie je moeilijk. Kijk goed."],
+["Fietsers mogen in Nederland op de rijbaan rijden als er een verplicht fietspad naast ligt. Waar of niet waar?",["Niet waar, ze moeten het fietspad gebruiken","Waar"],0,"Een verplicht fietspad moeten fietsers gebruiken."],
+["Je rijdt in een fietsstraat achter een groep fietsers. Mag je ze inhalen?",["Alleen als het veilig en rustig kan; de auto is te gast","Ja, gewoon","Nooit"],0,"In een fietsstraat past de auto zich aan fietsers aan."],
+["Een fietser voor je steekt zijn linkerarm uit. Wat betekent dat?",["De fietser gaat linksaf","De fietser laat je passeren","De fietser gaat stoppen"],0,"Een uitgestoken arm geeft de richting aan."],
+["Waar mag een speed pedelec (snelle elektrische fiets, geel kenteken) rijden?",["Meestal op de rijbaan, net als een bromfiets","Alleen op voetpaden","Op de snelweg"],0,"Speed pedelecs zijn wettelijk bromfietsen en kunnen tot 45 km/u."],
+["Wat verwacht je van een bromfietser in de stad?",["Snelle en plotselinge richtingsveranderingen","Altijd langzaam rijden","Alleen op fietspaden rijden"],0,"Bromfietsen zijn snel en wendbaar. Let op ze in je spiegels."],
+["Een voetganger loopt op een erf op de rijbaan. Mag dat?",YN,0,"Op een erf mogen voetgangers de hele breedte van de weg gebruiken."],
+["Kinderen voetballen op de stoep naast de weg. Wat doe je?",["Langzamer rijden en klaar zijn om te remmen","Snelheid houden","Toeteren"],0,"De bal of een kind kan plotseling op de weg komen."],
+["Je rijdt achter een ruiter te paard. Hoe passeer je?",["Langzaam, met veel ruimte en zonder lawaai","Snel om het achter de rug te hebben","Met een kort toetersignaal"],0,"Paarden kunnen schrikken van lawaai en snelheid."],
+["Voetgangers met een kinderwagen lopen op de weg omdat de stoep geblokkeerd is. Wat doe je?",["Afremmen en met ruimte passeren","Toeteren","Snelheid houden"],0,"Passeer kwetsbare verkeersdeelnemers langzaam en met ruimte."],
+["Als je rechtsaf slaat, slaat een vrachtauto naast je ook rechtsaf. Wie loopt het meeste gevaar?",["Fietsers en voetgangers bij de hoek","Jij","Tegemoetkomend verkeer"],0,"Grote voertuigen hebben grote dode hoeken en snijden bochten af."],
+["Je rijdt naast een vrachtauto. Waar kan de chauffeur je niet zien?",["In zijn dode hoeken, bijvoorbeeld vlak naast de cabine","Overal voor hem","Ver achter hem"],0,"Zie jij de spiegels van de vrachtauto niet, dan ziet de chauffeur jou niet."],
+["Een kind op een fiets slingert voor je op de weg. Wat doe je?",["Afremmen en ruim afstand houden","Snel inhalen","Toeteren"],0,"Jonge fietsers zijn wankel en onvoorspelbaar."],
+["Wat doe je bij een speelplaats?",["Langzaam rijden en letten op kinderen","Toeteren","Niets bijzonders"],0,"Kinderen kunnen elk moment de weg op rennen."],
+["Bij een tramhalte midden op de weg lopen mensen. Wat doe je?",["Langzaam rijden en ze laten oversteken","Snelheid houden","De tram links inhalen"],0,"Reizigers van of naar een tramhalte kunnen oversteken."],
+["Een groep kinderen loopt onder begeleiding langs de weg. Wat doe je?",["Afremmen en met ruimte passeren","Snelheid houden","Ze gebaren opzij te gaan"],0,"Ook kinderen in een groep kunnen plotseling de weg op stappen."]
+]);
+
+QB.add("hazard",[
+["Je rijdt 50 km/u in een woonstraat. 15 m voor je rolt een bal tussen geparkeerde auto's de weg op.",HZ,0,"Er kan elk moment een kind achteraan komen en de afstand is kort. Nu remmen."],
+["Je rijdt 80 km/u op een lege landweg. Ver voor je rijdt een fietser op een vrijliggend fietspad.",HZ,2,"De fietser rijdt gescheiden van jou en is ver weg. Geen reden om langzamer te gaan."],
+["Je nadert met 40 km/u een zebrapad. Een voetganger die op zijn telefoon kijkt, loopt ernaartoe.",HZ,1,"Hij kan zomaar oversteken. Gas loslaten zodat je op tijd kunt stoppen."],
+["De auto vlak voor je toont plotseling felle remlichten. Je rijdt er dicht achter.",HZ,0,"Korte afstand en je voorganger remt: jij moet ook remmen."],
+["Op de snelweg met 100 km/u begint een vrachtauto ruim voor je richting aan te geven naar jouw strook.",HZ,1,"Geef de vrachtauto ruimte door gas los te laten. Hard remmen is op deze afstand niet nodig."],
+["In een 30-zone rent een kind op de stoep achter een hond aan, recht op de weg af.",HZ,0,"Het kind rent zo de weg op. Remmen."],
+["Je rijdt 50 km/u op een voorrangsweg. Een auto nadert snel uit een zijweg en lijkt niet af te remmen.",HZ,1,"Jij hebt voorrang, maar de ander stopt misschien niet. Gas loslaten en klaar zijn."],
+["Je rijdt op een rechte weg. Het verkeerslicht ver voor je staat al een tijd op groen.",HZ,1,"Een licht dat al lang groen is, kan op geel springen. Gas loslaten zodat je rustig kunt stoppen."],
+["Een fietser voor je kijkt over haar schouder en steekt haar linkerarm uit.",HZ,1,"Ze gaat voor je linksaf. Gas loslaten."],
+["Je rijdt 80 km/u op een droge, lege weg met goed zicht. Er gebeurt niets.",HZ,2,"Geen gevaar. Zonder reden afremmen hindert het verkeer achter je."],
+["In de stad rijdt vlak voor je een auto zonder te kijken uit een parkeervak.",HZ,0,"De auto komt op korte afstand op jouw weg. Remmen."],
+["Je rijdt 50 km/u. Het verkeerslicht vlak voor je springt op geel en je kunt nog veilig stoppen.",HZ,0,"Geel betekent stoppen als dat veilig kan. Remmen."],
+["Je rijdt 50 km/u. Het licht 20 m voor je springt op rood.",HZ,0,"Voor rood moet je stoppen. Remmen."],
+["Je rijdt 50 km/u naar een kruispunt waar verkeer van rechts voorrang heeft. Er nadert een auto van rechts.",HZ,0,"Je moet de auto van rechts voorrang verlenen. Remmen."],
+["Je rijdt 50 km/u naar een gelijkwaardig kruispunt. Door heggen kun je de straat rechts niet inkijken.",HZ,1,"Er kan verkeer van rechts komen. Gas loslaten zodat je voorrang kunt verlenen."],
+["Je rijdt 30 km/u langs een school. Kinderen staan kletsend bij de stoeprand, met hun rug naar de weg.",HZ,1,"Ze kunnen achteruit stappen of oversteken. Gas loslaten en klaar zijn."],
+["Je rijdt 80 km/u op een voorrangsweg. Een trekker wacht netjes bij een zijweg rechts.",HZ,2,"De trekker wacht op jou. Geen reden om langzamer te gaan."],
+["Je rijdt 50 km/u. Voor je geeft een bus bij een halte aan dat hij wegrijdt. Je bent ongeveer 40 m weg.",HZ,1,"Binnen de bebouwde kom moet je de bus laten vertrekken. Gas loslaten om hem ruimte te geven."],
+["Je rijdt 50 km/u. 10 m voor je trekt een bus op vanaf een halte.",HZ,0,"De bus rijdt al op jouw weg. Remmen."],
+["Je rijdt 100 km/u op de snelweg. Ver voor je zie je op alle stroken alarmlichten knipperen.",HZ,1,"Er staat plotseling file. Gas loslaten; remmen als het nodig is."],
+["Je rijdt 100 km/u op de snelweg. Het verkeer 60 m voor je staat ineens stil.",HZ,0,"Je moet op tijd stoppen. Remmen."],
+["Je rijdt 50 km/u. Op het zebrapad voor je loopt al een voetganger.",HZ,0,"Voetgangers op het zebrapad hebben voorrang. Remmen."],
+["Je rijdt 50 km/u. Rechts vlak voor je gaat het portier van een geparkeerde auto open.",HZ,0,"Het portier kan je weg op komen. Remmen."],
+["Je rijdt 50 km/u langs een lange rij geparkeerde auto's. Niets beweegt.",HZ,2,"Blijf alert, maar er is geen concrete reden om langzamer te gaan."],
+["Je rijdt 80 km/u. Een ree staat in de berm vlak naast de weg voor je.",HZ,0,"Wild springt onvoorspelbaar. Remmen."],
+["Je rijdt 80 km/u op een landweg in de schemering. Er staat een waarschuwingsbord voor wild. Verder zie je niets.",HZ,1,"Er kunnen dieren opduiken. Gas loslaten."],
+["Je rijdt 50 km/u. Een fietser voor je op de rijbaan rijdt erg wankel.",HZ,1,"De fietser kan uitwijken. Gas loslaten en afstand houden."],
+["Je rijdt 50 km/u. Ver voor je, op 80 m, stuitert een bal over de weg.",HZ,1,"Er kan een kind volgen, maar je hebt tijd. Gas loslaten."],
+["Je rijdt 30 km/u op een erf. Er spelen kinderen op straat.",HZ,0,"Op een erf moet je stapvoets rijden en hebben kinderen de ruimte. Remmen."],
+["Je rijdt 80 km/u. De auto voor je remt rustig af voor een bocht. Je houdt veilig afstand.",HZ,1,"Neem gas terug met het verkeer voor je; hard remmen is niet nodig."],
+["Je rijdt 50 km/u. Er staat water over de weg en je kunt niet zien hoe diep het is.",HZ,1,"Verlaag je snelheid voor het water."],
+["Je rijdt 50 km/u op een weg zonder verkeer. Het licht voor je is groen en er is niemand.",HZ,2,"Geen gevaar. Doorrijden."],
+["Je rijdt 50 km/u. Voor je staat een voetganger met een witte stok op het punt over te steken.",HZ,0,"Je moet een blinde voetganger laten oversteken. Remmen."],
+["Je rijdt 50 km/u. Een ambulance met blauw zwaailicht en sirene komt voor je uit een zijweg.",HZ,0,"Geef de ambulance voorrang. Remmen."],
+["Je rijdt 50 km/u. Je hoort een sirene, maar je ziet niet waar die vandaan komt.",HZ,1,"Gas loslaten en rondkijken, zodat je ruimte kunt maken."],
+["Je rijdt 70 km/u naar een overweg. De lichten beginnen rood te knipperen.",HZ,0,"Er komt een trein. Remmen en stoppen."],
+["Je rijdt 50 km/u. Een auto voor je stopt plotseling om te parkeren en rijdt achteruit een vak in.",HZ,0,"De auto komt jouw kant op. Remmen."],
+["Je rijdt 50 km/u. Voor je staat een bestelbus dubbel geparkeerd met de alarmlichten aan.",HZ,1,"Er kan iemand uitstappen of oversteken. Gas loslaten en voorzichtig passeren."],
+["Je rijdt 80 km/u op een droge weg. Een auto haalt je in en voegt met genoeg ruimte voor je in.",HZ,2,"De inhaler houdt genoeg afstand. Geen actie nodig."],
+["Je rijdt 80 km/u. Een auto haalt je in en snijdt heel dicht voor je in.",HZ,1,"Herstel je volgafstand door gas los te laten."],
+["Je rijdt 50 km/u naar een rotonde met haaientanden. Er rijdt al een auto op de rotonde richting jouw ingang.",HZ,0,"Je moet verkeer op de rotonde voorrang verlenen. Remmen."],
+["Je rijdt 100 km/u op de snelweg op de rechterstrook. De strook naast je is leeg en er voegt niemand in.",HZ,2,"Geen gevaar. Doorrijden."],
+["Je rijdt 50 km/u. Voor je geeft een auto links aan en wacht op tegenliggers. Rechts is ruimte om te passeren.",HZ,1,"Gas loslaten en voorzichtig rechts passeren."],
+["Je rijdt 50 km/u. Een loslopende hond loopt op de stoep naast de weg.",HZ,1,"De hond kan de weg op rennen. Gas loslaten."],
+["Je rijdt 50 km/u. Vlak voor je komt rechts een kind op een fiets een uitrit uit.",HZ,0,"Het kind komt op jouw weg. Remmen."],
+["Je rijdt 80 km/u op veilige afstand achter een trekker. De weg voor je is vrij, maar inhalen kan nog niet.",HZ,1,"Pas je snelheid aan de trekker aan."],
+["Je rijdt 50 km/u. Bij een zebrapad staan voetgangers en een stapt naar voren.",HZ,0,"Een voetganger die gaat oversteken heeft voorrang. Remmen."],
+["Je rijdt 30 km/u. De mist wordt ineens heel dicht; je ziet maar 20 m.",HZ,0,"Je moet kunnen stoppen binnen je zicht. Remmen naar een lagere snelheid."],
+["Je rijdt 80 km/u. In een bocht voor je ligt een laag bladeren op de weg.",HZ,1,"Bladeren kunnen glad zijn. Rem af voor de bocht."],
+["Je rijdt 50 km/u op een voorrangsweg. Een fietser wacht bij de zijweg en kijkt naar je.",HZ,2,"De fietser heeft je gezien en wacht. Geen reden om langzamer te gaan."],
+["Je rijdt 50 km/u. Een fietser komt snel uit de zijweg naar de voorrangsweg en kijkt niet.",HZ,1,"De fietser stopt misschien niet. Gas loslaten en klaar zijn."],
+["Je rijdt 50 km/u. Een vrachtauto voor je rijdt achteruit uit een inrit jouw weg op.",HZ,0,"De vrachtauto komt op jouw weg. Remmen."],
+["Je rijdt 50 km/u. Uit een stilstaande tram lopen mensen voor je langs naar de stoep.",HZ,0,"Reizigers steken voor je over. Remmen."]
+]);
+
+QB.add("safety",[
+["Wat is de alcohollimiet voor een ervaren bestuurder?",["0,5‰","0,2‰","0,8‰"],0,"De limiet is 0,5 promille. Beginnende bestuurders hebben 0,2."],
+["Je hebt je rijbewijs 2 jaar geleden gehaald. Wat is jouw alcohollimiet?",["0,2‰","0,5‰","0,0‰"],0,"Beginnende bestuurders (eerste 5 jaar met rijbewijs) hebben een limiet van 0,2 promille."],
+["Hoe lang ben je beginnend bestuurder voor de lagere alcohollimiet?",["De eerste 5 jaar met rijbewijs","1 jaar","Tot je 25e"],0,"In de eerste 5 jaar met je rijbewijs geldt de limiet van 0,2‰."],
+["Kunnen koffie of een koude douche je promillage verlagen?",YN,1,"Alleen tijd verlaagt je alcoholpromillage."],
+["Wordt je reactietijd langer door alcohol?",YN,0,"Zelfs kleine hoeveelheden vertragen je reactie en geven vals zelfvertrouwen."],
+["Mag je rijden na het gebruik van drugs zoals cannabis?",YN,1,"Rijden onder invloed van drugs is verboden en gevaarlijk."],
+["Je wacht voor een rood licht. Mag je je telefoon vasthouden om een bericht te sturen?",YN,1,"Een telefoon vasthouden is verboden als je in het verkeer rijdt, ook voor een rood licht."],
+["Mag je handsfree bellen tijdens het rijden?",YN,0,"Handsfree bellen mag, maar het leidt je nog steeds af."],
+["Mag je je telefoon in een houder als navigatie gebruiken?",["Ja, als hij vastzit in een houder en je hem niet vasthoudt","Nee, nooit","Alleen stilstaand"],0,"Een telefoon in een houder mag je voor navigatie gebruiken. Houd hem niet vast."],
+["Vanaf welke lengte mag een kind zonder kinderzitje in de auto?",null,135,"Kinderen kleiner dan 1,35 m moeten een geschikt kinderzitje gebruiken.","cm"],
+["Moeten passagiers op de achterbank een gordel dragen?",YN,0,"Iedereen in de auto moet een gordel gebruiken als die er is."],
+["Wie is verantwoordelijk voor het gordelgebruik of kinderzitje van passagiers onder de 18?",["De bestuurder","Het kind","Alleen de ouders"],0,"De bestuurder moet zorgen dat passagiers onder 18 goed vastzitten."],
+["Mag een achterwaarts gericht kinderzitje voorin met een ingeschakelde airbag?",YN,1,"Een airbag kan een baby in een achterwaarts zitje ernstig verwonden. Zet de airbag uit."],
+["Je medicijn heeft een gele sticker. Wat betekent dat?",["Het kan je rijvaardigheid beïnvloeden","Het is veilig met alcohol","Het moet koel bewaard worden"],0,"Een gele sticker waarschuwt voor effecten op je rijvaardigheid."],
+["Hoe vaak neem je op een lange rit pauze?",["Ongeveer elke 2 uur","Elke 5 uur","Alleen als je moe bent"],0,"Vermoeidheid bouwt zich op voordat je het merkt."],
+["Je voelt je erg slaperig tijdens het rijden. Wat is het beste?",["Veilig stoppen en rusten","Het raam openen","De muziek harder zetten"],0,"Alleen rust helpt echt tegen vermoeidheid."],
+["Wanneer is de kans groter dat je achter het stuur in slaap valt?",["'s Nachts en na lange eentonige ritten","In de spits","In de stad"],0,"'s Nachts rijden en eentonigheid maken je slaperig."],
+["Wat is het effect van emoties zoals boosheid op je rijgedrag?",["Je neemt meer risico","Je rijdt beter","Geen effect"],0,"Sterke emoties verminderen je aandacht en vergroten risico's."],
+["Hoe stel je je hoofdsteun af?",["Bovenkant gelijk met de bovenkant van je hoofd","Op nekhoogte","Zo laag mogelijk"],0,"Een goed afgestelde hoofdsteun beschermt je nek bij een kop-staartbotsing."],
+["Je komt bij een ongeval met gewonden. Wat doe je eerst?",["Zorgen dat je zelf veilig bent en de plek beveiligen","De gewonden meteen verplaatsen","Doorrijden"],0,"Bescherm eerst jezelf en de plek, bel dan 112 en verleen hulp."],
+["Welk nummer bel je in Nederland bij nood?",["112","911","0900"],0,"112 is het alarmnummer."],
+["Je bent betrokken bij een aanrijding met alleen schade. Wat doe je?",["Stoppen, gegevens uitwisselen, schadeformulier invullen","Doorrijden als de schade klein is","Altijd op de politie wachten"],0,"Stoppen is verplicht. Gebruik het Europees schadeformulier."],
+["Ben je verplicht te stoppen na een ongeval waarbij je betrokken bent?",YN,0,"Doorrijden na een ongeval is een misdrijf."],
+["Je ziet een bestuurder die dronken lijkt. Wat kun je doen?",["De politie bellen","Hem volgen en aanhouden","Niets"],0,"Meld het bij de politie; breng jezelf niet in gevaar."],
+["Mag je tijdens het rijden in beide oren oortjes dragen?",["Niet verstandig: je moet het verkeer en sirenes horen","Ja, geen probleem","Alleen op de snelweg"],0,"Je moet sirenes en ander verkeer kunnen horen."],
+["Wat doet een vastgemaakte gordel bij een botsing?",["Hij houdt je op je stoel en vermindert letsel","Hij stopt de airbag","Niets bij lage snelheid"],0,"Ook bij lage snelheid vermindert een gordel het letsel sterk."],
+["Kun je een boete krijgen voor geen gordel op de achterbank?",YN,0,"Ook passagiers achterin moeten de gordel dragen."],
+["Ben je verplicht mee te werken aan een blaastest als de politie dat vraagt?",YN,0,"Weigeren van een blaastest is strafbaar."],
+["Wat doe je met losse spullen in de auto?",["Vastzetten; bij een botsing worden het projectielen","Op de achterbank laten liggen","Op het dashboard leggen"],0,"Losse spullen vliegen bij een botsing met grote kracht naar voren."],
+["Een passagier leidt je steeds af. Wat doe je?",["Vragen ermee te stoppen of aan de kant gaan","Doorrijden en negeren","Harder rijden om er sneller te zijn"],0,"Je aandacht hoort bij de weg."]
+]);
+
+QB.add("vehicle",[
+["Hoeveel seconden afstand houd je minstens tot je voorganger?",null,2,"De 2-secondenregel geeft je tijd om te reageren. Houd meer aan bij regen of in het donker.","s"],
+["Wat is de wettelijke minimale profieldiepte van autobanden?",null,1.6,"Het wettelijk minimum is 1,6 mm.","mm"],
+["Bij welk zicht mag je je mistachterlicht gebruiken (minder dan)?",null,50,"Alleen bij zicht minder dan 50 m. Anders verblindt het bestuurders achter je.","m"],
+["Je rijdt twee keer zo snel. Wat gebeurt er met je remweg?",["Ongeveer 4 keer zo lang","2 keer zo lang","Blijft gelijk"],0,"De remweg groeit met het kwadraat van de snelheid."],
+["Je rijdt drie keer zo snel. Wat gebeurt er met je remweg?",["Ongeveer 9 keer zo lang","3 keer zo lang","6 keer zo lang"],0,"De remweg groeit met het kwadraat van de snelheid: 3 × 3 = 9."],
+["Waaruit bestaat de stopafstand?",["Reactieafstand + remweg","Alleen de remweg","Snelheid × 2"],0,"Terwijl je reageert, rijdt de auto door. Daarna rem je."],
+["Wat gebeurt er met de reactieafstand als je twee keer zo snel rijdt?",["Die wordt twee keer zo lang","Die blijft gelijk","Die wordt vier keer zo lang"],0,"De reactieafstand groeit gelijk op met de snelheid."],
+["Je auto begint te aquaplanen. Wat doe je?",["Gas loslaten, stuur recht houden","Hard remmen","Snel opzij sturen"],0,"Laat de banden weer grip krijgen door rustig snelheid te minderen."],
+["'s Nachts nadert een tegenligger terwijl je groot licht voert. Wat doe je?",["Overschakelen op dimlicht","Groot licht aanhouden","Lichten uit"],0,"Groot licht verblindt. Dim op tijd."],
+["Je rijdt 's nachts achter een andere auto. Mag je groot licht gebruiken?",YN,1,"Groot licht verblindt de bestuurder voor je via zijn spiegels."],
+["Je auto heeft ABS. Hoe rem je in een noodsituatie?",["Hard remmen en blijven sturen","Pompend remmen","Zacht remmen"],0,"Met ABS kun je vol remmen en toch sturen."],
+["Wat helpt om zuiniger te rijden?",["Vroeg opschakelen en anticiperen","In lage versnellingen rijden","Laat en hard remmen"],0,"Een laag toerental en rustig rijden besparen brandstof."],
+["Het regent hard. Wat doe je met je volgafstand?",["Vergroten","2 seconden aanhouden","Verkleinen om de auto voor je te zien"],0,"Natte wegen geven langere remwegen."],
+["Wanneer moet je dimlicht voeren?",["Tussen zonsondergang en zonsopgang en bij slecht zicht","Alleen in tunnels","Alleen buiten de bebouwde kom"],0,"Gebruik verlichting 's nachts en altijd bij slecht zicht."],
+["Wanneer mag je mistlampen voor gebruiken?",["Bij mist, sneeuw of zware regen met slecht zicht","Altijd 's nachts","Als het donker is in de stad"],0,"Mistlampen voor zijn alleen voor slecht zicht door mist, sneeuw of regen."],
+["Wat is het gevolg van te zachte banden?",["Slechtere wegligging en hoger verbruik","Betere grip","Geen gevolg"],0,"Controleer regelmatig je bandenspanning."],
+["Waar vind je de juiste bandenspanning van je auto?",["In het instructieboekje of op een sticker in de auto","Alleen op de band","Bij het politiebureau"],0,"De fabrikant geeft de juiste spanning op."],
+["Tijdens het rijden gaat een rood waarschuwingslampje op je dashboard branden. Wat doe je?",["Zo snel als veilig kan stoppen en controleren","Doorrijden tot thuis","Negeren"],0,"Rode waarschuwingslampjes wijzen op een ernstig probleem."],
+["Wat is de APK?",["De periodieke technische keuring van een voertuig","Een rijbewijs","Een parkeervergunning"],0,"De APK controleert of je auto technisch veilig en schoon genoeg is."],
+["Mag je rijden met een kapot remlicht?",YN,1,"Je verlichting moet werken. Laat het zo snel mogelijk maken."],
+["Je voorruit is bevroren. Wat doe je?",["Alle ruiten helemaal ijsvrij maken voor je rijdt","Een klein kijkgaatje maken","Met het raam open rijden"],0,"Je moet rondom goed zicht hebben."],
+["Wat doet de motorrem?",["Hij remt de auto af als je in een versnelling gas loslaat","Hij vervangt de handrem","Hij warmt de motor op"],0,"Gas loslaten in een versnelling remt de auto af zonder brandstof te gebruiken."],
+["Wanneer is de remweg van een auto het langst?",["Op natte bladeren of ijs","Op droog asfalt","Op een droge betonweg"],0,"Weinig grip betekent een lange remweg."],
+["Wat is het gevolg van zware lading in je auto?",["Langere remweg en ander weggedrag","Kortere remweg","Geen gevolg"],0,"Extra massa maakt remmen en bochten lastiger."],
+["Wat moet je doen als je een lange lading vervoert die achter uitsteekt?",["Hem duidelijk markeren zodat anderen hem zien","Niets","Met alarmlichten rijden"],0,"Uitstekende lading moet gemarkeerd worden voor anderen."],
+["Wat is het belangrijkste doel van dagrijverlichting?",["Je beter zichtbaar maken voor anderen","De weg verlichten","Dimlicht 's nachts vervangen"],0,"'s Nachts heb je dimlicht nodig: dagrijverlichting verlicht de achterkant niet."],
+["Wat is de dode hoek?",["Het gebied rond je auto dat je niet in je spiegels ziet","Het donkere deel van de weg","Het gebied achter de kofferbak"],0,"Kijk over je schouder voordat je van strook wisselt of afslaat."],
+["Wat doe je als je auto op ijs slipt?",["Rustig sturen in de richting die je op wilt, niet hard remmen","Zo hard mogelijk remmen","Gas geven"],0,"Rustige correcties helpen de banden weer grip te krijgen."],
+["Er staat harde zijwind op een brug. Wat kun je verwachten?",["Je auto kan opzij worden gedrukt","Betere grip","Niets"],0,"Houd het stuur stevig vast en rijd langzamer."],
+["Wat is het gevaar van door diep water rijden?",["Motorschade en remmen die minder goed werken","Beter remmen","Geen"],0,"Test na water voorzichtig je remmen."],
+["Wat vergroot bumperkleven?",["De kans op een kop-staartbotsing","Zuinigheid","Je zicht"],0,"Houd minstens 2 seconden afstand."],
+["Waarom houd je meer afstand achter een vrachtauto?",["Je ziet dan meer van de weg voor je","Vrachtauto's remmen sneller","Het is wettelijk alleen bij vrachtauto's verplicht"],0,"Afstand geeft je zicht langs de vrachtauto en tijd om te reageren."],
+["Wat doe je in een tunnel?",["Dimlicht aan en afstand houden","Snel inhalen","De radio uitzetten"],0,"Tunnels zijn schemerig; licht en afstand helpen."],
+["Wanneer moet je je alarmlichten aanzetten?",["Als je stilstaat en een gevaar vormt, bijvoorbeeld na pech","Bij fout parkeren","Bij zware regen tijdens het rijden"],0,"Alarmlichten waarschuwen anderen voor een stilstaand gevaar. Niet voor parkeren."],
+["Wat is het effect van snelheid op brandstofverbruik?",["Hogere snelheid betekent veel hoger verbruik","Geen effect","Lager verbruik"],0,"Luchtweerstand neemt sterk toe met snelheid."],
+["Je auto trekt bij het remmen naar één kant. Wat kan de oorzaak zijn?",["Een probleem met remmen of banden","Weinig brandstof","Een vuile voorruit"],0,"Laat het nakijken door een garage."],
+["Wat controleer je voor een lange rit?",["Banden, verlichting, vloeistoffen","Alleen de brandstof","Niets"],0,"Een korte controle voorkomt pech."]
+]);
+
+QB.add("rules",[
+["Waar op de weg rijd je normaal?",["Zo veel mogelijk rechts","In het midden","Ergens op je strook"],0,"Houd rechts zodat anderen kunnen passeren en er ruimte is voor tegenliggers."],
+["Je verkeerslicht springt op geel en je kunt nog veilig stoppen. Wat doe je?",["Stoppen","Snel doorrijden","Vrij kiezen"],0,"Geel betekent stoppen, tenzij je niet meer veilig kunt stoppen."],
+["Een verkeerslicht knippert geel. Wat betekent dat?",["Voorzichtig; de gewone voorrangsregels gelden","Jij hebt voorrang","Stoppen"],0,"Een knipperend geel licht betekent dat het licht het verkeer niet regelt."],
+["Bij een overweg knipperen de rode lichten en gaan de bellen. Wat doe je?",["Stoppen","Snel oversteken voor de bomen dichtgaan","Afremmen en oversteken"],0,"Knipperende rode lichten betekenen dat er een trein komt."],
+["De spoorbomen gaan omhoog, maar de rode lichten blijven knipperen. Mag je oversteken?",YN,1,"Zolang de rode lichten knipperen, moet je wachten. Er kan een tweede trein komen."],
+["Een verkeersregelaar steekt één arm recht omhoog. Wat betekent dat?",["Al het verkeer moet stoppen","Alleen verkeer voor hem stopt","Doorrijden"],0,"Een opgeheven arm betekent stoppen voor iedereen, behalve voertuigen die al op het kruispunt zijn."],
+["Een verkeersregelaar strekt beide armen zijwaarts uit. Wat betekent dat voor verkeer aan zijn voor- of achterkant?",["Stoppen","Doorrijden","Rechtsaf"],0,"Verkeer aan de voor- of achterkant van de regelaar moet stoppen."],
+["Wat is de maximale toegestane massa van een voertuig met rijbewijs B?",null,3500,"Rijbewijs B geldt voor voertuigen tot 3.500 kg toegestane maximummassa.","kg"],
+["Hoeveel passagiers (zonder de bestuurder) mag je met rijbewijs B vervoeren?",null,8,"Met rijbewijs B mag je naast de bestuurder maximaal 8 passagiers vervoeren.","passagiers"],
+["Op welke leeftijd mag je met 2toDrive onder begeleiding van een coach gaan rijden?",null,17,"Met 2toDrive kun je je rijbewijs op 17 halen en tot je 18e rijden met een coach.","jaar"],
+["Wanneer mag je binnen de bebouwde kom toeteren?",["Alleen om gevaar te voorkomen","Om iemand te groeten","Als iemand te langzaam rijdt"],0,"De claxon is om gevaar te voorkomen."],
+["Wanneer geef je richting aan bij het wisselen van rijstrook?",["Ruim van tevoren","Tijdens het wisselen","Alleen als er anderen zijn"],0,"Geef op tijd aan zodat anderen weten wat je gaat doen."],
+["Wanneer zet je je richtingaanwijzer uit?",["Als de manoeuvre klaar is","Voor de manoeuvre","Nooit, hij gaat altijd vanzelf uit"],0,"Een vergeten richtingaanwijzer misleidt anderen."],
+["Waar zet je je auto neer voordat je linksaf slaat op een weg met tweerichtingsverkeer?",["Dicht bij de middenstreep","Helemaal rechts","Op de rijstrook van tegenliggers"],0,"Voorsorteren links zodat verkeer achter je rechts kan passeren."],
+["Waar zet je je auto neer voordat je rechtsaf slaat?",["Zo ver mogelijk rechts","In het midden","Links"],0,"Zo voorkom je dat anderen je rechts passeren."],
+["Je moet je rijbewijs bij je hebben als je rijdt. Waar of niet waar?",["Waar","Niet waar"],0,"Je moet je rijbewijs op verzoek kunnen tonen."],
+["Hoeveel jaar is een autorijbewijs meestal geldig?",null,10,"Een Nederlands autorijbewijs is normaal 10 jaar geldig.","jaar"],
+["Mag je over een fietspad rijden om een file te passeren?",YN,1,"Auto's mogen nooit over een fietspad rijden."],
+["Mag je over de vluchtstrook een file passeren?",YN,1,"De vluchtstrook is alleen voor noodgevallen."],
+["Wat betekent een groen verkeerslicht?",["Je mag rijden als de weg vrij is","Je hebt voorrang op iedereen","Je moet rijden"],0,"Groen betekent dat je mag gaan, maar je moet bijvoorbeeld nog overstekende voetgangers voor laten gaan."],
+["Wat betekent een rode pijl in een verkeerslicht?",["Stoppen voor die richting","In die richting afslaan","Opletten"],0,"De pijl geeft aan voor welke richting het licht geldt."],
+["Je komt bij een gesloten spoorboom. Mag je eromheen rijden?",YN,1,"Rijd nooit om of onder spoorbomen door."],
+["Mag je een kruispunt oprijden als je er door de file niet af kunt?",YN,1,"Blokkeer het kruispunt niet. Wacht tot je kunt doorrijden."],
+["Wie mag jou aanwijzingen geven in het verkeer?",["Politie en bevoegde verkeersregelaars","Iedereen in een geel hesje","Andere bestuurders"],0,"Volg aanwijzingen van politie en bevoegde verkeersregelaars op."],
+["Wat doe je als een politieauto achter je 'Stop politie' aangeeft?",["Veilig aan de kant van de weg stoppen","Doorrijden naar de volgende afslag","Harder rijden"],0,"Volg de aanwijzing op en stop op een veilige plek."],
+["Wat is nodig om met rijbewijs B met een aanhangwagen te rijden?",["De combinatie moet binnen de grenzen van B blijven","Niets","Een vrachtwagenrijbewijs"],0,"Zware combinaties vragen een BE-rijbewijs of code 96."],
+["Wat betekent rechts houden op een smalle weg met tegenliggers?",["Zo ver als veilig kan naar rechts","Stoppen","In het midden blijven"],0,"Geef tegenliggers ruimte."],
+["Mag je rechts inhalen op een weg met één strook in elke richting?",["Alleen een voertuig dat linksaf slaat","Altijd","Nooit"],0,"Rechts inhalen mag alleen in bepaalde gevallen."],
+["Je ziet een stilstaand voertuig met blauw zwaailicht op de weg. Wat doe je?",["Langzamer rijden en voorzichtig passeren","Stoppen","Normaal doorrijden"],0,"Hulpdiensten zijn daar aan het werk; geef ze ruimte."],
+["Wat betekent een knipperend oranje licht op een voertuig?",["Let op: bijzonder voertuig (bijv. wegenwacht, langzaam voertuig)","Voorrang verlenen","Stoppen"],0,"Oranje knipperlichten waarschuwen voor een langzaam of werkend voertuig."],
+["Je hebt het theorie-examen gehaald. Mag je nu alleen met een auto de openbare weg op?",YN,1,"Met een theoriecertificaat heb je nog geen rijbewijs. Je moet nog slagen voor het praktijkexamen."],
+["Hoe lang is een gehaald CBR-theorie-examen geldig?",["18 maanden","6 maanden","5 jaar"],0,"Binnen die tijd moet je slagen voor het praktijkexamen."],
+["Wat betekent 'ritsen'?",["Om en om invoegen aan het eind van een strook","Rechts inhalen","Tussen de stroken rijden"],0,"Elke auto laat er afwisselend één tussen."],
+["Wat moet je doen bij een STOP-streep op de weg met een STOP-bord?",["Stoppen bij de streep","Stoppen na de streep","Alleen afremmen"],0,"Stop bij de streep, kijk en rijd als het veilig is."],
+["Op een rijstrook staat een pijl naar links. Jij wilt rechtdoor. Mag je die strook gebruiken?",YN,1,"Pijlen op de weg zijn verplicht. Kies de strook voor jouw richting."],
+["Mag je van rijstrook wisselen over een doorgetrokken streep tussen stroken?",YN,1,"Een doorgetrokken streep tussen stroken mag je niet overschrijden."],
+["Wie moet een geldig rijbewijs hebben als een leerling met 2toDrive rijdt?",["De coach","Niemand","Alleen de leerling"],0,"De coach moet het juiste rijbewijs hebben en geregistreerd zijn."],
+["Je hoort een treinfluit bij een onbewaakte overweg. Wat doe je?",["Stoppen en wachten","Snel oversteken","Negeren"],0,"Er komt een trein. Stoppen."],
+["Wat betekent een blauw bord met een witte 'i'?",["Informatiepunt","Ziekenhuis","Internet"],0,"Het geeft een informatiepunt aan."]
+]);
+
+QB.add("priority",[
+["Jij komt uit een gelijkwaardige zijstraat rechts van een auto die linksaf jouw straat in wil. Wie gaat eerst?",["Jij, je komt voor de ander van rechts","De afslaande auto"],0,"Jij komt voor die auto van rechts, dus hij verleent jou voorrang."],
+["Op een gelijkwaardig kruispunt slaat een auto van rechts rechtsaf de straat in waar jij vandaan komt. Moet je wachten?",["Meestal is er geen conflict, maar blijf opletten","Ja, altijd","Nee, hij moet jou voorrang verlenen"],0,"Zijn route kruist de jouwe niet, maar let op wat hij doet."],
+["Je rijdt van een parkeerterrein af en wilt linksaf. Een fietser komt van links over het fietspad. Wie gaat eerst?",["De fietser","Jij, omdat de fietser van links komt"],0,"Bij het verlaten van een parkeerterrein verleen je al het verkeer voorrang."],
+["Wie heeft voorrang op een rotonde zonder borden: een fietser die de rotonde oprijdt of jij die er al op rijdt?",["De oprijdende fietser","Jij"],0,"Zonder borden geldt de rechtsregel: oprijdend verkeer komt van rechts."],
+["Je verlaat een rotonde en kruist een fietspad dat eromheen loopt. Het fietspad heeft voorrangsmarkering. Wie gaat eerst?",["De fietsers","Jij"],0,"Binnen de bebouwde kom hebben fietsers op een rotondefietspad meestal voorrang. Volg de markering."],
+["Een voetganger wil oversteken waar geen zebrapad is. Moet je hem laten gaan?",["Geen verplichting, maar wees voorzichtig en hoffelijk","Ja, altijd","Alleen kinderen"],0,"Buiten een oversteekplaats hebben voetgangers geen voorrang, behalve blinden. Voorkom wel gevaar."],
+["Je rijdt op een gelijkwaardige weg. Een auto komt links uit een uitrit. Wie gaat eerst?",["Jij","De auto uit de uitrit"],0,"Wie uit een uitrit komt, verleent iedereen voorrang."],
+["Je rijdt op een voorrangsweg. Een auto komt van rechts uit een zijweg. Wie gaat eerst?",["Jij","De auto van rechts"],0,"Op een voorrangsweg verlenen zijwegen voorrang. Ze hebben meestal haaientanden of een voorrangsbord."],
+["Een tram en een auto komen allebei van rechts op een gelijkwaardig kruispunt. Jij gaat rechtdoor. Moet je beide voorrang verlenen?",YN,0,"De tram heeft voorrang en de auto komt van rechts."],
+["Je staat voor een rood licht. Een verkeersregelaar geeft aan dat je moet rijden. Wat doe je?",["Rijden volgens de regelaar","Wachten op groen","Achteruitrijden"],0,"Verkeersregelaars gaan voor verkeerslichten."],
+["Groen licht voor jou en voor fietsers die naast je rechtdoor gaan. Jij slaat rechtsaf. Wie gaat eerst?",["De fietsers","Jij"],0,"Afslaand verkeer verleent voorrang aan rechtdoorgaand verkeer."],
+["Je groene licht toont een groene pijl naar rechts. Kunnen er dan toch overstekende voetgangers of fietsers zijn?",["Mogelijk, dus kijk goed","Nee, een pijl betekent conflictvrij","Alleen 's nachts"],0,"Niet elke groene pijl is conflictvrij. Kijk altijd goed."],
+["Een brandweerauto met blauw zwaailicht en sirene wil erlangs, maar jij staat voor rood. Wat doe je?",["Voorzichtig ruimte maken zonder gevaar te veroorzaken","Hard door rood rijden","Blijven staan"],0,"Maak ruimte voor zover dat veilig kan."],
+["Een politieauto zonder sirene of zwaailicht rijdt achter je. Moet je ruimte maken?",YN,1,"Alleen met blauw zwaailicht én sirene hebben hulpdiensten voorrang."],
+["Een ambulance voert blauw zwaailicht maar geen sirene. Moet je hem voorrang geven?",["Wettelijk alleen met zwaailicht én sirene, maar werk mee","Ja, altijd","Nooit"],0,"Wettelijke voorrang vraagt zwaailicht en sirene; laat hem toch passeren als dat kan."],
+["Op een smalle weg met geparkeerde auto's aan jouw kant nadert een tegenligger. Wie gaat eerst?",["De tegenligger, want het obstakel staat aan jouw kant","Jij","Wie het snelst is"],0,"Wie het obstakel aan zijn kant heeft, laat de ander meestal eerst gaan."],
+["Op een gelijkwaardig kruispunt komen drie auto's tegelijk aan, elk met een andere auto rechts van zich. Wat doen ze?",["Afspraken maken met gebaren; één ziet af van voorrang","De grootste gaat eerst","De snelste gaat eerst"],0,"Bij een impasse moet iemand afzien van zijn voorrang."],
+["Een auto komt van rechts uit een onverharde weg. Wie gaat eerst?",["Jij, op de verharde weg","De auto van rechts"],0,"De onverharde weg verleent voorrang, ook van rechts."],
+["Mag een auto ooit een fiets-/bromfietspad gebruiken?",["Nee","Ja, om in te halen"],0,"Auto's mogen deze paden niet gebruiken."]
+]);
+
+QB.add("signs",[
+["Wat betekent een stopstreep (witte balk dwars over de strook) bij verkeerslichten?",["Bij rood erachter stoppen","Parkeerstreep","Einde rijstrook"],0,"Wacht achter de stopstreep."],
+["Een waarschuwingsdriehoek met een fietser betekent:",["Fietsers kunnen oversteken of de rijbaan oprijden","Verplicht fietspad verderop","Geen fietsers"],0,"Let op overstekende fietsers."],
+["Een waarschuwingsdriehoek met een persoon op een zebrapad betekent:",["Voetgangersoversteekplaats verderop","Einde voetpad","School verderop"],0,"Wees klaar om voetgangers voorrang te geven."],
+["Een waarschuwingsdriehoek met een weg die aan beide kanten smaller wordt betekent:",["Rijbaanversmalling verderop","Brug verderop","Tweerichtingsverkeer"],0,"Rem af en wees klaar om tegenliggers te laten passeren."],
+["Een waarschuwingsdriehoek met twee pijlen (omhoog en omlaag) betekent:",["Tweerichtingsverkeer verderop","Eenrichtingsweg","Rijstrookwissel"],0,"Na een stuk eenrichtingsverkeer kun je tegenliggers verwachten."],
+["Een waarschuwingsdriehoek met een scherpe bocht naar rechts betekent:",["Gevaarlijke bocht naar rechts","Verplicht rechtsaf","Rechterstrook eindigt"],0,"Rem af voor de bocht."],
+["Een waarschuwingsdriehoek met een auto en slipsporen betekent:",["Slipgevaar","Rallyroute","Wasstraat"],0,"Pas je snelheid aan; de weg kan glad zijn."],
+["Een waarschuwingsdriehoek met een tram betekent:",["Trams kruisen of rijden op de weg","Tramhalte","Verplichte trambaan"],0,"Let op trams; ze hebben voorrang op gelijkwaardige kruispunten."],
+["Een waarschuwingsdriehoek met een werkman met schep betekent:",["Werk in uitvoering","Boerderij","Voetgangersgebied"],0,"Verwacht werklieden, versmalde stroken en een lagere snelheid."],
+["Een waarschuwingsdriehoek met een koe betekent:",["Er kan vee op de weg zijn","Boerderijwinkel","Dierentuin"],0,"Wees klaar om voor dieren te stoppen."],
+["Een blauw vierkant bord met een witte auto op een veerboot betekent:",["Veerpont","Wasstraat","Parkeren bij de haven"],0,"Er komt een veerpont."],
+["Een bord toont 'Zone 30' op een witte rechthoek met een rode cirkel. Wat geldt er?",["30 km/u op alle wegen in de zone","30 km/u als advies","30 km/u alleen tijdens schooltijden"],0,"Zoneborden gelden tot het einde-zonebord."],
+["Een bord met een rode cirkel en een getal met 't' (bijv. 7,5 t) betekent:",["Zwaardere voertuigen mogen er niet in","Minimaal gewicht","Tol"],0,"Het is een gewichtsbeperking."],
+["Een bord met een rode cirkel en een auto met aanhanger betekent:",["Gesloten voor voertuigen met aanhangwagen","Parkeren voor aanhangers","Sleepdienst"],0,"Voertuigen met een aanhangwagen mogen er niet in."],
+["Een bord met een rode cirkel en een fiets betekent:",["Gesloten voor fietsers","Fietspad","Fietsenstalling"],0,"Fietsers mogen er niet in."],
+["Een blauw rond bord met een witte voetganger betekent:",["Verplicht voetpad; geen auto's","Voetgangersoversteekplaats","Einde voetgangersgebied"],0,"Alleen voetgangers mogen dit pad gebruiken."],
+["Een bord met een blauw rond bord met rode rand en de tekst 'zone' met een doorgestreepte P betekent:",["Parkeerverbodzone","Parkeerzone","Buszone"],0,"In de hele zone geldt een parkeerverbod tot het einde."],
+["Wat betekent een witte pijl op de weg die rechtdoor en naar rechts wijst?",["Strook voor rechtdoor en rechtsaf","Strook voor linksaf","Busstrook"],0,"Pijlen op de weg geven aan voor welke richtingen de strook is."]
+]);
+
+QB.add("parking",[
+["Je stopt om zware dozen uit te laden bij een winkeldeur. Is dat stilstaan of parkeren?",["Stilstaan, als je meteen uitlaadt","Parkeren"],0,"Direct laden en lossen geldt als stilstaan."],
+["Een bord 'P' met een blauw onderbord 'max 2 uur' betekent:",["Maximaal 2 uur parkeren","Parkeren vanaf 2 uur","Parkeren kost 2 euro"],0,"Onderborden beperken de parkeerduur."],
+["Een parkeerplaats heeft een bord met een 'P' en 'vergunninghouders'. Wie mag er parkeren?",["Alleen vergunninghouders","Iedereen","Taxi's"],0,"Vergunningparkeren is voor bewoners met een vergunning."],
+["Waar laat je je auto het veiligst achter als je buiten de bebouwde kom pech krijgt?",["Zo mogelijk helemaal naast de weg","Op de rijbaan met de lichten uit","In een bocht"],0,"Haal de auto uit de verkeersstroom."],
+["Mag je parkeren in een tunnel?",YN,1,"Stilstaan of parkeren in een tunnel is gevaarlijk en verboden."],
+["Je parkeert bij een parkeerautomaat. Wanneer moet je betalen?",["Tijdens de tijden op de automaat of het bord","Alleen in het weekend","Nooit"],0,"Controleer de tijden van betaald parkeren."],
+["Hoe laat je je auto geparkeerd achter op een helling?",["Handrem erop en in een versnelling (of P bij een automaat)","Alleen in z'n vrij","Met draaiende motor"],0,"Zet de auto zo vast dat hij niet kan wegrollen."],
+["Mag je op een weg met tweerichtingsverkeer links parkeren, tegen de rijrichting in?",YN,1,"Op een weg met tweerichtingsverkeer parkeer je aan de rechterkant."]
+]);
+
+QB.add("motorway",[
+["Wat doe je als je op een matrixbord een filewaarschuwing ziet?",["Afremmen en klaar zijn om te stoppen","Snel van strook wisselen","Negeren"],0,"Filewaarschuwingen helpen kop-staartbotsingen te voorkomen."],
+["Een matrixbord toont 50 met knipperende lichten. Wat betekent dat?",["Maximaal 50 km/u, afremmen","Alleen een advies","Minimaal 50"],0,"Matrixsnelheden in een rode cirkel zijn wettelijke maxima."],
+["Waar is de vluchtstrook voor?",["Noodgevallen en pech","Inhalen","Langzaam verkeer"],0,"Gebruik hem alleen in noodgevallen."],
+["Mag je op een snelweg met drie stroken rechts inhalen?",["Normaal niet; alleen in parallelle files","Ja, altijd","Alleen vrachtauto's"],0,"Haal links in; rechts sneller rijden mag alleen in files."],
+["Op de radio hoor je een waarschuwing voor een spookrijder. Wat doe je?",["Rechts blijven, afremmen en niet inhalen","Op de linkerstrook rijden","Stoppen op de vluchtstrook"],0,"Spookrijders rijden meestal op hun 'rechter' strook, dat is jouw linkerstrook."],
+["De snelweg is dicht door een ongeval en het verkeer staat stil. Mag je je auto verlaten?",["Alleen als het nodig en veilig is; blijf alert","Ja, rondlopen","Over de vluchtstrook rijden"],0,"Blijf in je auto, tenzij er gevaar is of de politie iets anders zegt."],
+["Wat is een plusstrook op een snelweg?",["Een extra smalle strook links die in de spits opengaat","Vluchtstrook","Vrachtwagenstrook"],0,"Het is een tijdelijke strook; gebruik hem alleen als hij open is."],
+["Welke spiegel gebruik je het meest bij het invoegen vanaf de invoegstrook?",["Linker buitenspiegel en over je schouder kijken","Rechter buitenspiegel","Alleen binnenspiegel"],0,"Het verkeer op de snelweg rijdt links van je."],
+["Vrachtauto's mogen op sommige tijden niet inhalen op de snelweg. Hoe wordt dat aangegeven?",["Met een inhaalverbod voor vrachtauto's","Met gele strepen","Met een rood kruis"],0,"Borden met een rode vrachtauto en een auto verbieden inhalen door vrachtauto's."],
+["Hoe neem je een afslag als je op de linkerstrook van een snelweg met drie stroken rijdt?",["Op tijd naar de rechterstroken gaan","Bij de afslag alle stroken oversteken","Links afslaan"],0,"Plan vooruit en ga vroeg naar rechts."],
+["Wat doe je bij een knooppunt?",["Op tijd de strook kiezen voor jouw richting via de borden","Plots remmen als je je route ziet","Achteruitrijden als je hem mist"],0,"Kies je strook vroeg aan de hand van de borden boven de weg."]
+]);
+
+QB.add("overtake",[
+["Mag je een fietser inhalen bij een voetgangersoversteekplaats?",["Alleen heel voorzichtig; voetgangers kunnen oversteken","Altijd","Nooit"],0,"Wees extra voorzichtig bij oversteekplaatsen."],
+["Mag je inhalen als een vrachtauto voor je het zicht op tegenliggers blokkeert?",YN,1,"Je moet de weg die je gaat gebruiken goed kunnen overzien."],
+["Wat is de beste manier om een langzaam voertuig in te halen op een weg met een doorgetrokken streep?",["Wachten tot de streep onderbroken wordt","Snel over de streep","Rechts inhalen"],0,"Geduld; de streep verandert vaak verderop."],
+["Mag je een stilstaande tram inhalen waaruit mensen uitstappen?",["Alleen stapvoets of niet; laat reizigers oversteken","Ja, met normale snelheid","Alleen links"],0,"Reizigers moeten veilig de stoep kunnen bereiken."],
+["Je haalt op een natte weg een vrachtauto in. Wat verwacht je?",["Opspattend water dat je zicht beperkt","Betere grip","Niets"],0,"Opspattend water van vrachtauto's kan je even verblinden."],
+["Iemand haalt jou met hoge snelheid in en er komt verkeer tegemoet. Wat kun je doen?",["Afremmen om hem terug te laten","Gas geven","Hem blokkeren"],0,"Help een ongeval te voorkomen."]
+]);
+
+QB.add("people",[
+["Hoe passeer je een fietser het best op een smalle weg met tegenliggers?",["Erachter wachten tot er ruimte is","Dicht langs","Toeteren"],0,"Geef de fietser ruimte; wacht als het moet."],
+["Iemand in een rolstoel steekt de weg over. Wat doe je?",["Geduldig wachten tot hij over is","Eromheen rijden","Toeteren"],0,"Geef hem tijd en ruimte."],
+["Voetgangers moeten het trottoir gebruiken. Waar lopen ze als er geen is?",["Op het fietspad of aan de kant van de weg","Overal","Alleen rechts"],0,"Waar geen trottoir is, gebruiken voetgangers het fietspad of de kant van de weg."],
+["Kinderen achterin je auto willen aan de straatkant uitstappen. Wat doe je?",["Ze aan de stoepkant laten uitstappen","Ze snel laten uitstappen","Maakt niet uit"],0,"Uitstappen aan de stoepkant is het veiligst."],
+["Je ziet een groep fietsers op de rijbaan rijden terwijl er een fietspad is. Wat doe je?",["Geduld houden en voorzichtig passeren","Er dicht achter rijden","Toeteren"],0,"Blijf rustig en veilig, ook als anderen regels overtreden."],
+["Wat weet je over oudere bestuurders of fietsers?",["Ze kunnen trager reageren","Ze rijden altijd hard","Ze maken nooit fouten"],0,"Geef ze extra ruimte en tijd."],
+["Je rijdt in een straat waar veel studenten fietsen. Wat verwacht je?",["Fietsers in groepen, soms onvoorspelbaar","Geen fietsers","Alleen voetgangers"],0,"Anticipeer op groepsgedrag."],
+["Waar mag iemand op een snorfiets (blauw kenteken) rijden?",["Op het fietspad (tenzij borden iets anders zeggen)","Op de snelweg","Alleen op het trottoir"],0,"Snorfietsen (max 25 km/u) rijden meestal op het fietspad."],
+["Hoe gedraag je je bij een 'kiss and ride'-zone bij een school?",["Langzaam rijden; kinderen stappen in en uit","Snel passeren","In het midden parkeren"],0,"Verwacht openslaande portieren en overstekende kinderen."]
+]);
+
+QB.add("safety",[
+["Wat doe je als je op een feest hebt gedronken?",["Niet rijden; ander vervoer regelen","Water drinken en rijden","Langzaam rijden"],0,"Regel een BOB, taxi of openbaar vervoer."],
+["Wat is een BOB?",["De aangewezen nuchtere bestuurder","Een politiecontrole","Een soort blaastest"],0,"De BOB is degene die nuchter blijft en rijdt."],
+["Kunnen medicijnen en alcohol samen extra gevaarlijk zijn?",YN,0,"De effecten kunnen elkaar versterken."],
+["Je bent erg moe na een nachtdienst. Wat is het beste?",["Eerst slapen of ander vervoer regelen","Koffie drinken en rijden","Met het raam open rijden"],0,"Vermoeidheid kan net zo gevaarlijk zijn als alcohol."],
+["Wat doe je na een kleine aanrijding op een drukke weg als niemand gewond is?",["De auto's na het vastleggen van de situatie veilig opzij zetten","De auto's laten staan","Wegrijden"],0,"Voorkom nieuwe ongevallen; leg eerst de situatie vast."],
+["Is het verstandig een gevarendriehoek mee te nemen en te gebruiken bij pech op een gewone weg?",["Ja, verstandig om anderen te waarschuwen","Nooit","Alleen op snelwegen"],0,"Een gevarendriehoek waarschuwt naderend verkeer. Op de snelweg gaat je eigen veiligheid voor."],
+["Waar zet je buiten de bebouwde kom op een gewone weg een gevarendriehoek neer?",["Ruim achter de auto, zodat anderen hem op tijd zien","Op het dak van de auto","Vlak naast de auto"],0,"Anderen hebben tijd nodig om te reageren."],
+["Is een veiligheidshesje nuttig na pech?",YN,0,"Het maakt je zichtbaar voor anderen."]
+]);
+
+QB.add("vehicle",[
+["Wat betekent een accu-waarschuwingslampje tijdens het rijden meestal?",["De accu wordt niet opgeladen","Weinig brandstof","Gordel los"],0,"Laat het snel controleren."],
+["Wat betekent het oliedruklampje?",["Zet de motor zo snel als veilig kan uit","Weinig brandstof","Remmen versleten"],0,"Lage oliedruk kan de motor snel beschadigen."],
+["Hoe controleer je of je remlichten werken?",["Iemand laten kijken of een weerspiegeling gebruiken","In de binnenspiegel kijken","Niet nodig"],0,"Remlichten waarschuwen het verkeer achter je."],
+["Wat is aquaplaning?",["Banden verliezen contact met de weg door een waterfilm","Door diep water rijden","Een wasstraat"],0,"Lagere snelheid en goede banden verkleinen het risico."],
+["Wat kun je doen om aquaplaning te voorkomen?",["Bij hevige regen langzamer rijden en banden goed houden","Harder rijden","Groot licht gebruiken"],0,"Snelheid en profieldiepte zijn het belangrijkst."],
+["Wat is het effect van winterbanden?",["Betere grip bij lage temperaturen en sneeuw","Slechtere grip","Geen effect"],0,"Winterbanden zijn in Nederland niet verplicht, maar helpen bij kou."],
+["Wat doe je als je remmen het begeven?",["Motorrem en voorzichtig de handrem gebruiken, anderen waarschuwen","De motor uitzetten","De sloot in sturen"],0,"Schakel terug, gebruik de handrem voorzichtig en waarschuw anderen."],
+["Waarom is het onverstandig in z'n vrij een helling af te rijden?",["Je verliest motorrem en controle","Het kost meer brandstof","Het maakt niet uit"],0,"Blijf in een versnelling voor controle."],
+["Hoe ver vooruit kijk je als je in de stad rijdt?",["Ver vooruit, om te anticiperen","Alleen naar de auto voor je","Naar het dashboard"],0,"Ver vooruit kijken geeft je tijd om te reageren."],
+["Wat doet cruise control?",["Een ingestelde snelheid vasthouden","Altijd automatisch remmen","De auto besturen"],0,"Je blijft zelf verantwoordelijk voor het rijden."],
+["Waarom houd je je ruiten en spiegels schoon?",["Voor goed zicht","Voor het uiterlijk","Alleen voor de APK"],0,"Vuil glas geeft schittering en slecht zicht."],
+["Wat doe je als je verblind wordt door tegenliggers?",["Naar de rechterkant van de weg kijken en afremmen","Met groot licht terugseinen","Je ogen dichtdoen"],0,"Naar de rechter wegrand kijken vermindert de verblinding."]
+]);
+
+QB.add("rules",[
+["Mag je links op de weg rijden om kuilen te ontwijken?",["Alleen als het veilig is en je tegenliggers niet hindert","Altijd","Nooit"],0,"Houd zo veel mogelijk rechts."],
+["Wie moet zorgen dat de auto veilig is om mee te rijden?",["De bestuurder","Alleen de eigenaar","De garage"],0,"De bestuurder is tijdens het rijden verantwoordelijk voor de staat van de auto."],
+["Moet je richting aangeven bij het verlaten van een rotonde?",YN,0,"Geef rechts aan voordat je de afslag neemt."],
+["Geef je richting aan bij het oprijden van een rotonde (als je rechtdoor gaat)?",["Niet nodig; geef rechts aan bij het verlaten","Links aangeven","Alarmlichten"],0,"Geef vlak voor je afslag rechts aan."],
+["Hoeveel mensen mag je maximaal in een auto vervoeren?",["Zoveel als er zitplaatsen (met gordel) zijn","Zoveel als er passen","Altijd 5"],0,"Elke passagier heeft een zitplaats nodig (met gordel als die er is)."],
+["Je krijgt een boete die volgens jou onterecht is. Wat kun je doen?",["Bezwaar maken bij de instantie","Negeren","Het politiebureau bellen"],0,"Je kunt officieel bezwaar maken."],
+["Wat doe je als er in een file een hulpdienst van achteren komt?",["Opzij ruimte maken als dat veilig kan","Precies blijven staan","De stoep op rijden"],0,"Help ruimte te maken voor de hulpdienst."],
+["Moet je verzekerd zijn (WA) om met je auto te rijden?",YN,0,"Een WA-verzekering is verplicht."],
+["Wat dekt een WA-verzekering?",["Schade die jij aan anderen toebrengt","Schade aan je eigen auto","Boetes"],0,"WA dekt je aansprakelijkheid voor schade aan anderen."],
+["Mag je in Nederland rijden met een geldig buitenlands rijbewijs?",["Hangt af van het land en hoe lang je hier woont","Altijd, voor altijd","Nooit"],0,"De regels verschillen voor EU- en niet-EU-rijbewijzen. Kijk bij het RDW."],
+["Mag je rijden met je voet rustend op de koppeling?",["Niet verstandig: het slijt de koppeling","Verplicht","Alleen in de stad"],0,"Laat je voet ergens anders rusten."],
+["Wat doe je als je bij groen licht verblind wordt?",["Afremmen en goed kijken","Hard doorrijden","Op het kruispunt stoppen"],0,"Veiligheid eerst: rijd langzamer tot je weer goed ziet."]
+]);
+
+/* ---------- Procedural question families ---------- */
+const cart=(...a)=>a.reduce((acc,b)=>acc.flatMap(x=>b.map(y=>[...x,y])),[[]]);
+
+/* ---- intersection scenes ---- */
+const ARMPOS={S:[170,245,0,[200,250]],N:[130,55,180,[100,50]],E:[245,130,-90,[250,98]],W:[55,170,90,[50,204]]};
+const TEETH={
+ S:[154,163,172,181].map(x=>`${x},198 ${x+8},198 ${x+4},208`),
+ N:[113,122,131,140].map(x=>`${x},102 ${x+8},102 ${x+4},92`),
+ E:[113,122,131,140].map(y=>`198,${y} 198,${y+8} 208,${y+4}`),
+ W:[153,162,171,180].map(y=>`102,${y} 102,${y+8} 92,${y+4}`)};
+const ARMRECT={S:[110,190,80,110],N:[110,0,80,110],E:[190,110,110,80],W:[0,110,110,80]};
+const rotP=(x,y,k)=>{for(let i=0;i<k;i++)[x,y]=[300-y,x];return[x,y]};
+function vehSVG(v,k){
+ const [x0,y0,r0,lp0]=ARMPOS[v.arm],[x,y]=rotP(x0,y0,k),[lx,ly]=rotP(lp0[0],lp0[1],k),r=r0+90*k;
+ const c=v.you?"var(--blue)":({bike:"var(--bike)",moped:"var(--moped)",tram:"var(--tram)"})[v.kind]||"var(--veh)";
+ let body,len=24;
+ if(v.kind==="bike"||v.kind==="moped")body=`<rect x="-3.5" y="-15" width="7" height="30" rx="3.5" fill="${c}"/><circle r="6.5" fill="${c}"/>`;
+ else if(v.kind==="tram"){body=`<rect x="-12" y="-44" width="24" height="88" rx="6" fill="${c}"/><rect x="-9" y="-38" width="18" height="9" rx="2" fill="#fff" opacity=".85"/>`;len=48}
+ else body=`<rect x="-11" y="-19" width="22" height="38" rx="5" fill="${c}"/><rect x="-8" y="-12" width="16" height="8" rx="2" fill="#fff" opacity=".85"/>`;
+ const path=v.turn==="L"?`M0,-${len} V-${len+20} Q0,-${len+34} -14,-${len+34} H-34 M-27,-${len+40} L-35,-${len+34} L-27,-${len+28}`
+  :v.turn==="R"?`M0,-${len} V-${len+20} Q0,-${len+34} 14,-${len+34} H34 M27,-${len+40} L35,-${len+34} L27,-${len+28}`
+  :`M0,-${len} V-${len+24} M-6,-${len+17} L0,-${len+25} L6,-${len+17}`;
+ const arr=`<path d="${path}" stroke="${c}" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+ const lab=v.you?`<circle r="16" fill="var(--surface)" stroke="${c}" stroke-width="2.5"/><text text-anchor="middle" dy="3.5" font-size="9" font-weight="800" fill="var(--ink)" font-family="Overpass,Arial,sans-serif">${STR.you}</text>`
+  :`<circle r="12" fill="var(--surface)" stroke="${c}" stroke-width="2.5"/><text text-anchor="middle" dy="4.5" font-size="13" font-weight="800" fill="var(--ink)" font-family="Overpass,Arial,sans-serif">${v.l}</text>`;
+ return `<g transform="translate(${x} ${y}) rotate(${r})">${body}${arr}</g><g transform="translate(${lx} ${ly})">${lab}</g>`;
+}
+function scene(o){
+ const k=o.rot||0,d='stroke="#fff" stroke-width="2" stroke-dasharray="10 8"';
+ const dash={N:[150,0,150,104],S:[150,196,150,300],W:[0,150,104,150],E:[196,150,300,150]};
+ let g=`<rect width="300" height="300" fill="var(--grass)"/><rect x="110" width="80" height="300" fill="var(--road)"/><rect y="110" width="300" height="80" fill="var(--road)"/>`;
+ (o.unpaved||[]).forEach(a=>{const r=ARMRECT[a];g+=`<rect x="${r[0]}" y="${r[1]}" width="${r[2]}" height="${r[3]}" fill="var(--sand)"/>`});
+ Object.entries(dash).forEach(([a,c])=>{if(!(o.unpaved||[]).includes(a))g+=`<line x1="${c[0]}" y1="${c[1]}" x2="${c[2]}" y2="${c[3]}" ${d}/>`});
+ if(o.rails)g+=`<line x1="0" y1="163" x2="300" y2="163" stroke="var(--rail)" stroke-width="2"/><line x1="0" y1="177" x2="300" y2="177" stroke="var(--rail)" stroke-width="2"/>`;
+ (o.teeth||[]).forEach(a=>TEETH[a].forEach(p=>g+=`<polygon points="${p}" fill="#fff"/>`));
+ if(o.diamond)g+=`<g transform="translate(222 222) rotate(45)"><rect x="-11" y="-11" width="22" height="22" fill="#fff" stroke="#333" stroke-width="1"/><rect x="-7" y="-7" width="14" height="14" fill="#F2B300"/></g>`;
+ let s=`<svg viewBox="0 0 300 300" class="scene" role="img" aria-label="${STR.sceneAria}"><g transform="rotate(${90*k} 150 150)">${g}</g>`;
+ o.v.forEach(v=>s+=vehSVG(v,k));
+ return s+"</svg>";
+}
+const YOU={arm:"S",you:true};
+const KIND=t=>STR.kinds[t];
+
+/* ---- traffic signs ---- */
+const RED="#C8102E",BLU="#1F4FA0",AMB="#F2B300";
+const tri=(inner)=>`<polygon points="60,10 112,102 8,102" fill="#fff" stroke="${RED}" stroke-width="9" stroke-linejoin="round"/>${inner}`;
+const disc=(fill,ring,inner="")=>`<circle cx="60" cy="60" r="${ring?50:56}" fill="${fill}" ${ring?`stroke="${RED}" stroke-width="12"`:""}/>${inner}`;
+const txt=(t,size,fill="#111",y=60)=>`<text x="60" y="${y}" text-anchor="middle" dominant-baseline="central" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="${size}" fill="${fill}">${t}</text>`;
+const arrow=(rot)=>`<g transform="rotate(${rot} 60 60)"><path d="M60,92 V40 M40,58 L60,34 L80,58" stroke="#fff" stroke-width="11" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>`;
+const car=(x,c)=>`<g transform="translate(${x} 62)"><rect x="-13" y="-10" width="26" height="16" rx="4" fill="${c}"/><rect x="-9" y="-17" width="18" height="10" rx="3" fill="${c}"/><circle cx="-8" cy="7" r="3.5" fill="${c}"/><circle cx="8" cy="7" r="3.5" fill="${c}"/></g>`;
+const SIGNS=[
+ ...[30,50,60,70,80,100,120].map(n=>({id:"spd"+n,svg:disc("#fff",1,txt(n,n>99?36:44)),m:STR.sg.speed(n),d:[STR.sg.advice(n),STR.sg.minimum(n)]})),
+ {id:"noentry",svg:disc(RED,0,`<rect x="20" y="50" width="80" height="20" fill="#fff"/>`),...STR.sg.noentry},
+ {id:"closed",svg:disc("#fff",1),...STR.sg.closed},
+ {id:"nopark",svg:disc(BLU,1,`<line x1="25" y1="25" x2="95" y2="95" stroke="${RED}" stroke-width="10"/>`),...STR.sg.nopark},
+ {id:"nostop",svg:disc(BLU,1,`<line x1="25" y1="25" x2="95" y2="95" stroke="${RED}" stroke-width="10"/><line x1="95" y1="25" x2="25" y2="95" stroke="${RED}" stroke-width="10"/>`),...STR.sg.nostop},
+ {id:"prio",svg:`<g transform="rotate(45 60 60)"><rect x="22" y="22" width="76" height="76" fill="#fff" stroke="#444" stroke-width="2"/><rect x="34" y="34" width="52" height="52" fill="${AMB}"/></g>`,...STR.sg.prio},
+ {id:"prioend",svg:`<g transform="rotate(45 60 60)"><rect x="22" y="22" width="76" height="76" fill="#fff" stroke="#444" stroke-width="2"/><rect x="34" y="34" width="52" height="52" fill="${AMB}"/></g><line x1="28" y1="92" x2="92" y2="28" stroke="#111" stroke-width="9"/>`,...STR.sg.prioend},
+ {id:"giveway",svg:`<polygon points="8,16 112,16 60,108" fill="#fff" stroke="${RED}" stroke-width="9" stroke-linejoin="round"/>`,...STR.sg.giveway},
+ {id:"stop",svg:`<polygon points="38,6 82,6 114,38 114,82 82,114 38,114 6,82 6,38" fill="${RED}" stroke="#fff" stroke-width="4"/>${txt("STOP",30,"#fff")}`,...STR.sg.stop},
+ {id:"noovertake",svg:disc("#fff",1,car(42,RED)+car(78,"#111")),...STR.sg.noovertake},
+ {id:"oneway",svg:`<rect x="8" y="22" width="104" height="76" rx="6" fill="${BLU}"/><path d="M60,88 V40 M44,56 L60,36 L76,56" stroke="#fff" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`,...STR.sg.oneway},
+ {id:"mright",svg:disc(BLU,0,arrow(90)),...STR.sg.mright},
+ {id:"mleft",svg:disc(BLU,0,arrow(-90)),...STR.sg.mleft},
+ {id:"mstraight",svg:disc(BLU,0,arrow(0)),...STR.sg.mstraight},
+ {id:"cycle",svg:disc(BLU,0,`<g stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="38" cy="72" r="14"/><circle cx="82" cy="72" r="14"/><path d="M38,72 L54,48 L72,48 L82,72 M54,48 L62,72 L38,72 M50,40 H60 M72,48 L68,38"/></g>`),...STR.sg.cycle},
+ {id:"park",svg:`<rect x="10" y="10" width="100" height="100" rx="8" fill="${BLU}"/>${txt("P",72,"#fff",62)}`,...STR.sg.park},
+ {id:"deadend",svg:`<rect x="10" y="10" width="100" height="100" rx="8" fill="${BLU}"/><rect x="52" y="44" width="16" height="54" fill="#fff"/><rect x="28" y="28" width="64" height="16" fill="${RED}"/>`,...STR.sg.deadend},
+ {id:"wdanger",svg:tri(txt("!",50,"#111",70)),...STR.sg.wdanger},
+ {id:"wcross",svg:tri(`<path d="M42,54 L78,94 M78,54 L42,94" stroke="#111" stroke-width="7" stroke-linecap="round"/>`),...STR.sg.wcross},
+ {id:"wprio",svg:tri(`<path d="M60,44 V96" stroke="#111" stroke-width="11"/><path d="M36,74 H84" stroke="#111" stroke-width="4"/>`),...STR.sg.wprio},
+ {id:"wlights",svg:tri(`<rect x="49" y="40" width="22" height="56" rx="4" fill="#111"/><circle cx="60" cy="51" r="6" fill="${RED}"/><circle cx="60" cy="68" r="6" fill="${AMB}"/><circle cx="60" cy="85" r="6" fill="#1E8A4C"/>`),...STR.sg.wlights},
+ {id:"height",svg:disc("#fff",1,txt("3.5m",26)+`<polygon points="52,26 68,26 60,36" fill="#111"/><polygon points="52,94 68,94 60,84" fill="#111"/>`),...STR.sg.height},
+ {id:"rail",svg:`<g transform="rotate(35 60 60)"><rect x="2" y="51" width="116" height="18" fill="#fff" stroke="${RED}" stroke-width="4"/></g><g transform="rotate(-35 60 60)"><rect x="2" y="51" width="116" height="18" fill="#fff" stroke="${RED}" stroke-width="4"/></g>`,...STR.sg.rail}
+];
+const signSVG=s=>`<svg viewBox="0 0 120 120" class="sign" role="img" aria-label="${STR.signAria}">${s}</svg>`;
+
+/* ---- families ---- */
+const GEN=[
+{id:"g:scene",t:"priority",params:cart(["car","bike","moped"],["E","W"],["none","teethMine","teethTheirs","prioMine","unpavedMine","unpavedTheirs"],[0,1,2,3]),
+ make:([kind,arm,cond,rot])=>{
+  const yes=cond==="teethMine"||cond==="unpavedMine"||(cond==="none"&&arm==="E");
+  const o={rot,v:[YOU,{arm,kind,l:"B"}]};
+  if(cond==="teethMine")o.teeth=["S","N"];if(cond==="teethTheirs")o.teeth=["E","W"];if(cond==="prioMine")o.diamond=1;
+  if(cond==="unpavedMine")o.unpaved=["S"];if(cond==="unpavedTheirs")o.unpaved=[arm];
+  return {svg:scene(o),q:STR.g.sceneQ(STR.g.cond[cond],KIND(kind)),o:STR.yn,a:yes?0:1,e:STR.g.sceneE(cond,arm,KIND(kind))};
+ }},
+{id:"g:tram",t:"priority",params:cart(["E","W"],[false,true],[0,1,2,3]),
+ make:([arm,teeth,rot])=>({svg:scene({rot,rails:1,teeth:teeth?["E","W"]:[],v:[YOU,{arm,kind:"tram",l:"B"}]}),q:STR.g.tramQ(teeth),o:STR.yn,a:teeth?1:0,e:STR.g.tramE(teeth)})},
+{id:"g:three",t:"priority",params:cart([["car","car"],["car","bike"],["bike","car"],["bike","bike"]],["none","teethMine","teethTheirs"],[0,1,2,3]),
+ make:([[kb,kc],cond,rot])=>{
+  const o={rot,v:[YOU,{arm:"E",kind:kb,l:"B"},{arm:"W",kind:kc,l:"C"}]};
+  if(cond==="teethMine")o.teeth=["S","N"];if(cond==="teethTheirs")o.teeth=["E","W"];
+  return {svg:scene(o),q:STR.g.threeQ(STR.g.cond[cond]),o:STR.g.threeO,a:{none:0,teethMine:1,teethTheirs:2}[cond],shuffle:1,e:STR.g.threeE[cond]};
+ }},
+{id:"g:turn",t:"priority",params:cart(["car","bike"],["youLeft","themLeft"],[0,1,2,3]),
+ make:([kind,who,rot])=>{
+  const v=who==="youLeft"?[{...YOU,turn:"L"},{arm:"N",kind,l:"B"}]:[YOU,{arm:"N",kind,l:"B",turn:"L"}];
+  return {svg:scene({rot,v}),q:STR.g.turnQ(who,KIND(kind)),o:STR.yn,a:who==="youLeft"?0:1,e:STR.g.turnE(who)};
+ }},
+{id:"g:sign",t:"signs",params:SIGNS.map(s=>[s]),
+ make:([s])=>({svg:signSVG(s.svg),q:STR.g.signQ,o:[s.m,...s.d],a:0,shuffle:1,e:s.m+"."})},
+{id:"g:dist",t:"vehicle",params:cart([20,30,40,50,60,70,80,90,100,110,120,130],[1,2,3]),
+ make:([v,t])=>({q:STR.g.distQ(v,t),a:Math.round(v/3.6*t),tol:Math.max(2,Math.round(v/3.6*t*.05)),u:"m",e:STR.g.distE(v,t,Math.round(v/3.6*t))})},
+{id:"g:brake",t:"vehicle",params:cart([30,40,50,60],[6,8,10,12,15],[2,3,0.5]),
+ make:([v0,d0,f])=>({q:STR.g.brakeQ(v0,d0,v0*f),a:d0*f*f,tol:0.5,u:"m",e:STR.g.brakeE(f,d0*f*f)})},
+{id:"g:alcohol",t:"safety",params:cart([1,2,3,4,6,7,8,10,12,15],[0.1,0.3,0.4,0.6,0.7,0.8]),
+ make:([y,p])=>{const lim=y<=4?0.2:0.5;return {q:STR.g.alcQ(y,p),o:STR.yn,a:p<lim?0:1,e:STR.g.alcE(y<=4,lim)}}},
+{id:"g:tread",t:"vehicle",params:[1.0,1.2,1.4,1.5,1.8,2.0,2.5,3.0,4.0].map(x=>[x]),
+ make:([x])=>({q:STR.g.treadQ(x),o:STR.yn,a:x>=1.6?0:1,e:STR.g.treadE})},
+{id:"g:fog",t:"vehicle",params:[10,20,30,40,60,80,100,200].map(x=>[x]),
+ make:([x])=>({q:STR.g.fogQ(x),o:STR.yn,a:x<50?0:1,e:STR.g.fogE})},
+{id:"g:gap",t:"vehicle",params:[0.5,1,1.5,2.5,3,4].map(x=>[x]),
+ make:([x])=>({q:STR.g.gapQ(x),o:STR.yn,a:x>=2?0:1,e:STR.g.gapE})},
+{id:"g:park",t:"parking",params:[1,2,3,4,6,7,8,10,15].map(x=>[x]),
+ make:([x])=>({q:STR.g.parkQ(x),o:STR.yn,a:x>5?0:1,e:STR.g.parkE})},
+{id:"g:child",t:"safety",params:[90,100,110,120,125,130,140,145,150,160].map(x=>[x]),
+ make:([x])=>({q:STR.g.childQ(x),o:STR.yn,a:x<135?0:1,e:STR.g.childE})},
+{id:"g:mass",t:"rules",params:[1500,2500,3000,3400,3600,4000,4500,5000].map(x=>[x]),
+ make:([x])=>({q:STR.g.massQ(x),o:STR.yn,a:x<=3500?0:1,e:STR.g.massE})},
+{id:"g:pass",t:"rules",params:[3,4,5,6,7,8,9,10,11,12].map(x=>[x]),
+ make:([x])=>({q:STR.g.passQ(x),o:STR.yn,a:x<=8?0:1,e:STR.g.passE})},
+{id:"g:mwtime",t:"speed",params:[7,8,9,10,11,12,13,14,15,16,17,18,20,21,22,23].map(x=>[x]),
+ make:([h])=>({q:STR.g.mwQ(h),a:h<19?100:130,u:STR.kmh,e:STR.g.mwE})},
+{id:"g:road",t:"speed",params:STR.g.roads.map(r=>[r]),
+ make:([r])=>({q:STR.g.roadQ(r[0]),a:r[1],u:STR.kmh,e:r[2]})}
+];
+const genCount=()=>GEN.reduce((s,g)=>s+g.params.length,0);
+
+/* ---------- pool ---------- */
+const EXAM_MIX={priority:8,hazard:7,signs:5,speed:4,parking:4,motorway:4,overtake:3,people:4,safety:4,vehicle:4,rules:3};
+const PASS=35,TARGET=44,DAILY=30;
+const TOPICS=STR.topics,LESSONS=STR.lessons,U=STR.ui;
+const POOL=[...QB.items,...GEN.map(g=>({id:g.id,t:g.t,fam:g}))];
+const byTopic=t=>POOL.filter(p=>p.t===t);
+function inst(p,pi){
+ let q;
+ if(p.fam){const i=pi??Math.floor(Math.random()*p.fam.params.length);q={...p,...p.fam.make(p.fam.params[i]),pi:i}}
+ else q={...p};
+ if(q.o&&(q.shuffle||(q.o.length>2&&q.t!=="hazard"))){
+  const idx=q.o.map((_,i)=>i).sort(()=>Math.random()-.5);
+  q={...q,o:idx.map(i=>q.o[i]),a:idx.indexOf(q.a)};
+ }
+ return q;
+}
+
+/* ---------- state ---------- */
+const KEY="theory-drill-v2";
+const blank=()=>({q:{},t:{},tick:0,relearn:[],lessonAt:{},exams:[],days:{}});
+let S;try{S=Object.assign(blank(),JSON.parse(localStorage.getItem(KEY))||{})}catch(e){S=blank()}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const rec=id=>S.q[id]||(S.q[id]={b:0,s:0,w:0,l:-99});
+const acc=t=>{const a=S.t[t]||[];return a.length?a.reduce((x,y)=>x+y,0)/a.length:null};
+const today=()=>{const d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()};
+function streak(){let n=0;const d=new Date();for(;;){const k=d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();if((S.days[k]||0)>0){n++;d.setDate(d.getDate()-1)}else break}return n}
+function mastery(t){
+ const qs=byTopic(t),cov=qs.filter(p=>S.q[p.id]&&S.q[p.id].b>=1).length/qs.length,a=acc(t);
+ return a==null?0:a*Math.min(1,cov*1.4);
+}
+const readiness=()=>Math.round(Object.keys(TOPICS).reduce((s,t)=>s+mastery(t),0)/Object.keys(TOPICS).length*100);
+function record(q,ok){
+ const r=rec(q.id);r.s++;r.l=S.tick;S.tick++;
+ if(ok)r.b=Math.min(5,r.b+1);else{r.b=0;r.w++;S.relearn=S.relearn.filter(x=>x.id!==q.id);S.relearn.push({id:q.id,pi:q.pi,due:S.tick+3+Math.floor(Math.random()*3)})}
+ (S.t[q.t]=S.t[q.t]||[]).push(ok?1:0);if(S.t[q.t].length>15)S.t[q.t].shift();
+ const d=today();S.days[d]=(S.days[d]||0)+1;
+ save();
+}
+function pick(pool,lastId){
+ const due=S.relearn.find(r=>r.due<=S.tick&&r.id!==lastId&&pool.some(p=>p.id===r.id));
+ if(due){S.relearn=S.relearn.filter(r=>r!==due);return [pool.find(p=>p.id===due.id),due.pi]}
+ let tot=0;const ws=pool.map(p=>{
+  const r=S.q[p.id];const base=!r||!r.s?2.2:[4,2.5,1.4,.8,.4,.2][r.b];
+  const a=acc(p.t);const tf=1+3*(1-(a==null?.5:a));
+  const fresh=p.id===lastId?0:(r&&S.tick-r.l<(p.fam?2:6)?.04:1);
+  const w=base*tf*fresh*(p.fam?4:1);tot+=w;return w});
+ let x=Math.random()*tot;for(let i=0;i<pool.length;i++){x-=ws[i];if(x<=0)return [pool[i]]}
+ return [pool[pool.length-1]];
+}
+const mistakes=()=>POOL.filter(p=>S.q[p.id]&&S.q[p.id].w>0&&S.q[p.id].b<3);
+
+/* ---------- views ---------- */
+const app=document.getElementById("app"),hstat=document.getElementById("hstat");
+let sess=null;
+const cls=v=>v<.5?"lo":v<.8?"mid":"hi";
+const pct=v=>Math.round(v*100)+"%";
+const H=(s)=>{app.innerHTML=s;window.scrollTo(0,0)};
+const LANGS=[["en","English","./"],["nl","Nederlands","nl.html"],["tr","Türkçe","tr.html"]];
+const langLinks=()=>/github\.io$|localhost/.test(location.hostname)?`<div class="row langs">${LANGS.filter(l=>l[0]!==STR.lang&&(window.AVAIL||["en","nl"]).includes(l[0])).map(l=>`<a class="btn ghost" href="${l[2]}" lang="${l[0]}">${l[1]}</a>`).join("")}</div>`:"";
+function home(){
+ sess=null;hstat.textContent="";
+ const rd=readiness(),m=mistakes().length,ans=Object.values(S.q).reduce((s,r)=>s+r.s,0);
+ const last=S.exams[S.exams.length-1],td=S.days[today()]||0,st=streak();
+ const rows=Object.entries(TOPICS).map(([t,n])=>{const v=mastery(t);return `<div class="trow"><span>${n}</span><div class="bar ${cls(v)}"><i style="width:${pct(v)}"></i></div><span class="pct">${pct(v)}</span></div>`}).join("");
+ H(`
+ <section class="panel ready">
+  <div class="gauge">${rd}<small>%</small></div>
+  <div style="min-width:0;flex:1"><div class="lbl">${U.readiness}</div>
+  <div class="muted" style="font-size:.92rem">${ans?U.answers(ans)+(last!=null?U.lastExam(last):"")+". "+U.aim:U.start}</div>
+  <div class="daily"><div class="bar ${td>=DAILY?"hi":""}"><i style="width:${Math.min(100,td/DAILY*100)}%"></i></div><span>${U.today(td,DAILY)}${U.streak(st)}</span></div></div>
+ </section>
+ <section class="modes">
+  <button class="mode primary" data-go="smart"><b>${U.smart}</b><span>${U.smartD}</span></button>
+  <button class="mode" data-go="weak" ${m?"":"disabled"}><b>${U.weak}</b><span>${U.weakD(m)}</span></button>
+  <button class="mode" data-go="exam"><b>${U.exam}</b><span>${U.examD}</span></button>
+  <button class="mode" data-go="scenes"><b>${U.scenes}</b><span>${U.scenesD}</span></button>
+  <button class="mode" data-go="signs"><b>${U.signsM}</b><span>${U.signsD}</span></button>
+  <button class="mode wide" data-go="learn"><b>${U.learn}</b><span>${U.learnD}</span></button>
+ </section>
+ <section class="panel"><div class="row" style="justify-content:space-between;margin-bottom:6px"><h2>${U.topics}</h2><span class="lbl">${U.mastery}</span></div>${rows}</section>
+ <p class="muted small">${U.bank(QB.items.length,genCount())}. ${U.install}</p>
+ ${langLinks()}
+ <p class="muted small">${U.disclaimer}</p>
+ <div class="row"><button class="btn ghost" id="reset">${U.reset}</button></div>`);
+ app.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
+ const rs=document.getElementById("reset");rs.onclick=()=>{if(rs.dataset.c){S=blank();save();home()}else{rs.dataset.c=1;rs.textContent=U.resetSure;rs.className="btn warn"}};
+}
+function go(m){
+ if(m==="learn")return learn();
+ if(m==="exam")return startExam();
+ let pool=POOL,label=U.smart;
+ if(m==="weak"){pool=mistakes();label=U.weak;if(!pool.length)return home()}
+ if(m==="scenes"){pool=POOL.filter(p=>p.fam&&p.t==="priority");label=U.scenes}
+ if(m==="signs"){pool=POOL.filter(p=>p.t==="signs");label=U.signsM}
+ if(m.startsWith("topic:")){const t=m.slice(6);pool=byTopic(t);label=TOPICS[t]}
+ sess={mode:m,pool,label,n:0,ok:0,missedT:{},last:null};
+ next();
+}
+function next(){
+ if(sess.mode==="weak"){sess.pool=mistakes();if(!sess.pool.length)return summary()}
+ const [p,pi]=pick(sess.pool,sess.last);sess.last=p.id;
+ const again=S.q[p.id]&&S.q[p.id].w>0&&S.q[p.id].b===0;
+ sess.cur=inst(p,pi);render(sess.cur,again);
+}
+function head(){hstat.textContent=sess.exam?U.examProg(sess.i+1):U.counter(sess.ok,sess.n)}
+function render(q,again){
+ head();
+ const opts=q.o?(q.t==="hazard"?`<div class="hz">${q.o.map((o,i)=>`<button class="opt" data-i="${i}">${o}</button>`).join("")}</div>`
+  :`<div class="opts">${q.o.map((o,i)=>`<button class="opt" data-i="${i}"><span class="k">${String.fromCharCode(65+i)}</span><span>${o}</span></button>`).join("")}</div>`)
+  :`<form class="num" id="nf"><input id="numin" inputmode="decimal" autocomplete="off" placeholder="${U.answer}" aria-label="${U.answer}"><span class="muted">${q.u||""}</span><button class="btn">${U.check}</button></form>`;
+ H(`
+ <div class="prog"><span class="lbl">${sess.exam?U.exam:sess.label}</span><button class="btn ghost" id="quit">${sess.exam?U.stopExam:U.finish}</button></div>
+ <section class="panel qpanel">
+  <div class="row"><span class="chip">${TOPICS[q.t]}</span>${again?`<span class="chip again">${U.missed}</span>`:""}</div>
+  ${q.svg||""}
+  <div class="qtext">${q.t==="hazard"?U.whatDo:""}${q.q}</div>
+  ${opts}
+ </section><div id="after"></div>`);
+ document.getElementById("quit").onclick=()=>sess.exam?finishExam():summary();
+ if(q.o)app.querySelectorAll(".opt").forEach(b=>b.onclick=()=>answer(+b.dataset.i));
+ else{const f=document.getElementById("nf"),inp=document.getElementById("numin");f.onsubmit=e=>{e.preventDefault();const v=parseFloat(inp.value.replace(",","."));if(isNaN(v))return;answer(v)}}
+}
+const isRight=(q,v)=>q.o?v===q.a:Math.abs(v-q.a)<=(q.tol||1e-9);
+const fmt=n=>String(n).replace(".",STR.lang==="en"?".":",");
+function answer(v){
+ const q=sess.cur,ok=isRight(q,v);
+ record(q,ok);
+ if(sess.exam){sess.res.push({q,ok,v});sess.i++;if(sess.i>=sess.qs.length)return finishExam();sess.cur=inst(sess.qs[sess.i]);return render(sess.cur)}
+ sess.n++;if(ok)sess.ok++;else sess.missedT[q.t]=(sess.missedT[q.t]||0)+1;head();
+ if(q.o)app.querySelectorAll(".opt").forEach(b=>{const i=+b.dataset.i;b.disabled=true;if(i===q.a)b.classList.add("ok");else if(i===v)b.classList.add("bad")});
+ else{document.getElementById("numin").disabled=true;document.querySelector("#nf .btn").remove()}
+ const right=q.o?q.o[q.a]:`${fmt(q.a)} ${q.u||""}`;
+ let lesson="";
+ if(!ok){const a=acc(q.t),n=(S.t[q.t]||[]).length;
+  if(n>=3&&a<.6&&S.tick-(S.lessonAt[q.t]??-99)>12){S.lessonAt[q.t]=S.tick;save();
+   lesson=`<div class="lesson"><div class="lbl">${U.quick(TOPICS[q.t])}</div><div class="muted small">${U.quickD}</div><ul>${LESSONS[q.t].map(x=>`<li>${x}</li>`).join("")}</ul></div>`}}
+ document.getElementById("after").innerHTML=`<div class="stack">
+  <div class="fb ${ok?"":"bad"}"><h3>${ok?U.correct:U.wrong(right)}</h3><div>${q.e}</div></div>
+  ${lesson}
+  <div class="row"><button class="btn" id="nx">${U.next}</button>${!ok&&!lesson?`<button class="btn ghost" id="lt">${U.rulesFor(TOPICS[q.t])}</button>`:""}</div></div>`;
+ const nx=document.getElementById("nx");nx.onclick=next;
+ const lt=document.getElementById("lt");if(lt)lt.onclick=()=>{lt.outerHTML=`<div class="lesson" style="width:100%"><div class="lbl">${TOPICS[q.t]}</div><ul>${LESSONS[q.t].map(x=>`<li>${x}</li>`).join("")}</ul></div>`};
+ document.getElementById("after").scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+function summary(){
+ if(!sess||!sess.n)return home();
+ hstat.textContent="";
+ const weak=Object.entries(sess.missedT).sort((a,b)=>b[1]-a[1]);
+ H(`<section class="panel stack">
+  <div class="lbl">${U.done}</div><div class="big">${sess.ok} / ${sess.n}</div>
+  ${weak.length?`<div>${U.mostMissed}${weak.slice(0,3).map(([t,c])=>`<b>${TOPICS[t]}</b> (${c})`).join(", ")}. ${U.moreOften}</div>`:`<div>${U.noMiss}</div>`}
+  <div class="row"><button class="btn" id="again">${U.keep}</button><button class="btn ghost" id="hm">${U.overview}</button></div></section>`);
+ const m=sess.mode;
+ document.getElementById("again").onclick=()=>go(m==="weak"&&!mistakes().length?"smart":m);
+ document.getElementById("hm").onclick=home;
+}
+function learn(){
+ hstat.textContent="";
+ H(`<h1>${U.learnH}</h1><p class="muted" style="margin:0">${U.learnP}</p>
+ <section class="panel">${Object.keys(TOPICS).sort((a,b)=>mastery(a)-mastery(b)).map(t=>{const v=mastery(t);return `<details><summary><span>${TOPICS[t]}</span><div class="bar ${cls(v)}"><i style="width:${pct(v)}"></i></div><span class="pct">${pct(v)}</span></summary><ul>${LESSONS[t].map(x=>`<li>${x}</li>`).join("")}</ul><button class="btn" data-t="${t}">${U.drill(TOPICS[t])}</button></details>`}).join("")}</section>
+ <div><button class="btn ghost" id="hm">${U.back}</button></div>`);
+ app.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>go("topic:"+b.dataset.t));
+ document.getElementById("hm").onclick=home;
+}
+const shuf=a=>a.map(x=>[Math.random(),x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
+function startExam(){
+ let qs=[];
+ for(const[t,n]of Object.entries(EXAM_MIX)){
+  const fams=byTopic(t).filter(p=>p.fam),hand=shuf(byTopic(t).filter(p=>!p.fam));
+  const nf=fams.length?Math.min(Math.ceil(n/3),n):0;
+  const g=Array.from({length:nf},()=>fams[Math.floor(Math.random()*fams.length)]);
+  qs.push(...g,...hand.slice(0,n-nf));
+ }
+ qs=shuf(qs);
+ sess={exam:true,qs,i:0,res:[]};sess.cur=inst(qs[0]);render(sess.cur);
+}
+function finishExam(){
+ const res=sess.res,score=res.filter(r=>r.ok).length,done=res.length;
+ if(done===50){S.exams.push(score);save()}
+ hstat.textContent="";
+ const wrong=res.filter(r=>!r.ok);
+ const verdict=done<50?`<div class="muted">${U.stopped(done)}</div>`:score>=TARGET?`<div class="pass">${U.passMargin}</div>`:score>=PASS?`<div class="pass">${U.passLow(TARGET)}</div>`:`<div class="fail">${U.fail(PASS)}</div>`;
+ const ans=(q,v)=>q.o?q.o[v]:fmt(v)+" "+(q.u||"");
+ H(`<section class="panel stack">
+  <div class="lbl">${U.result}</div><div class="big ${score>=PASS&&done===50?"pass":"fail"}">${score} / ${done||50}</div>${verdict}
+  <div class="row"><button class="btn" id="fx" ${wrong.length?"":"disabled"}>${U.fix}</button><button class="btn ghost" id="hm">${U.overview}</button></div></section>
+ ${wrong.length?`<section class="panel"><h2>${U.review}</h2>${wrong.map(r=>`<div class="rev"><span class="chip">${TOPICS[r.q.t]}</span>${r.q.svg?`<div class="revsvg">${r.q.svg}</div>`:""}<p class="revq">${r.q.q}</p><div>${U.yours}<span class="fail">${ans(r.q,r.v)}</span> · ${U.right}<span class="pass">${ans(r.q,r.q.a)}</span></div><div class="muted" style="margin-top:4px">${r.q.e}</div></div>`).join("")}</section>`:""}`);
+ document.getElementById("hm").onclick=home;
+ const fx=document.getElementById("fx");if(fx)fx.onclick=()=>go("weak");
+ sess=null;
+}
+const hb=document.getElementById("home");hb.onclick=home;hb.onkeydown=e=>{if(e.key==="Enter")home()};
+document.documentElement.lang=STR.lang;
+home();
+if("serviceWorker" in navigator&&location.protocol==="https:"&&!location.hostname.endsWith("claude.ai")&&!location.hostname.includes("claudeusercontent")){
+ navigator.serviceWorker.register("sw.js").catch(()=>{});
+}
+
+</script>
+
+</body></html>

@@ -99,6 +99,7 @@ summary{cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) 90px 44p
 summary::-webkit-details-marker{display:none}
 .rev{border-top:1px solid var(--line);padding-top:12px;margin-top:12px}
 .big{font-family:var(--display);font-weight:900;font-size:2.6rem;font-variant-numeric:tabular-nums}
+.langs .btn{text-decoration:none;font-size:.9rem;padding:8px 14px}
 .pass{color:var(--ok)}.fail{color:var(--bad)}
 @media (prefers-reduced-motion:no-preference){.opt,.mode{transition:border-color .15s,background .15s}}
 </style>
@@ -109,9 +110,10 @@ summary::-webkit-details-marker{display:none}
 </div></header>
 <main class="wrap" id="app"></main>
 <script>
+window.AVAIL=["en", "nl"];
 const YN=["Yes","No"], HZ=["Brake","Release accelerator","Do nothing"];
 const STR={
-lang:"en",you:"YOU",sceneAria:"Top view of the intersection",signAria:"Traffic sign",
+lang:"en",kmh:"km/h",you:"YOU",sceneAria:"Top view of the intersection",signAria:"Traffic sign",
 yn:YN,
 kinds:{car:"car",bike:"cyclist",moped:"moped rider",tram:"tram"},
 topics:{priority:"Right of way",hazard:"Hazard perception",signs:"Signs & markings",speed:"Speed limits",parking:"Stopping & parking",motorway:"Motorways",overtake:"Overtaking & lanes",people:"Vulnerable road users",safety:"Alcohol, phone & safety",vehicle:"Distance, lights & vehicle",rules:"General rules & licence"},
@@ -871,9 +873,9 @@ const GEN=[
 {id:"g:pass",t:"rules",params:[3,4,5,6,7,8,9,10,11,12].map(x=>[x]),
  make:([x])=>({q:STR.g.passQ(x),o:STR.yn,a:x<=8?0:1,e:STR.g.passE})},
 {id:"g:mwtime",t:"speed",params:[7,8,9,10,11,12,13,14,15,16,17,18,20,21,22,23].map(x=>[x]),
- make:([h])=>({q:STR.g.mwQ(h),a:h<19?100:130,u:"km/h",e:STR.g.mwE})},
+ make:([h])=>({q:STR.g.mwQ(h),a:h<19?100:130,u:STR.kmh,e:STR.g.mwE})},
 {id:"g:road",t:"speed",params:STR.g.roads.map(r=>[r]),
- make:([r])=>({q:STR.g.roadQ(r[0]),a:r[1],u:"km/h",e:r[2]})}
+ make:([r])=>({q:STR.g.roadQ(r[0]),a:r[1],u:STR.kmh,e:r[2]})}
 ];
 const genCount=()=>GEN.reduce((s,g)=>s+g.params.length,0);
 
@@ -934,6 +936,8 @@ let sess=null;
 const cls=v=>v<.5?"lo":v<.8?"mid":"hi";
 const pct=v=>Math.round(v*100)+"%";
 const H=(s)=>{app.innerHTML=s;window.scrollTo(0,0)};
+const LANGS=[["en","English","./"],["nl","Nederlands","nl.html"],["tr","Türkçe","tr.html"]];
+const langLinks=()=>/github\.io$|localhost/.test(location.hostname)?`<div class="row langs">${LANGS.filter(l=>l[0]!==STR.lang&&(window.AVAIL||["en","nl"]).includes(l[0])).map(l=>`<a class="btn ghost" href="${l[2]}" lang="${l[0]}">${l[1]}</a>`).join("")}</div>`:"";
 function home(){
  sess=null;hstat.textContent="";
  const rd=readiness(),m=mistakes().length,ans=Object.values(S.q).reduce((s,r)=>s+r.s,0);
@@ -956,6 +960,7 @@ function home(){
  </section>
  <section class="panel"><div class="row" style="justify-content:space-between;margin-bottom:6px"><h2>${U.topics}</h2><span class="lbl">${U.mastery}</span></div>${rows}</section>
  <p class="muted small">${U.bank(QB.items.length,genCount())}. ${U.install}</p>
+ ${langLinks()}
  <p class="muted small">${U.disclaimer}</p>
  <div class="row"><button class="btn ghost" id="reset">${U.reset}</button></div>`);
  app.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
@@ -997,7 +1002,7 @@ function render(q,again){
  else{const f=document.getElementById("nf"),inp=document.getElementById("numin");f.onsubmit=e=>{e.preventDefault();const v=parseFloat(inp.value.replace(",","."));if(isNaN(v))return;answer(v)}}
 }
 const isRight=(q,v)=>q.o?v===q.a:Math.abs(v-q.a)<=(q.tol||1e-9);
-const fmt=n=>String(n).replace(".",STR.lang==="nl"?",":".");
+const fmt=n=>String(n).replace(".",STR.lang==="en"?".":",");
 function answer(v){
  const q=sess.cur,ok=isRight(q,v);
  record(q,ok);

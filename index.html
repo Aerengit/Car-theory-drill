@@ -1,0 +1,1077 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1F4FA0"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Theory Drill">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" href="icon-192.png">
+<title>Theory Drill NL</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@600;800;900&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* Layout: single-column drill console; Dutch road-sign blue header band, asphalt-grey surfaces, amber priority-diamond accents */
+:root{
+  --bg:#EDF0F3;--surface:#FFFFFF;--ink:#15202B;--muted:#5A6675;--line:#D4DAE1;
+  --blue:#1F4FA0;--blue-ink:#FFFFFF;--amber:#F2B300;--ok:#1E8A4C;--ok-bg:#E3F3EA;--bad:#C8322B;--bad-bg:#FBE7E5;
+  --road:#4A525C;--grass:#CFDDC4;--sand:#C9AE7E;--veh:#E07B24;--bike:#16806B;--moped:#8A4FB8;--tram:#B88A00;--rail:#2E343B;
+  --display:"Overpass","Arial Narrow",Arial,sans-serif;--body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F1419;--surface:#18212A;--ink:#E6EBF0;--muted:#97A3B0;--line:#2B3644;
+  --blue:#2E5FB8;--blue-ink:#FFFFFF;--amber:#F4C33A;--ok:#4CC27E;--ok-bg:#16301F;--bad:#F06A61;--bad-bg:#3A1A18;
+  --road:#3A434E;--grass:#22321F;--sand:#7A6544;--veh:#E88B3A;--bike:#2FB394;--moped:#A774D6;--tram:#D6A92A;--rail:#1A1F25;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1419;--surface:#18212A;--ink:#E6EBF0;--muted:#97A3B0;--line:#2B3644;
+  --blue:#2E5FB8;--blue-ink:#FFFFFF;--amber:#F4C33A;--ok:#4CC27E;--ok-bg:#16301F;--bad:#F06A61;--bad-bg:#3A1A18;
+  --road:#3A434E;--grass:#22321F;--sand:#7A6544;--veh:#E88B3A;--bike:#2FB394;--moped:#A774D6;--tram:#D6A92A;--rail:#1A1F25;color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--blue)}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--blue);color:var(--blue-ink)}
+.hin,.wrap{max-width:640px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.hin{display:flex;align-items:center;gap:12px;padding-block:12px}
+.logo{font-family:var(--display);font-weight:900;font-size:1.25rem;flex:1;cursor:pointer;display:flex;align-items:center;gap:10px}
+.dia{width:20px;height:20px;background:var(--amber);transform:rotate(45deg);border:3px solid #fff;flex:none}
+.hstat{font-family:var(--display);font-weight:800;font-size:.95rem;font-variant-numeric:tabular-nums}
+.wrap{padding-block:20px 48px;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.15}
+h1{font-size:1.7rem;font-weight:900}h2{font-size:1.2rem;font-weight:800}
+.lbl{font-family:var(--display);font-weight:800;font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}.small{font-size:.88rem;margin:0}
+.stack{display:flex;flex-direction:column;gap:14px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px}
+.qpanel{display:flex;flex-direction:column;gap:14px}
+.ready{display:flex;gap:18px;align-items:center}
+.gauge{font-family:var(--display);font-weight:900;font-size:3rem;line-height:1;font-variant-numeric:tabular-nums}
+.gauge small{font-size:1.2rem}
+.daily{display:grid;grid-template-columns:80px minmax(0,1fr);gap:10px;align-items:center;margin-top:8px;font-size:.85rem;font-weight:700}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--blue);border-radius:4px}
+.bar.lo>i{background:var(--bad)}.bar.mid>i{background:var(--amber)}.bar.hi>i{background:var(--ok)}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:420px){.modes{grid-template-columns:1fr}}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:focus-visible,input:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+.mode{text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.mode b{font-family:var(--display);font-weight:800;font-size:1.05rem}
+.mode span{font-size:.88rem;color:var(--muted)}
+.mode.primary{background:var(--blue);color:var(--blue-ink);border-color:var(--blue);grid-column:1/-1}
+.mode.primary span{color:var(--blue-ink);opacity:.88}
+.mode.wide{grid-column:1/-1}
+.mode[disabled]{opacity:.55;cursor:default}
+.trow{display:grid;grid-template-columns:minmax(0,1fr) 100px 44px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:.95rem}
+.trow:last-child{border-bottom:0}
+.pct{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+.chip{display:inline-block;font-family:var(--display);font-weight:800;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;background:var(--amber);color:#1a1400;padding:3px 8px;border-radius:3px}
+.chip.again{background:var(--bad);color:#fff}
+.qtext{font-size:1.2rem;font-weight:700;line-height:1.4}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{text-align:left;background:var(--surface);border:2px solid var(--line);border-radius:10px;padding:13px 14px;font-size:1rem;display:flex;gap:12px;align-items:flex-start}
+.opt .k{font-family:var(--display);font-weight:900;color:var(--muted);flex:none;width:1.1em}
+.opt:hover:not([disabled]){border-color:var(--blue)}
+.opt.ok{border-color:var(--ok);background:var(--ok-bg)}.opt.bad{border-color:var(--bad);background:var(--bad-bg)}
+.opt[disabled]{cursor:default}
+.hz{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.hz .opt{justify-content:center;text-align:center;font-weight:700;font-size:.95rem}
+.num{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.num input{font:inherit;font-size:1.3rem;font-weight:700;width:140px;padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font-variant-numeric:tabular-nums}
+.btn{background:var(--blue);color:var(--blue-ink);border:0;border-radius:10px;padding:12px 18px;font-family:var(--display);font-weight:800;font-size:1rem}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.warn{background:var(--bad);color:#fff}
+.btn[disabled]{opacity:.5}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.fb{border-radius:10px;padding:14px 16px;border-left:5px solid var(--ok);background:var(--ok-bg)}
+.fb.bad{border-color:var(--bad);background:var(--bad-bg)}
+.fb h3{font-size:1.05rem;margin-bottom:4px}
+.lesson{border:2px dashed var(--amber);border-radius:10px;padding:14px 16px}
+.lesson ul,details ul{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:5px}
+.scene{width:100%;max-width:300px;display:block;margin:0 auto;border-radius:10px}
+.sign{width:120px;height:120px;display:block;margin:4px auto}
+.revsvg .scene{max-width:180px;margin:8px 0}.revsvg .sign{width:72px;height:72px;margin:8px 0}
+.revq{font-weight:700;margin:8px 0 4px}
+.prog{display:flex;justify-content:space-between;align-items:center;gap:10px}
+details{border-bottom:1px solid var(--line);padding:12px 0}
+details:last-child{border-bottom:0}
+details .btn{margin-top:10px}
+summary{cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) 90px 44px;gap:10px;align-items:center;font-weight:700;list-style:none}
+summary::-webkit-details-marker{display:none}
+.rev{border-top:1px solid var(--line);padding-top:12px;margin-top:12px}
+.big{font-family:var(--display);font-weight:900;font-size:2.6rem;font-variant-numeric:tabular-nums}
+.pass{color:var(--ok)}.fail{color:var(--bad)}
+@media (prefers-reduced-motion:no-preference){.opt,.mode{transition:border-color .15s,background .15s}}
+</style>
+</head><body>
+<header><div class="hin">
+  <div class="logo" id="home" role="button" tabindex="0"><span class="dia"></span>Theory Drill NL</div>
+  <div class="hstat" id="hstat"></div>
+</div></header>
+<main class="wrap" id="app"></main>
+<script>
+const YN=["Yes","No"], HZ=["Brake","Release accelerator","Do nothing"];
+const STR={
+lang:"en",you:"YOU",sceneAria:"Top view of the intersection",signAria:"Traffic sign",
+yn:YN,
+kinds:{car:"car",bike:"cyclist",moped:"moped rider",tram:"tram"},
+topics:{priority:"Right of way",hazard:"Hazard perception",signs:"Signs & markings",speed:"Speed limits",parking:"Stopping & parking",motorway:"Motorways",overtake:"Overtaking & lanes",people:"Vulnerable road users",safety:"Alcohol, phone & safety",vehicle:"Distance, lights & vehicle",rules:"General rules & licence"},
+ui:{
+ readiness:"Exam readiness",answers:n=>`${n} answers so far`,lastExam:s=>` · last mock exam ${s}/50`,aim:"Aim for 85%+ before booking.",start:"Start practising and this number will grow as you master each topic.",
+ smart:"Smart practice",smartD:"Adapts to you: more of what you get wrong, missed questions come back",
+ weak:"Fix my mistakes",weakD:n=>n?`${n} question${n>1?"s":""} to fix`:"No mistakes yet",
+ exam:"Mock exam",examD:"50 questions, results at the end",learn:"Learn",learnD:"Key rules per topic",
+ scenes:"Intersection drill",scenesD:"Who goes first? Drawn situations",signsM:"Sign drill",signsD:"Recognise Dutch traffic signs",
+ topics:"Topics",mastery:"mastery",reset:"Reset progress",resetSure:"Tap again to erase all progress",
+ today:(n,g)=>`Today: ${n} / ${g}`,streak:n=>n>1?` · ${n}-day streak`:"",
+ finish:"Finish",stopExam:"Stop exam",missed:"Missed before",whatDo:"What do you do? ",answer:"Answer",check:"Check",
+ correct:"Correct",wrong:a=>"Not quite. Answer: "+a,next:"Next question",rulesFor:t=>`Rules for ${t.toLowerCase()}`,
+ quick:t=>`Quick lesson · ${t}`,quickD:"You've missed several questions on this topic. These rules cover most of them:",
+ done:"Session done",mostMissed:"Most missed: ",moreOften:"These topics will come up more often next time.",noMiss:"No mistakes this session.",
+ keep:"Keep practising",overview:"Overview",learnH:"Learn the rules",learnP:"Weakest topics first. Tap a topic to read its key rules, then drill it.",
+ drill:t=>`Drill ${t.toLowerCase()}`,back:"Back to overview",result:"Mock exam result",stopped:n=>`Stopped after ${n} questions.`,
+ passMargin:"<b>Passed with margin.</b> You are in the safe zone.",passLow:t=>`<b>Passed</b>, but below the safe target of ${t}. Practise your weak topics.`,fail:p=>`<b>Not passed.</b> You need at least ${p}. Your mistakes are now queued for practice.`,
+ fix:"Fix these mistakes",review:"Review your mistakes",yours:"Your answer: ",right:"Correct: ",
+ bank:(h,g)=>`${h} written questions + ${g} generated variations`,install:"Add to Home Screen from the Share menu to use it like an app, also offline.",
+ disclaimer:"Independent practice app. Not affiliated with the CBR. Check cbr.nl for official exam information.",
+ counter:(o,n)=>`${o} / ${n} correct`,examProg:i=>`${i} / 50`,lang:"Nederlands"
+},
+lessons:{
+speed:["Built-up area (from the blue place-name sign): 50 km/h.","Outside built-up areas: 80 km/h.","Autoweg (blue sign with a white car): 100 km/h.","Motorway: 100 km/h from 06:00 to 19:00. At night up to 130 km/h only where signs allow it.","Erf (woonerf): walking pace. Zone 30: 30 km/h.","A limit is a maximum. In rain, fog or busy streets, drive slower."],
+priority:["Equal intersection: give way to traffic from the right, including cyclists and moped riders.","Trams have priority at equal intersections, even from the left (unless the tram's road has shark teeth).","From an unpaved road onto a paved road: the unpaved road gives way.","Leaving an exit, an erf or a car park, pulling away, reversing, turning around or changing lanes: give way to everyone.","Shark teeth, a give-way triangle or STOP: give way to traffic from both directions.","Turning traffic lets straight-on traffic on the same road go first, including cyclists beside you.","Hierarchy: traffic controller, then traffic lights, then signs, then general rules.","Blue lights and siren together: make way."],
+signs:["Red circle: prohibition. Blue circle: obligation. Red triangle: warning. Blue rectangle: information.","Red disc with a white bar: no entry. White disc with red border: closed to all vehicles in both directions.","Blue disc with red border and one diagonal: no parking. With a red cross: no stopping.","Orange-yellow diamond: priority road. With a black bar through it: end of priority road.","Continuous white line: do not cross. Broken line: you may cross. Hatched area: don't drive on it.","Continuous yellow kerb line: no stopping. Broken yellow line: no parking. Yellow lines at roadworks overrule white ones."],
+parking:["Stopping means briefly letting passengers in or out, or loading and unloading straight away. Anything else is parking.","No parking within 5 m of an intersection.","Never stop on a cycle path, a pedestrian crossing or a level crossing.","On the motorway you may only stop in an emergency.","Blue zone: display your parking disc.","Don't park in front of an exit, at a bus stop or in a disabled bay without a card."],
+motorway:["Only vehicles that can and may drive faster than 60 km/h may use it.","Use the acceleration lane to match speed. Traffic on the motorway has priority.","Keep right. Overtake on the left.","Red cross above a lane: closed. Diagonal arrow: move over.","Missed your exit? Drive on to the next one. Never reverse or turn.","Lane ends in slow traffic: zip merge at the end of the lane.","Breakdown: hard shoulder, hazard lights, everyone behind the crash barrier, call for help."],
+overtake:["Overtake on the left. Trams are overtaken on the right, unless that is impossible.","Overtaking on the right is allowed in slow parallel queues, or when the vehicle ahead is turning left.","Mirrors, blind spot, signal, then go.","Never cross a continuous line to overtake.","Being overtaken: keep right and don't speed up.","Give cyclists plenty of sideways space."],
+people:["Pedestrians on, or about to step onto, a zebra crossing: let them cross.","Blind pedestrians (white cane or guide dog): always let them pass.","Children are unpredictable. Slow down near schools, playgrounds and parked cars.","Turning right: check your mirror and blind spot for cyclists.","Cyclists may ride two abreast if they don't obstruct traffic.","Fietsstraat with 'auto te gast': the car is a guest.","Open your door with the far hand so you look back (the Dutch reach)."],
+hazard:["CBR hazard questions have three answers: Brake, Release accelerator, Do nothing.","Brake: the danger is real and close. You must slow down now.","Release accelerator: something could develop. Anticipate and lose some speed.","Do nothing: no danger and no reason to slow down. Braking without reason is also wrong.","Look far ahead, check your mirrors and watch what others are about to do."],
+safety:["Alcohol limit: 0.5‰. Starters (first 5 years with a licence): 0.2‰.","Holding a phone while driving is forbidden, also when waiting at a red light.","Seatbelts for everyone. Children under 1.35 m need a suitable child seat.","Medicine with a yellow warning sticker can affect your driving.","On long trips, take a break about every 2 hours.","Accident: secure the scene, call 112, help. Never drive on after an accident."],
+vehicle:["Keep at least 2 seconds behind the vehicle ahead. More in rain or darkness.","Stopping distance = reaction distance + braking distance.","Double the speed: reaction distance doubles, braking distance becomes about four times longer.","In 1 second you travel speed ÷ 3.6 metres (50 km/h ≈ 14 m).","Minimum tyre tread depth: 1.6 mm.","Rear fog light only when visibility is under 50 m.","Aquaplaning: release the accelerator, keep the wheel straight, don't brake hard."],
+rules:["Keep as far right as is practical.","Signal in good time before turning or changing lanes.","Yellow light: stop if you safely can. Flashing yellow: normal priority rules apply.","Railway crossing with flashing red lights or bells: stop.","A traffic controller with a raised arm: all traffic stops.","B licence: max 3,500 kg total mass and max 8 passengers.","2toDrive: start at 17 with an approved coach. A passed theory exam is valid for 18 months."]
+},
+sg:{
+ speed:n=>`Maximum speed ${n} km/h`,advice:n=>`Advised speed ${n} km/h`,minimum:n=>`Minimum speed ${n} km/h`,
+ noentry:{m:"No entry (from this side)",d:["Closed to all vehicles both ways","No stopping"]},
+ closed:{m:"Closed to all vehicles in both directions",d:["No entry from this side","End of all restrictions"]},
+ nopark:{m:"No parking",d:["No stopping","No entry"]},
+ nostop:{m:"No stopping",d:["No parking","Road closed"]},
+ prio:{m:"Priority road",d:["Danger ahead","Give way"]},
+ prioend:{m:"End of priority road",d:["Priority road","No overtaking"]},
+ giveway:{m:"Give way to traffic on the crossing road",d:["Warning: danger","Stop line ahead"]},
+ stop:{m:"Stop completely and give way",d:["Slow down and give way","Stop only if traffic comes"]},
+ noovertake:{m:"No overtaking of motor vehicles",d:["Two-way traffic","Car park"]},
+ oneway:{m:"One-way road",d:["You must go straight on","Motorway ahead"]},
+ mright:{m:"You must turn right",d:["One-way road to the right","Bend to the right"]},
+ mleft:{m:"You must turn left",d:["One-way road to the left","No turning right"]},
+ mstraight:{m:"You must go straight on",d:["One-way road","Priority road"]},
+ cycle:{m:"Compulsory cycle path (no cars)",d:["Cyclists may use the road","Bicycle parking"]},
+ park:{m:"Parking place",d:["Police","Priority"]},
+ deadend:{m:"Dead end",d:["Intersection ahead","Tunnel"]},
+ wdanger:{m:"Other danger (see supplementary sign)",d:["Accident ahead, road closed","Stop"]},
+ wcross:{m:"Intersection ahead; the right-hand rule applies",d:["Intersection where you have priority","Railway crossing"]},
+ wprio:{m:"Intersection ahead where you have priority",d:["Equal intersection ahead","Road narrows"]},
+ wlights:{m:"Traffic lights ahead",d:["Lights out of order","Speed camera"]},
+ height:{m:"Vehicles higher than 3.5 m may not enter",d:["Minimum height 3.5 m","Road width 3.5 m"]},
+ rail:{m:"Railway crossing (look out for trains)",d:["No entry","Intersection ahead"]}
+},
+g:{
+ cond:{none:"Equal intersection, no signs.",teethMine:"There are shark teeth on your road.",teethTheirs:"There are shark teeth on B's road.",prioMine:"You drive on a priority road (see the diamond sign).",unpavedMine:"Your road is unpaved; B's road is paved.",unpavedTheirs:"B's road is unpaved; yours is paved."},
+ sceneQ:(c,k)=>`${c} You (blue) go straight on. Must you give way to ${k} B?`,
+ sceneE:(c,arm,k)=>({
+  none:arm==="E"?`The ${k} comes from your right. At an equal intersection traffic from the right goes first.`:`The ${k} comes from your left, so you are on its right. B gives way to you.`,
+  teethMine:"Shark teeth on your road: you give way to crossing traffic from both directions.",
+  teethTheirs:"B has shark teeth, so B gives way to you, from whichever side.",
+  prioMine:"You are on the priority road. B, on the side road, gives way.",
+  unpavedMine:"Unpaved gives way to paved, even when you come from the right.",
+  unpavedTheirs:"B is on the unpaved road, so B gives way to you."})[c],
+ tramQ:t=>t?"Shark teeth are on the tram's road. You (blue) go straight on. Must you give way to tram B?":"Equal intersection, no signs. You (blue) go straight on. Must you give way to tram B?",
+ tramE:t=>t?"Signs come before general rules. With shark teeth on its road, the tram gives way.":"At equal intersections trams have priority over all other traffic, from left or right.",
+ threeQ:c=>`${c} Everyone goes straight on. What is the order?`,
+ threeO:["B, then you, then C","B and C first, then you","You first, then B and C"],
+ threeE:{none:"B is on your right, so you wait for B. You are on C's right, so C waits for you. B and C don't cross each other. Order: B, you, C.",teethMine:"You have shark teeth, so you wait for both. B and C don't cross each other, so they can go together. Then you.",teethTheirs:"B and C have shark teeth, so you go first. Then B and C, who don't cross each other."},
+ turnQ:(w,k)=>w==="youLeft"?`Equal intersection. You (blue) turn left. The oncoming ${k} B goes straight on. Must you let B go first?`:`Equal intersection. You (blue) go straight on. The oncoming ${k} B turns left. Must you let B go first?`,
+ turnE:w=>w==="youLeft"?"Turning traffic gives way to oncoming straight-on traffic.":"B is turning and you go straight on along the same road, so B waits for you.",
+ signQ:"What does this sign mean?",
+ distQ:(v,t)=>`You drive ${v} km/h. How many metres do you travel in ${t} second${t>1?"s":""}?`,
+ distE:(v,t,m)=>`Metres per second = km/h ÷ 3.6. ${v} ÷ 3.6 × ${t} ≈ ${m} m.`,
+ brakeQ:(v0,d0,v1)=>`At ${v0} km/h your braking distance is ${d0} m. About how long is it at ${v1} km/h (same road)?`,
+ brakeE:(f,d)=>`Braking distance changes with the square of the speed factor: ${f} × ${f} = ${f*f}. So about ${d} m.`,
+ alcQ:(y,p)=>`You got your licence at 22, ${y} year${y>1?"s":""} ago. A breath test shows ${String(p)}‰. Is that within the limit?`,
+ alcE:(st,l)=>st?`You are still a starter (first 5 years): the limit is 0.2‰.`:`After 5 years the normal limit of 0.5‰ applies.`,
+ treadQ:x=>`Your tyres have ${String(x)} mm of tread left. Is that legal?`,treadE:"The legal minimum is 1.6 mm. Below 3 mm grip in rain already gets worse.",
+ fogQ:x=>`Visibility in fog is about ${x} m. May you switch on your rear fog light?`,fogE:"The rear fog light is only allowed when visibility is under 50 m.",
+ gapQ:x=>`You drive ${String(x)} seconds behind the car ahead on a dry road. Is that enough?`,gapE:"Keep at least 2 seconds. Less leaves too little time to react.",
+ parkQ:x=>`May you park ${x} m from an intersection (no signs)?`,parkE:"Parking within 5 m of an intersection is forbidden.",
+ childQ:x=>`A 10-year-old child is ${x} cm tall. Must the child use a child seat?`,childE:"Children under 1.35 m must use a suitable child seat.",
+ massQ:x=>`A camper has a maximum total mass of ${x.toLocaleString("en")} kg. May you drive it with a B licence?`,massE:"A B licence covers vehicles up to 3,500 kg.",
+ passQ:x=>`May you drive a vehicle with ${x} passengers (plus you) on a B licence?`,passE:"A B licence allows up to 8 passengers besides the driver.",
+ mwQ:h=>`A motorway sign shows '100 06-19h' and 130 at other times. It is ${h}:00. What is your maximum speed?`,mwE:"Between 06:00 and 19:00 the daytime limit of 100 applies; otherwise the higher limit shown.",
+ roadQ:r=>`${r} What is the maximum speed?`,
+ roads:[["You drive in a built-up area without speed signs.",50,"The general limit in built-up areas is 50 km/h."],["You drive outside the built-up area on a normal road without signs.",80,"Outside built-up areas: 80 km/h."],["You drive on an autoweg without other signs.",100,"Autoweg: 100 km/h."],["You just passed a 'Zone 30' sign.",30,"30 km/h until the end-of-zone sign."],["You just passed a 'Zone 60' sign outside town.",60,"60 km/h until the zone ends."],["You just passed a crossed-out blue place-name sign. No other signs.",80,"You left the built-up area: 80 km/h."],["You just passed a blue place-name sign. No other signs.",50,"You entered the built-up area: 50 km/h."]]
+}
+};
+
+const QB={items:[],n:{},add(t,arr){arr.forEach(r=>{const k=(this.n[t]=(this.n[t]||0)+1);this.items.push({id:t+"-"+k,t,q:r[0],o:r[1],a:r[2],e:r[3],u:r[4]})})}};
+
+// Format: [question, options | YN | HZ | null (number answer), answer index or number, explanation, unit]
+QB.add("speed",[
+["What is the maximum speed for a car in a built-up area when no sign says otherwise?",null,50,"Inside the built-up area the general limit is 50 km/h.","km/h"],
+["What is the maximum speed outside a built-up area on a normal road without signs?",null,80,"Outside built-up areas the general limit is 80 km/h.","km/h"],
+["What is the maximum speed on an autoweg (blue sign with a white car)?",null,100,"On an autoweg the limit is 100 km/h unless signs show otherwise.","km/h"],
+["On most Dutch motorways, what is the maximum speed between 06:00 and 19:00?",null,100,"Since 2020 most motorways have 100 km/h during the day.","km/h"],
+["What is the highest speed limit you can find on a Dutch motorway (at night, where signs allow)?",null,130,"130 km/h is only allowed at night and only where signs show it.","km/h"],
+["How fast may you drive in an erf (woonerf)?",["At walking pace","30 km/h","50 km/h"],0,"In an erf pedestrians may use the whole street, so cars drive at walking pace (stapvoets)."],
+["Where does the 50 km/h built-up area limit start?",["At the blue place-name sign","At the first house","At the first street light"],0,"The built-up area (bebouwde kom) starts at the blue place-name sign."],
+["You pass a white sign with a village name, but no blue place-name sign. Does the 50 km/h limit now apply?",YN,1,"Only the blue place-name sign marks the built-up area. A white name sign does not change the limit."],
+["A blue place-name sign has a red diagonal line through it. What does it mean?",["End of the built-up area","No entry to the village","Village closed to cars"],0,"The crossed-out sign marks the end of the built-up area. The 80 km/h limit applies from there unless signs say otherwise."],
+["You drive past houses outside the built-up area (no blue place-name sign). No speed signs. What is the limit?",null,80,"Without a blue place-name sign you are still outside the built-up area: 80 km/h.","km/h"],
+["It is foggy on an 80 km/h road. Is 80 km/h still allowed?",["Only if you can stop within the distance you can see is clear","Yes, the sign allows it","No, the limit drops to 50 km/h automatically"],0,"A limit is a maximum. You must always be able to stop within the distance you can see is clear."],
+["You pass a 'Zone 30' sign. How long does the 30 km/h limit apply?",["Until the end-of-zone sign","Until the next intersection","For 500 metres"],0,"A zone sign applies to all roads in the zone until you pass the end-of-zone sign."],
+["You pass a 'Zone 60' sign outside the built-up area. What is the limit in this zone?",null,60,"In a 60 zone the limit is 60 km/h until the zone ends.","km/h"],
+["Above your lane a matrix sign shows 70 in a red circle. What does it mean?",["Maximum 70 km/h in that lane","Advised speed 70 km/h","Minimum 70 km/h"],0,"A number in a red circle on a matrix sign is a legal maximum."],
+["A speed number on a rectangular sign under a warning triangle is:",["An advisory speed","A legal maximum","A minimum speed"],0,"A rectangular speed sign is advice. Red-bordered round signs are the legal maximum."],
+["A motorway sign shows '100 06-19h'. It is 14:00. What is your maximum?",null,100,"Between 06:00 and 19:00 the daytime limit applies.","km/h"],
+["A motorway sign shows '100 06-19h' and a separate 120 sign for other times. It is 21:00. What is your maximum?",null,120,"Outside 06:00–19:00 the higher limit shown applies.","km/h"],
+["May you go over the speed limit for a moment to finish overtaking?",YN,1,"The limit always applies, also while overtaking. If you can't overtake within the limit, don't overtake."],
+["May you drive so slowly that you hold up other traffic without a reason?",YN,1,"Driving needlessly slowly obstructs traffic and can be dangerous."],
+["What does a 'trajectcontrole' (section control) measure?",["Your average speed over a section","Your speed at one point","Your following distance"],0,"Section control measures the average speed between two points."],
+["A moped with a yellow number plate may drive at most:",null,45,"A bromfiets (yellow plate) has a maximum of 45 km/h. Expect large speed differences.","km/h"],
+["Snow lies on the road and the limit is 80 km/h. What speed do you choose?",["Lower, so you can stop safely","80 km/h","At least 60 km/h to keep traction"],0,"Choose a speed that matches the conditions; the limit is only a maximum."],
+["Where do speed limits from a speed sign stop applying?",["At another speed sign or an end sign","At every intersection","After 1 km"],0,"A speed sign remains valid until a new speed sign or an end sign."],
+["What is the minimum speed on a motorway?",["There is no fixed minimum, but your vehicle must be able to go faster than 60 km/h","50 km/h","80 km/h"],0,"No fixed minimum speed applies, but only vehicles that can and may go faster than 60 km/h are allowed."]
+]);
+
+QB.add("priority",[
+["Equal intersection without signs. A car comes from your right. Must you give way?",YN,0,"At an equal intersection you give way to traffic from the right."],
+["Equal intersection. A cyclist comes from your right. Must you give way?",YN,0,"Cyclists follow the same rule. Traffic from the right goes first, whatever the vehicle."],
+["Equal intersection. A cyclist comes from your left. Who goes first?",["You","The cyclist"],0,"You are on the cyclist's right, so the cyclist gives way to you."],
+["Equal intersection. A moped rider comes from your right. Who goes first?",["The moped rider","You, because a car is faster"],0,"The right-hand rule applies to all drivers and riders, including mopeds."],
+["Equal intersection. A tram comes from your left. Must you give way?",YN,0,"Trams have priority at equal intersections, even from the left."],
+["The tram's road has shark teeth; your road has none. Must you give way to the tram?",YN,1,"Signs and markings come before general rules. With shark teeth on its road the tram must give way."],
+["You drive on an unpaved road towards a paved road. Who has priority?",["Traffic on the paved road","You, if you come from the right","Whoever arrives first"],0,"Drivers on an unpaved road give way to drivers on a paved road."],
+["You drive out of a driveway (uitrit) onto the road. Whom must you give way to?",["All traffic, including pedestrians","Only cars","Only traffic from the right"],0,"Leaving an exit, you give way to everyone on the road and pavement."],
+["You leave a petrol station onto the road. Who has priority?",["All traffic on the road","You, if traffic comes from the left","Nobody"],0,"A petrol station exit counts as an exit. You give way to everyone."],
+["You leave an erf onto a normal road. Who has priority?",["Traffic on the normal road","You, if traffic comes from your left","Whoever is fastest"],0,"Leaving an erf is like leaving an exit. You give way to all traffic."],
+["You pull away from a parking space at the kerb. Who has priority?",["All traffic on the road","You, because you signal","Only traffic from the right"],0,"Pulling away is a special manoeuvre. You give way to everyone."],
+["You want to turn around (U-turn) on a quiet road. Who has priority?",["All other traffic","You, once you have signalled","Traffic from the right only"],0,"Turning around is a special manoeuvre. Other traffic goes first."],
+["You reverse out of a parking space. Who has priority?",["All other traffic","You","Only pedestrians"],0,"Reversing is a special manoeuvre: give way to all other road users."],
+["You change lanes. Who has priority?",["Traffic already in the other lane","You, because you signalled","The faster vehicle"],0,"Changing lanes, you give way to traffic in the lane you move into."],
+["You approach a roundabout with shark teeth and a give-way sign. Who has priority?",["Traffic already on the roundabout","You, because you come from the right","Whoever is fastest"],0,"Shark teeth mean you give way to traffic on the roundabout. Most Dutch roundabouts work like this."],
+["A roundabout has no priority signs or shark teeth at all. Who has priority?",["Traffic entering the roundabout (from the right)","Traffic on the roundabout","Nobody, use eye contact"],0,"Without signs the right-hand rule applies. Entering traffic comes from the right of circulating traffic."],
+["You turn right. A cyclist on the cycle path beside you goes straight on. Who goes first?",["The cyclist","You, because you signalled","Whoever is in front"],0,"Turning traffic lets straight-on traffic on the same road go first."],
+["You turn left at an equal intersection. An oncoming car goes straight on. Who goes first?",["The oncoming car","You","The car that arrived first"],0,"Straight-on traffic on the same road goes before turning traffic."],
+["You turn left. An oncoming cyclist goes straight on. Who goes first?",["The cyclist","You"],0,"Straight-on traffic on the same road, including cyclists, goes before you."],
+["You drive on a priority road and turn left into a side road. An oncoming car on the priority road goes straight on. Who goes first?",["The oncoming car","You, because you are on the priority road"],0,"Both of you are on the priority road. Straight-on traffic goes before turning traffic."],
+["You drive on a priority road and turn right into a side street. A cyclist on the cycle path next to the priority road goes straight on. Who goes first?",["The cyclist","You"],0,"The cyclist goes straight on along the same road. You give way."],
+["You drive on a priority road. A cyclist comes from the right out of a side road with shark teeth. Who goes first?",["You","The cyclist"],0,"The shark teeth mean the cyclist gives way."],
+["A cycle path crosses your road. The cycle path has shark teeth. Who goes first?",["You","The cyclists"],0,"Shark teeth on the cycle path mean cyclists give way."],
+["Equal T-junction: you come from the side road. A car on the through road comes from your left. Who goes first?",["You","The car on the through road"],0,"In the Netherlands the right-hand rule also applies at equal T-junctions. You are on the other car's right."],
+["Equal T-junction: you drive on the through road. A car comes out of the side road from your right. Who goes first?",["The car from the side road","You, because you are on the through road"],0,"Without signs the through road has no priority. Traffic from the right goes first."],
+["A police officer waves you through, but your traffic light is red. What do you do?",["Follow the officer and drive","Wait for green","Stop and ask"],0,"Instructions from a traffic controller come before traffic lights, signs and rules."],
+["Your light is green, but there are shark teeth on your road. Who has priority?",["You, the green light counts","Traffic on the crossing road","Traffic from the right"],0,"Traffic lights come before signs and markings. The shark teeth apply only when the lights are off."],
+["The traffic lights are off. Your road has shark teeth. Who has priority?",["Traffic on the crossing road","You","Traffic from the right only"],0,"With the lights off, signs and markings decide."],
+["Your light turns green, but a pedestrian is still crossing in front of you. What do you do?",["Wait until the pedestrian has crossed","Drive; you have green","Sound the horn"],0,"Green does not let you drive into someone. Let them finish crossing."],
+["An ambulance with blue lights and siren comes up behind you. What must you do?",["Make way for it","Keep driving normally","Speed up to stay ahead"],0,"Emergency vehicles with blue lights and a siren must be given room to pass."],
+["In a built-up area a bus at a stop signals that it is leaving. What must you do?",["Give it room to pull out","Pass quickly before it moves","Sound your horn"],0,"In a built-up area you must let a bus leave its stop when it signals."],
+["Outside the built-up area a bus signals to leave its stop. Must you let it go first?",YN,1,"The obligation applies only inside the built-up area. Still, be careful."],
+["An orange-yellow diamond sign stands next to your road. What does it mean at the next intersection?",["You have priority","You give way to the right","You must stop"],0,"The diamond is the priority road sign. Side roads give way to you."],
+["What is the order of priority for instructions?",["Traffic controller, lights, signs, general rules","Signs, lights, controller, rules","Rules, signs, lights, controller"],0,"A traffic controller overrules lights; lights overrule signs; signs overrule general rules."],
+["Two cars arrive at the same time at an equal four-way intersection from opposite directions, both going straight on. Must one give way?",YN,1,"Their paths don't cross. Both can drive."],
+["You want to enter a road from a field path that is unpaved. A cyclist on the paved road comes from your left. Who goes first?",["The cyclist","You, because you come from the right"],0,"Unpaved gives way to paved, regardless of left or right."],
+["You approach a STOP sign. Traffic on the crossing road is far away. What do you do?",["Stop completely, then drive when safe","Slow down and drive on","Drive on; nobody is close"],0,"At STOP you must always come to a complete stop."],
+["Two lanes merge into one without markings. You are in the lane that ends. Who goes first?",["Traffic in the continuing lane","You, if you are ahead","Traffic on the right"],0,"Moving into another lane means giving way to traffic in that lane. In slow traffic, zip merge."]
+]);
+
+QB.add("signs",[
+["What does a red octagonal STOP sign require?",["Stop completely and give way","Slow down and give way","Stop only if traffic comes"],0,"At STOP you must come to a full stop, even with no traffic, and give way to traffic from both directions."],
+["What does an upside-down triangle with a red border mean?",["Give way","Danger ahead","Stop"],0,"The inverted triangle is the give-way sign, often together with shark teeth."],
+["What do shark teeth (white triangles) across your lane mean?",["Give way to traffic on the crossing road","Speed bump ahead","Pedestrian crossing ahead"],0,"Shark teeth mean you give way to traffic on the road you are entering, from both directions."],
+["A red disc with a white horizontal bar means:",["No entry for vehicles from this side","Road closed for trucks","End of all restrictions"],0,"This is the no-entry sign, typically at the far end of a one-way street."],
+["A white disc with a red border and no symbol means:",["Closed to all vehicles in both directions","No parking","Speed limit ends"],0,"An empty red-bordered disc closes the road to all vehicles in both directions."],
+["A blue rectangular sign with a white arrow pointing straight ahead means:",["One-way road","You must go straight on","Motorway ahead"],0,"A white arrow on a blue rectangle marks a one-way road."],
+["A blue disc with a white arrow pointing right means:",["You must turn right","One-way road to the right","Parking to the right"],0,"Blue discs are mandatory signs. Here you must follow the arrow."],
+["A blue disc with a red border and one red diagonal stripe means:",["No parking","No stopping","No entry"],0,"One diagonal: no parking. A red cross means no stopping."],
+["A blue disc with a red border and a red cross means:",["No stopping","No parking","Road closed"],0,"The red cross means you may not even stop briefly."],
+["An orange-yellow diamond with a white border means:",["Priority road","Danger","Roadworks"],0,"This is the priority road sign."],
+["An orange-yellow diamond with a black diagonal bar means:",["End of priority road","No overtaking","Road narrows"],0,"The bar crosses out the priority road. From here normal priority rules apply."],
+["A red triangle with a white background is generally a:",["Warning sign","Prohibition sign","Information sign"],0,"Triangles warn of danger ahead. Circles prohibit or command, rectangles inform."],
+["Red-bordered round signs are generally:",["Prohibitions","Obligations","Information"],0,"Red circle: prohibition. Blue circle: obligation."],
+["Blue round signs are generally:",["Obligations (mandatory)","Prohibitions","Warnings"],0,"A blue disc tells you what you must do."],
+["Blue rectangular signs are generally:",["Information","Prohibitions","Warnings"],0,"Rectangles give information, such as parking, one-way or motorway."],
+["A blue disc with a white bicycle means:",["Compulsory cycle path; cars may not use it","Bicycles allowed on the road","Bicycle parking"],0,"This is a compulsory cycle path. Cars may not drive or park on it."],
+["A blue disc with a white bicycle and a moped means:",["Cycle/moped path; cars may not use it","Shared road for all","Moped parking"],0,"Cyclists and moped riders must use this path. Cars are not allowed."],
+["A red-bordered disc with two cars side by side (left one red) means:",["No overtaking for motor vehicles","Two-way traffic","Car park full"],0,"This sign prohibits overtaking motor vehicles."],
+["A red-bordered disc with a truck in it means:",["Closed to trucks","Trucks only","Truck parking"],0,"Trucks may not enter."],
+["A red-bordered disc with a height in metres means:",["Vehicles higher than that may not enter","Minimum height","Distance to obstacle"],0,"It shows a maximum vehicle height, for example before a low bridge or tunnel."],
+["A blue sign with a house, a person, a car and a child playing marks:",["The start of an erf (woonerf)","A school","A parking area"],0,"An erf: walking pace, pedestrians may use the whole street."],
+["The erf sign with a red diagonal bar means:",["End of the erf","No children allowed","Parking forbidden"],0,"You leave the erf. When you drive out of it, give way to all traffic."],
+["A blue sign with a white car on it marks:",["An autoweg","A motorway","A car park"],0,"This is the autoweg sign: 100 km/h, no slow vehicles."],
+["A blue sign with a white symbol of a road with a bridge over it marks:",["A motorway","An autoweg","A tunnel"],0,"This is the motorway sign."],
+["A blue square sign with a white 'T' shape, the top bar red, means:",["Dead end","Intersection ahead","Tunnel"],0,"It marks a dead-end road."],
+["A blue square sign with a white 'P' means:",["Parking place","Priority","Police"],0,"Parking is allowed here."],
+["A warning triangle showing children means:",["Children may cross, e.g. near a school","Playground only","Children's crossing patrol required"],0,"Expect children, especially at school times."],
+["A warning triangle with a black thick vertical line crossed by a thin line means:",["Intersection ahead where you have priority","Intersection with equal roads","Railway crossing"],0,"The thick line is your road: you have priority at the next intersection."],
+["A warning triangle with an X-shaped cross (two equal lines) means:",["Intersection ahead; the right-hand rule applies","You have priority","Railway crossing without barriers"],0,"Equal lines mean an equal intersection: give way to the right."],
+["A warning triangle with three curved arrows in a circle means:",["Roundabout ahead","Detour","Recycling point"],0,"Prepare to give way at the roundabout."],
+["A warning triangle with a traffic light means:",["Traffic lights ahead","Lights out of order","Speed camera"],0,"Be ready to stop at the lights."],
+["A warning triangle with an exclamation mark means:",["Other danger; read the sign below","Accident ahead","Road closed"],0,"A general warning. A supplementary sign usually explains."],
+["A warning triangle with a leaping deer means:",["Wild animals may cross","Hunting area","Zoo nearby"],0,"Especially at dusk and dawn, slow down and watch the verges."],
+["A warning triangle with a bump means:",["Uneven road or speed bump ahead","Hill ahead","Loose gravel"],0,"Slow down before the bump."],
+["A warning triangle with a gate/barrier means:",["Railway crossing with barriers ahead","Toll gate","Road closed"],0,"Be ready to stop at the level crossing."],
+["A white St. Andrew's cross (X-shape) with red edges stands at a railway. What does it mean?",["Railway crossing; be ready to stop","No entry","Intersection ahead"],0,"It marks a level crossing. Look out for trains and signals."],
+["Next to you is a continuous white line, with a broken line on your side. May you cross?",YN,0,"The broken line is on your side, so you may cross. Traffic on the side of the continuous line may not."],
+["A single continuous white line divides your road. May you cross it to overtake?",YN,1,"A continuous line may never be crossed or straddled."],
+["A broken white line divides the road. May you cross it?",YN,0,"Broken lines may be crossed when it is safe."],
+["What does a white hatched area (diagonal lines with a border) on the road mean?",["You may not drive on it","Parking area","Overtaking area"],0,"Hatched areas (verdrijvingsvlakken) may not be driven on."],
+["Short, wide white blocks (block markings) along a lane mean:",["They mark the edge of a special lane, e.g. a slip road","No parking","Pedestrian crossing"],0,"Block markings separate lanes such as acceleration, deceleration or rush-hour lanes from the main lanes."],
+["There is a continuous yellow line along the kerb. What does it mean?",["No stopping","No parking, but stopping is allowed","Bus lane"],0,"A continuous yellow kerb line means no stopping. A broken yellow line means no parking."],
+["There is a broken yellow line along the kerb. What does it mean?",["No parking","No stopping","Taxi rank"],0,"A broken yellow line means no parking. Stopping briefly is allowed."],
+["At roadworks there are yellow lines and white lines. Which ones do you follow?",["The yellow lines","The white lines","Whichever you prefer"],0,"Temporary yellow markings at roadworks overrule white ones."],
+["'BUS' is written on a lane. May you drive in it?",YN,1,"Bus lanes are only for buses (and sometimes other vehicles shown by signs)."],
+["A red cross is shown above your lane on a matrix sign. What do you do?",["Leave that lane, it is closed","Slow down to 50 km/h","Use it only to overtake"],0,"A red cross means the lane is closed."],
+["A matrix sign shows a diagonal arrow above your lane. What does it mean?",["Move to the lane the arrow points to","Speed up","Exit ahead"],0,"Your lane is going to close. Move over in good time."],
+["A matrix sign shows a white circle with diagonal lines. What does it mean?",["End of the restrictions shown before","Lane closed","Speed camera"],0,"The previous matrix restrictions end."],
+["A small sign under a main sign (onderbord) does what?",["Adds conditions, e.g. times or exceptions","Cancels the main sign","Shows the sign's code"],0,"A supplementary sign narrows or explains the main sign."],
+["A traffic light shows white bars or white dots. Who is it for?",["Buses and trams","Cars","Pedestrians"],0,"Lights with white bars or dots regulate public transport, not cars."],
+["A traffic light shows a bicycle symbol. Who is it for?",["Cyclists only","Everyone","Cars turning right"],0,"Follow the light meant for your vehicle."],
+["A red sign on a cycle street says 'auto te gast'. What does it mean?",["Cars are guests; cyclists come first","Car parking only","Cars have priority"],0,"On a fietsstraat cyclists are the main users. Drive calmly behind them."],
+["A blue square sign showing a person walking on a zebra means:",["Pedestrian crossing","Footpath only","Pedestrian zone"],0,"Pedestrians on or about to step onto the crossing get priority."]
+]);
+
+QB.add("parking",[
+["What is the minimum distance from an intersection at which you may park?",null,5,"Parking within 5 m of an intersection is forbidden, because it blocks the view.","m"],
+["What is the difference between stopping and parking?",["Stopping is briefly letting people in or out or loading at once","Stopping is anything under 5 minutes","There is no difference"],0,"Stopping covers only boarding, alighting or immediate loading and unloading. Waiting longer is parking."],
+["You wait in your car for a friend who is still inside a shop. Are you stopping or parking?",["Parking","Stopping","Neither"],0,"Waiting for someone who is not getting in right away counts as parking."],
+["You let a passenger out and drive off straight away. Is that stopping or parking?",["Stopping","Parking"],0,"Letting someone out immediately is stopping."],
+["May you stop briefly on a cycle path to drop off a passenger?",YN,1,"You may never stop or park on a cycle path."],
+["May you park on a cycle lane (fietsstrook) marked on the road?",YN,1,"Parking on a cycle lane is forbidden."],
+["You park in a blue zone. What must you do?",["Display a parking disc","Pay at the machine","Nothing during the day"],0,"In a blue zone you set your parking disc to your arrival time; parking is time-limited."],
+["May you park in front of someone's driveway exit?",YN,1,"Parking in front of an exit is forbidden; it blocks the owner."],
+["May you stop on a zebra crossing?",YN,1,"Stopping on a pedestrian crossing is forbidden."],
+["When may you stop on the hard shoulder of a motorway?",["Only in an emergency or breakdown","To make a phone call","To check the route"],0,"The hard shoulder is only for emergencies."],
+["May you park in a disabled bay for 2 minutes without a disabled card?",YN,1,"Disabled bays are only for vehicles with a valid disabled parking card."],
+["May you stop on a level (railway) crossing?",YN,1,"Never stop on a level crossing. Only drive onto it if you can leave it straight away."],
+["May you park on a priority road outside the built-up area?",YN,1,"Parking on the carriageway of a priority road outside the built-up area is forbidden."],
+["May you park on the footpath?",YN,1,"Parking on footpaths is not allowed unless a sign permits it."],
+["May you park next to a continuous yellow line?",YN,1,"A continuous yellow line means no stopping, so certainly no parking."],
+["May you briefly let a passenger out next to a broken yellow line?",YN,0,"A broken yellow line forbids parking, but stopping is allowed."],
+["On which side of a normal two-way road do you park?",["On the right side","Either side","On the left side"],0,"Park on the right side of the road in your direction of travel."],
+["May you park in a bus lane?",YN,1,"Bus lanes are for buses only."],
+["May you park at a bus stop?",YN,1,"Parking at a bus stop blocks the bus."],
+["You park on a slope downhill. Which way do you turn your front wheels?",["Towards the kerb","Away from the kerb","Straight ahead"],0,"If the brake fails, the kerb will stop the car."],
+["What must you do before you get out of your parked car on the street side?",["Check for cyclists and traffic behind you","Turn on the hazard lights","Signal left"],0,"Look back (for example with the Dutch reach) so you don't open your door into a cyclist."],
+["May you park on a hatched area (verdrijvingsvlak)?",YN,1,"You may not drive on or stop on a hatched area."],
+["A sign shows a 'P' with an electric plug. Who may park there?",["Electric vehicles that are charging","Any car","Taxis"],0,"Charging spots are only for electric vehicles while charging."],
+]);
+
+QB.add("motorway",[
+["Which vehicles may use the motorway?",["Vehicles that can and may go faster than 60 km/h","All motor vehicles","Vehicles that can go faster than 40 km/h"],0,"Only motor vehicles that can and may drive faster than 60 km/h are allowed."],
+["May mopeds and cyclists use the motorway?",YN,1,"They are not allowed on motorways or autowegen."],
+["How do you join the motorway?",["Match speed on the acceleration lane and give way to motorway traffic","Stop at the end of the acceleration lane","Merge right away; joining traffic has priority"],0,"Use the acceleration lane to reach traffic speed. Traffic on the motorway has priority."],
+["The acceleration lane is short and traffic is busy. What do you do?",["Keep looking for a gap and adjust your speed","Drive onto the hard shoulder","Force your way in"],0,"Adapt your speed to fit into a gap. Stopping at the end is a last resort."],
+["You drive on the motorway and see a car joining. What can you do to help?",["Move one lane to the left if it's safe","Speed up","Sound the horn"],0,"Making room is courteous and safe, as long as it doesn't endanger others."],
+["You missed your exit. What do you do?",["Drive on to the next exit","Reverse on the hard shoulder","Turn at a gap in the barrier"],0,"Reversing or turning on the motorway is forbidden and very dangerous."],
+["May you make a U-turn on a motorway?",YN,1,"Turning is forbidden on motorways."],
+["Your lane ends and traffic is slow. How do you merge?",["Zip merge at the end of the lane","Merge as early as possible","Stop and wait for a gap"],0,"Drive on to the end of the lane and merge in turn (ritsen)."],
+["Which lane should you use on a motorway when not overtaking?",["The right lane","The middle lane","Any lane"],0,"Keep right. Use the left lanes to overtake."],
+["Three lanes, the right lane is free. You drive in the middle lane. Is that correct?",YN,1,"Keep right as much as possible. Return to the right when it is free."],
+["A rush-hour lane (spitsstrook) shows a red cross. May you use it?",YN,1,"A red cross means it is closed."],
+["How do you know a rush-hour lane is open?",["A speed sign or green arrow is shown above it","It is daytime","There is traffic on it"],0,"Use it only when the matrix sign above it shows it is open."],
+["You break down on the motorway. What is the best order?",["Hazard lights, hard shoulder, everyone behind the barrier, call for help","Stay in the car and call","Put the warning triangle on the road first"],0,"Get out of the danger zone: behind the crash barrier is much safer than inside the car."],
+["You break down on the motorway. Where do passengers wait?",["Behind the crash barrier","In the car with seatbelts on","On the hard shoulder next to the car"],0,"Traffic can hit a stationary car. Behind the barrier is safest."],
+["Where do you slow down when leaving the motorway?",["On the deceleration lane","On the main lane before the exit","On the hard shoulder"],0,"Move to the deceleration lane first, then brake there."],
+["May you stop on the motorway to pick up a hitchhiker?",YN,1,"Stopping on the motorway is only allowed in emergencies."],
+["May you reverse on a motorway slip road?",YN,1,"Reversing is forbidden on the motorway and its slip roads."],
+["A traffic jam starts ahead on the motorway. What can you do to warn traffic behind you?",["Briefly use your hazard lights","Brake hard several times","Flash your headlights at oncoming traffic"],0,"Hazard lights may be used briefly to warn following traffic of a sudden queue."],
+["What does a green arrow above a lane on a matrix sign mean?",["The lane is open","You must exit","Lane for trucks"],0,"A green arrow pointing down shows the lane is open."],
+["What is a 'weefvak' (weaving section)?",["A section where joining and leaving traffic share a lane","A tunnel entrance","A parking area"],0,"Watch carefully: traffic is moving in and out at the same time."],
+["What is the main danger of driving long distances on the motorway?",["Fatigue and loss of attention","Too many intersections","Pedestrians"],0,"Motorway driving is monotonous. Take regular breaks."],
+["On an autoweg, may you overtake?",["Yes, where it is allowed and safe","Never","Only on the right"],0,"Overtaking is allowed on an autoweg unless signs or lines forbid it. Oncoming traffic may be present."],
+["An autoweg often has no physical divider. What is the main risk?",["Head-on collisions with oncoming traffic","Pedestrians crossing","Trams"],0,"Overtaking on an autoweg with oncoming traffic is especially dangerous."],
+["May tractors drive on an autoweg?",YN,1,"Slow vehicles such as tractors are not allowed on an autoweg."],
+["You approach a tunnel on the motorway. What should you do?",["Switch on dipped beam and keep your distance","Switch on fog lights","Overtake before the tunnel"],0,"Use your lights in tunnels and keep a good distance."]
+]);
+
+QB.add("overtake",[
+["On which side do you normally overtake?",["Left","Right","Either"],0,"In the Netherlands you overtake on the left."],
+["On which side do you overtake a tram?",["On the right, unless that's impossible","Always on the left","Never"],0,"Trams are overtaken on the right."],
+["The car ahead has moved left and is signalling to turn left. May you pass it on the right?",YN,0,"You may pass on the right a vehicle that is turning left."],
+["May you cross a continuous white line to overtake a slow tractor?",YN,1,"A continuous line may never be crossed."],
+["You are being overtaken. What should you do?",["Keep right and keep your speed","Speed up","Move to the middle"],0,"Make overtaking easy: keep right and don't accelerate."],
+["What is the right order before overtaking?",["Mirrors, blind spot, signal, overtake","Signal, overtake, mirrors","Overtake, then signal"],0,"Check first, signal next, then move out."],
+["In slow parallel queues on a multi-lane road, your right lane moves faster. Is that allowed?",YN,0,"Moving faster on the right in parallel queues is allowed."],
+["May you overtake when a sign shows two cars side by side (left one red)?",["Not other motor vehicles; cyclists may be passed","Yes, carefully","Only on the right"],0,"You may not overtake other motor vehicles here. Passing cyclists is allowed."],
+["You want to overtake but the car behind you has already started to overtake you. What do you do?",["Wait until it has passed","Go anyway","Signal and push out"],0,"Never move out when someone is overtaking you."],
+["The car ahead signals left to overtake. Do you also start overtaking?",["No, wait until it has finished","Yes, follow it","Overtake it on the right"],0,"Overtaking a vehicle that is overtaking is dangerous."],
+["May you overtake just before the top of a hill?",["No, you can't see oncoming traffic","Yes, if you are fast","Only on an autoweg"],0,"Overtake only when you can see that the road is clear for long enough."],
+["May you overtake in a bend where you can't see far?",YN,1,"Without a clear view, overtaking is dangerous."],
+["After overtaking, when do you move back to the right?",["When you can see the overtaken car in your interior mirror","Immediately","After 1 km"],0,"Seeing it in the interior mirror means there is enough space."],
+["How much sideways space do you give a cyclist when overtaking?",["Plenty; about 1.5 m outside town is a good guide","20 cm","None needed"],0,"Cyclists wobble and can be blown by side wind or your slipstream."],
+["You overtake a cyclist and a car is coming towards you. What do you do?",["Wait behind the cyclist until it's safe","Squeeze between them","Sound the horn"],0,"Only overtake when you can give enough space."],
+["May you overtake a vehicle that is stopping for a pedestrian crossing?",YN,1,"It may be stopping for a pedestrian you can't see. Don't overtake it there."],
+["Is it allowed to overtake on an intersection?",["Only where it is safe and not forbidden; be very careful","Always","Never"],0,"Overtaking near intersections is risky: turning traffic and crossing traffic."],
+["May you drive in the left lane on a road with two lanes in your direction, when the right lane is free?",["Only to overtake","Yes, any time","Only above 100 km/h"],0,"Keep right; the left lane is for overtaking."],
+["A tram stop is in the middle of the road and passengers are getting off. What do you do?",["Stop or slow down and let them cross","Pass on the right quickly","Sound your horn"],0,"Passengers may cross towards the pavement. Let them go safely."],
+["You want to pass a stationary bus at a stop. What is the danger?",["Pedestrians crossing in front of the bus","Bus suddenly reversing","None"],0,"People often cross in front of a stopped bus."],
+["A tractor ahead drives slowly on a narrow road. Oncoming traffic now and then. What do you do?",["Wait for a clear stretch with enough view","Overtake in the next bend","Use the verge"],0,"Patience: overtake only with enough space and view."],
+["How do you signal to overtake?",["Left indicator before moving out, right indicator before moving back","No signal needed","Flash headlights"],0,"Signal clearly when you move out and when you move back."]
+]);
+
+QB.add("people",[
+["A pedestrian is about to step onto a zebra crossing. What do you do?",["Stop and let them cross","Drive on, they haven't started","Sound the horn"],0,"You must let pedestrians cross who are on, or about to step onto, a zebra crossing."],
+["A blind person with a white cane wants to cross the road where there is no zebra. Must you let them pass?",YN,0,"Blind pedestrians with a white cane or guide dog must always be given the chance to cross."],
+["A person with a guide dog wants to cross. What do you do?",["Stop and let them cross","Drive on slowly","Sound the horn to warn them"],0,"Guide-dog users are treated like white-cane users: let them cross."],
+["May two cyclists ride side by side on a normal road?",["Yes, if they don't obstruct traffic","No, never","Only on cycle paths"],0,"Cyclists may ride two abreast as long as they don't hinder other traffic."],
+["You want to turn right in town. What is the main danger?",["A cyclist in your blind spot","Oncoming traffic","Traffic behind you"],0,"Cyclists beside you go straight on and are easy to miss. Check mirror and blind spot."],
+["You park and want to open your door. How do you do it most safely?",["With the far hand, looking back","Quickly, with the near hand","Only after signalling"],0,"Opening with the far hand turns your body, so you see approaching cyclists."],
+["You drive past a school as children are leaving. What do you do?",["Slow down and be ready to stop","Keep the 50 km/h limit","Sound the horn as a warning"],0,"Children act suddenly. Lower speed gives you time to react."],
+["An elderly person on a mobility scooter is on the cycle path. Is that allowed?",YN,0,"Mobility scooters may use the cycle path, and the footpath at walking pace."],
+["You approach parked cars with a ball rolling from between them. What is likely next?",["A child running after it","Nothing","A car pulling out"],0,"A ball is often followed by a child. Expect it and slow down."],
+["An ice-cream van is parked in a residential street. What should you expect?",["Children running across the road","Nothing special","Traffic jam"],0,"Children focus on the van, not on traffic."],
+["Elderly pedestrians are crossing slowly. What do you do?",["Give them time and don't hurry them","Drive around them","Sound the horn"],0,"Older people may walk, see and hear less well."],
+["What is typical of young children in traffic?",["They can't judge speed and distance well","They always look both ways","They know the rules"],0,"Children are small, impulsive and misjudge speed."],
+["A cyclist rides at night without lights. What do you do?",["Expect them and be extra careful","Flash your lights at them","Ignore them"],0,"Unlit cyclists are hard to see. Look carefully."],
+["Cyclists in the Netherlands may ride on the road when there is a compulsory cycle path next to it. True or false?",["False, they must use the cycle path","True"],0,"A compulsory cycle path must be used by cyclists."],
+["You drive in a fietsstraat behind a group of cyclists. May you overtake them?",["Only if it is safe and calm; cars are guests","Yes, freely","Never"],0,"On a fietsstraat cars adapt to cyclists."],
+["A cyclist ahead puts out the left arm. What does it mean?",["The cyclist will turn left","The cyclist lets you pass","The cyclist will stop"],0,"An outstretched arm shows the direction of turning."],
+["Where can a speed pedelec (fast electric bicycle, yellow plate) ride?",["Usually on the road, like a moped","Only on footpaths","On the motorway"],0,"Speed pedelecs are mopeds by law and can go up to 45 km/h."],
+["What should you expect from a moped rider in town?",["Fast and sudden changes of direction","Always slow driving","Driving only on cycle paths"],0,"Mopeds can be fast and agile. Watch them in your mirrors."],
+["A pedestrian walks on the road in an erf. Is that allowed?",YN,0,"In an erf pedestrians may use the whole width of the road."],
+["Children play football on the pavement next to the road. What do you do?",["Slow down and be ready to brake","Keep your speed","Sound the horn"],0,"The ball or a child can come onto the road suddenly."],
+["You drive behind a horse rider. How do you pass?",["Slowly, with plenty of space and without noise","Quickly to get it over with","With a short horn signal"],0,"Horses can be startled by noise and speed."],
+["Pedestrians with a pram walk on the road because the pavement is blocked. What do you do?",["Slow down and pass with space","Sound the horn","Keep your speed"],0,"Pass vulnerable road users slowly and with space."],
+["When you turn right, a truck next to you also turns right. Who is in most danger?",["Cyclists and pedestrians near the corner","You","Oncoming traffic"],0,"Large vehicles have big blind spots and cut corners."],
+["You drive next to a truck. Where can the driver not see you?",["In its blind spots, e.g. right beside the cab","Anywhere ahead of it","Far behind it"],0,"If you can't see the truck's mirrors, the driver can't see you."],
+["A child on a bicycle wobbles on the road ahead. What do you do?",["Slow down and keep a large distance","Overtake quickly","Sound the horn"],0,"Young cyclists are unstable and unpredictable."],
+["What should you do near a playground?",["Drive slowly and look out for children","Use the horn","Nothing special"],0,"Children may run onto the road at any time."],
+["People walk at a tram stop in the middle of the road. What do you do?",["Drive slowly and let them cross","Keep your speed","Overtake the tram on the left"],0,"Passengers going to or from a tram stop may cross."],
+["A group of children walks along the road, supervised. What do you do?",["Slow down and pass with space","Keep your speed","Signal them to move"],0,"Children in groups can still step out suddenly."]
+]);
+
+QB.add("hazard",[
+["You drive 50 km/h in a residential street. A ball rolls onto the road from between parked cars 15 m ahead.",HZ,0,"A child may follow at any moment and the distance is short. Brake now."],
+["You drive 80 km/h on an empty country road. Far ahead a cyclist rides on a separate cycle path.",HZ,2,"The cyclist is separated from you and far away. No reason to slow down."],
+["You approach a zebra crossing at 40 km/h. A pedestrian looking at their phone walks towards it.",HZ,1,"They might step out. Release the accelerator so you can stop in time."],
+["The car right in front of you suddenly shows bright brake lights. You are close behind.",HZ,0,"Short distance and the car ahead is braking: you must brake too."],
+["On the motorway at 100 km/h, a truck well ahead starts signalling to move into your lane.",HZ,1,"Give the truck room by easing off. Hard braking is not needed at this distance."],
+["In a 30 zone, a child on the pavement runs after a dog straight towards the road.",HZ,0,"The child is about to run onto the road. Brake."],
+["You drive on a priority road at 50 km/h. A car approaches a side road quickly and does not seem to slow down.",HZ,1,"You have priority, but the other driver may not stop. Release the accelerator and be ready."],
+["You drive on a straight road. The traffic light far ahead has been green for a while.",HZ,1,"A light that has been green a long time can turn yellow. Easing off lets you stop calmly."],
+["A cyclist ahead of you looks over her shoulder and raises her left arm.",HZ,1,"She is about to turn left in front of you. Release the accelerator."],
+["You drive 80 km/h on a dry, empty road with good visibility. Nothing is happening ahead.",HZ,2,"No danger. Slowing down without reason disturbs traffic behind you."],
+["In town a car pulls out from a parking space just ahead of you without looking.",HZ,0,"The car is entering your path at short distance. Brake."],
+["You drive 50 km/h. The traffic light just ahead turns yellow and you can still stop safely.",HZ,0,"Yellow means stop if you safely can. Brake."],
+["You drive 50 km/h. The light 20 m ahead turns red.",HZ,0,"You must stop for red. Brake."],
+["You drive 50 km/h towards an intersection where traffic from the right has priority. A car approaches from the right.",HZ,0,"You must give way to the car from the right. Brake."],
+["You drive 50 km/h towards an equal intersection. You can't see into the street on the right because of hedges.",HZ,1,"Traffic from the right might come. Ease off so you can give way."],
+["You drive 30 km/h past a school. Children stand at the kerb, chatting, facing away from the road.",HZ,1,"They might step back or run across. Ease off and be ready."],
+["You drive on a priority road at 80 km/h. A tractor waits correctly at a side road on the right.",HZ,2,"The tractor is waiting for you. No need to slow down."],
+["You drive 50 km/h. Ahead, a bus at a stop starts signalling to pull out. You are about 40 m away.",HZ,1,"You must let the bus leave in a built-up area. Ease off to give it room."],
+["You drive 50 km/h. A bus pulls out right in front of you from a stop, 10 m away.",HZ,0,"The bus is already in your path. Brake."],
+["You drive 100 km/h on the motorway. Far ahead you see hazard lights flashing in all lanes.",HZ,1,"There is a sudden queue ahead. Release the accelerator; brake when needed."],
+["You drive 100 km/h on the motorway. Traffic ahead suddenly stands still, 60 m away.",HZ,0,"You must stop in time. Brake."],
+["You drive 50 km/h. A pedestrian already walks on the zebra crossing ahead.",HZ,0,"Pedestrians on the crossing have priority. Brake."],
+["You drive 50 km/h. On the right, a car door of a parked car starts to open just ahead of you.",HZ,0,"The door may open into your path. Brake."],
+["You drive 50 km/h past a long row of parked cars. Nothing moves.",HZ,2,"Stay alert, but there is no concrete reason to slow down."],
+["You drive 80 km/h. A deer stands in the verge right next to the road ahead.",HZ,0,"Wild animals jump unpredictably. Brake."],
+["You drive 80 km/h on a country road at dusk. A warning sign for deer stands by the road. Nothing else is visible.",HZ,1,"Animals may appear. Release the accelerator."],
+["You drive 50 km/h. A cyclist ahead on the road rides very unsteadily.",HZ,1,"The cyclist may swerve. Ease off and keep distance."],
+["You drive 50 km/h. A ball bounces across the road far ahead, 80 m away.",HZ,1,"A child may follow, but you have time. Ease off."],
+["You drive 30 km/h in an erf. Children play in the street.",HZ,0,"In an erf you must drive at walking pace and children have the space. Brake."],
+["You drive 80 km/h. The car ahead of you brakes gently for a bend. You are at a safe distance.",HZ,1,"Ease off with the traffic ahead; hard braking isn't needed."],
+["You drive 50 km/h. Water lies across the road ahead and you can't see how deep it is.",HZ,1,"Lower your speed before the water."],
+["You drive 50 km/h on a road with no traffic. The light ahead is green and nobody is around.",HZ,2,"No danger. Drive on."],
+["You drive 50 km/h. Ahead, a pedestrian with a white cane is about to cross.",HZ,0,"You must let a blind pedestrian cross. Brake."],
+["You drive 50 km/h. An ambulance with blue lights and siren comes from a side road ahead.",HZ,0,"Give way to the ambulance. Brake."],
+["You drive 50 km/h. You hear a siren but you can't see where it comes from.",HZ,1,"Ease off and look around so you can make room."],
+["You drive 70 km/h towards a level crossing. The lights start flashing red.",HZ,0,"A train is coming. Brake and stop."],
+["You drive 50 km/h. A car ahead stops suddenly to park and starts reversing into a space.",HZ,0,"The car is moving into your path. Brake."],
+["You drive 50 km/h. A delivery van is double-parked ahead with its hazard lights on.",HZ,1,"Someone may step out or cross. Ease off and pass carefully."],
+["You drive 80 km/h on a dry road. A car overtakes you and merges back in front with enough space.",HZ,2,"The overtaking car keeps enough distance. No action needed."],
+["You drive 80 km/h. A car overtakes you and cuts in very close in front of you.",HZ,1,"Restore your following distance by releasing the accelerator."],
+["You drive 50 km/h towards a roundabout with shark teeth. A car is already driving on the roundabout towards your entry.",HZ,0,"You must give way to traffic on the roundabout. Brake."],
+["You drive 100 km/h on the motorway in the right lane. The lane next to you is empty and nobody is joining.",HZ,2,"No danger. Keep going."],
+["You drive 50 km/h. Ahead, a car signals left and waits for oncoming traffic. There is room to pass on the right.",HZ,1,"Ease off and pass carefully on the right."],
+["You drive 50 km/h. A dog without a leash walks on the pavement next to the road.",HZ,1,"The dog may run onto the road. Ease off."],
+["You drive 50 km/h. A child on a bicycle comes out of a driveway on the right just ahead.",HZ,0,"The child is entering your path. Brake."],
+["You drive 80 km/h behind a tractor at a safe distance. The road ahead is clear but you can't overtake yet.",HZ,1,"Adjust your speed to the tractor."],
+["You drive 50 km/h. Pedestrians stand at a zebra crossing and one steps forward.",HZ,0,"A pedestrian who is about to cross has priority. Brake."],
+["You drive 30 km/h. Fog suddenly gets very thick; you can see only 20 m.",HZ,0,"You must be able to stop within your view. Brake to a lower speed."],
+["You drive 80 km/h. A patch of leaves lies on the road in a bend ahead.",HZ,1,"Leaves can be slippery. Slow down before the bend."],
+["You drive 50 km/h on a priority road. A cyclist waits at the side road, looking at you.",HZ,2,"The cyclist has seen you and is waiting. No need to slow down."],
+["You drive 50 km/h. A cyclist on the side road comes towards the priority road fast and does not look.",HZ,1,"The cyclist may not stop. Ease off and be ready."],
+["You drive 50 km/h. A truck ahead reverses out of a driveway into your path.",HZ,0,"The truck is entering your path. Brake."],
+["You drive 50 km/h. People walk out of a stopped tram towards the pavement in front of you.",HZ,0,"Passengers cross in front of you. Brake."]
+]);
+
+QB.add("safety",[
+["What is the alcohol limit for an experienced driver?",["0.5‰","0.2‰","0.8‰"],0,"The limit is 0.5 promille. Starters have 0.2."],
+["You got your licence 2 years ago. What is your alcohol limit?",["0.2‰","0.5‰","0.0‰"],0,"Starters (first 5 years with a licence) have a limit of 0.2 promille."],
+["How long are you a 'starter' (beginner) for the lower alcohol limit?",["The first 5 years with a licence","1 year","Until age 25"],0,"In the first 5 years with your licence the 0.2‰ limit applies."],
+["Can coffee or a cold shower lower your blood alcohol?",YN,1,"Only time lowers your blood alcohol."],
+["Does alcohol make your reaction time longer?",YN,0,"Even small amounts slow reactions and give false confidence."],
+["May you drive after using drugs such as cannabis?",YN,1,"Driving under the influence of drugs is forbidden and dangerous."],
+["You wait at a red light. May you hold your phone to send a message?",YN,1,"Holding a phone is forbidden when driving in traffic, including at a red light."],
+["May you use a hands-free phone kit while driving?",YN,0,"Hands-free calling is allowed, but it still distracts you."],
+["May you use your phone as navigation in a holder?",["Yes, if it is fixed in a holder and you don't hold it","No, never","Only when stationary"],0,"A phone fixed in a holder may be used for navigation. Don't hold it."],
+["From what height may a child use the car without a child seat?",null,135,"Children shorter than 1.35 m must use a suitable child seat.","cm"],
+["Must passengers in the back seat wear a seatbelt?",YN,0,"Everyone in the car must use a seatbelt where one is fitted."],
+["Who is responsible for children under 18 using a seatbelt or child seat?",["The driver","The child","The parents only"],0,"The driver must make sure passengers under 18 are correctly secured."],
+["May a rear-facing child seat be used on the front seat with an active airbag?",YN,1,"An airbag can seriously injure a baby in a rear-facing seat. Turn the airbag off."],
+["Your medicine has a yellow sticker. What does that mean?",["It can affect your ability to drive","It is safe with alcohol","It must be kept cool"],0,"A yellow sticker warns of effects on driving."],
+["On a long trip, how often should you take a break?",["About every 2 hours","Every 5 hours","Only when you feel tired"],0,"Fatigue builds up before you notice it."],
+["You feel very sleepy while driving. What is the best thing to do?",["Stop safely and rest","Open the window","Turn the music up"],0,"Only rest really helps against fatigue."],
+["When does the risk of falling asleep at the wheel increase?",["At night and after long monotonous drives","During rush hour","In town"],0,"Night driving and monotony make you drowsy."],
+["What is the effect of emotions like anger on your driving?",["You take more risks","You drive better","No effect"],0,"Strong emotions reduce attention and increase risk taking."],
+["How should your head restraint be adjusted?",["Top level with the top of your head","At neck height","As low as possible"],0,"A well-adjusted head restraint protects your neck in a rear-end collision."],
+["You come across an accident with injured people. What is the first thing to do?",["Make sure you yourself are safe and secure the scene","Move the injured immediately","Drive on"],0,"Protect yourself and the scene first, then call 112 and give help."],
+["Which number do you call in an emergency in the Netherlands?",["112","911","0900"],0,"112 is the emergency number."],
+["You are involved in a crash with only damage. What should you do?",["Stop, exchange details, fill in a damage form","Drive on if the damage is small","Wait for the police always"],0,"Stopping is required. Use the European accident report form."],
+["Are you obliged to stop after an accident you are involved in?",YN,0,"Driving on after an accident is a criminal offence."],
+["You see a driver who appears drunk. What can you do?",["Call the police","Follow and stop them","Nothing"],0,"Report it to the police; don't put yourself in danger."],
+["May you wear headphones in both ears while driving?",["Not advised: you must hear traffic and sirens","Yes, no problem","Only on the motorway"],0,"You need to hear sirens and other traffic."],
+["What does a fixed seatbelt do in a crash?",["It keeps you in your seat and reduces injuries","It stops the airbag","Nothing at low speed"],0,"Even at low speed, a seatbelt greatly reduces injuries."],
+["Can you be fined for not wearing a seatbelt in the back seat?",YN,0,"Back-seat passengers must also wear belts."],
+["Is a breath test by the police obligatory if they ask?",YN,0,"Refusing a breath test is an offence."],
+["What should you do with loose objects in the car?",["Secure them; they become projectiles in a crash","Leave them on the back seat","Put them on the dashboard"],0,"Loose objects fly forward with great force in a crash."],
+["A passenger in your car distracts you all the time. What do you do?",["Ask them to stop or pull over","Keep driving and ignore it","Drive faster to arrive sooner"],0,"Your attention belongs on the road."]
+]);
+
+QB.add("vehicle",[
+["How many seconds should you keep behind the vehicle ahead, at least?",null,2,"The 2-second rule gives you time to react. Use more in rain or darkness.","s"],
+["What is the minimum legal tyre tread depth for a car?",null,1.6,"The legal minimum is 1.6 mm.","mm"],
+["Below what visibility may you use your rear fog light?",null,50,"Only when visibility is under 50 m. Otherwise it dazzles drivers behind you.","m"],
+["You double your speed. What happens to your braking distance?",["About 4 times longer","2 times longer","Stays the same"],0,"Braking distance grows with the square of speed."],
+["You triple your speed. What happens to your braking distance?",["About 9 times longer","3 times longer","6 times longer"],0,"Braking distance grows with the square of speed: 3 × 3 = 9."],
+["What makes up the stopping distance?",["Reaction distance + braking distance","Only braking distance","Speed × 2"],0,"While you react, the car keeps moving. Then you brake."],
+["What happens to the reaction distance if you double your speed?",["It doubles","It stays the same","It becomes four times longer"],0,"Reaction distance grows in line with speed."],
+["Your car starts aquaplaning. What do you do?",["Release accelerator, keep the wheel straight","Brake hard","Steer quickly to the side"],0,"Let the tyres regain grip by slowing gently."],
+["An oncoming car approaches at night while you use high beam. What do you do?",["Switch to dipped beam","Keep high beam","Switch lights off"],0,"High beam dazzles. Dip your lights in good time."],
+["You drive behind another car at night. May you use high beam?",YN,1,"High beam dazzles the driver in front through their mirrors."],
+["Your car has ABS. How do you brake in an emergency?",["Brake hard and keep steering","Pump the brake","Brake gently"],0,"ABS lets you brake fully and still steer."],
+["What helps you drive more economically?",["Shift up early and anticipate","Drive in low gears","Brake late and hard"],0,"Low engine speed and smooth driving save fuel."],
+["It rains heavily. What should you do with your following distance?",["Increase it","Keep 2 seconds","Reduce it to see the car ahead"],0,"Wet roads need longer braking distances."],
+["When must you use dipped headlights?",["Between sunset and sunrise and in poor visibility","Only in tunnels","Only outside towns"],0,"Use lights at night and whenever visibility is poor."],
+["When may you use front fog lights?",["In fog, snow or heavy rain with poor visibility","Always at night","When it is dark in town"],0,"Front fog lights are only for poor visibility caused by fog, snow or rain."],
+["What is the effect of under-inflated tyres?",["Worse road holding and higher fuel use","Better grip","No effect"],0,"Check tyre pressure regularly."],
+["Where can you find the right tyre pressure for your car?",["In the owner's manual or on a sticker on the car","On the tyre only","At the police station"],0,"The manufacturer lists the correct pressure."],
+["A warning light shows red on your dashboard while driving. What do you do?",["Stop as soon as safely possible and check","Drive on until home","Ignore it"],0,"Red warning lights indicate a serious problem."],
+["What is the APK?",["The periodic technical inspection of a vehicle","A driving licence","A parking permit"],0,"The APK checks that your car is technically safe and clean enough."],
+["May you drive with a broken brake light?",YN,1,"Your lights must work. Repair it as soon as possible."],
+["Your windscreen is iced over. What do you do?",["Clear all windows fully before driving","Clear a small hole to look through","Drive with the window open"],0,"You must have a clear view all around."],
+["What does the engine brake do?",["It slows the car when you release the accelerator in gear","It replaces the handbrake","It warms the engine"],0,"Releasing the accelerator in gear slows the car without using fuel."],
+["When does a car have the longest braking distance?",["On wet leaves or ice","On dry asphalt","On a dry concrete road"],0,"Low grip means long braking distances."],
+["What is the effect of a heavy load in your car?",["Longer braking distance and different handling","Shorter braking distance","No effect"],0,"Extra mass makes braking and cornering harder."],
+["What must you do when transporting a long load that sticks out of the back?",["Mark it clearly so others can see it","Nothing","Drive with hazard lights"],0,"A load that sticks out must be marked for others."],
+["What is the main purpose of daytime running lights?",["To make you more visible to others","To light up the road","To replace dipped beam at night"],0,"At night you need dipped beam: daytime running lights don't light the rear."],
+["What is the blind spot?",["The area around your car you can't see in your mirrors","The dark part of the road","The area behind the boot"],0,"Look over your shoulder before changing lanes or turning."],
+["What should you do when your car skids on ice?",["Steer gently in the direction you want to go, no hard braking","Brake as hard as you can","Accelerate"],0,"Gentle corrections help the tyres regain grip."],
+["A strong side wind blows on a bridge. What can you expect?",["Your car may be pushed sideways","Better grip","Nothing"],0,"Hold the wheel firmly and slow down."],
+["What is the danger of driving through deep water?",["Engine damage and brakes that work less","Better braking","None"],0,"After water, test your brakes gently."],
+["What does 'tailgating' increase?",["The risk of a rear-end collision","Fuel economy","Your view"],0,"Keep at least 2 seconds' distance."],
+["Why should you keep more distance behind a truck?",["You can see more of the road ahead","Trucks brake faster","It's required by law only for trucks"],0,"Distance gives you a view past the truck and time to react."],
+["What should you do in a tunnel?",["Turn on dipped beam and keep distance","Overtake quickly","Turn off the radio"],0,"Tunnels are dim; lights and distance help."],
+["When must you switch on your hazard lights?",["When you are stationary and form a danger, e.g. after a breakdown","When parking illegally","In heavy rain while driving"],0,"Hazard lights warn others of a stationary hazard. Not for parking."],
+["What is the effect of speed on fuel use?",["Higher speed means much higher fuel use","No effect","Lower fuel use"],0,"Air resistance grows strongly with speed."],
+["Your car pulls to one side when braking. What may be the cause?",["A brake or tyre problem","Low fuel","A dirty windscreen"],0,"Have it checked by a garage."],
+["What should you check before a long trip?",["Tyres, lights, fluids","Only the fuel","Nothing"],0,"A quick check prevents breakdowns."]
+]);
+
+QB.add("rules",[
+["Where on the road should you normally drive?",["As far right as practical","In the middle","Anywhere in your lane"],0,"Keep right so others can pass and to leave room for oncoming traffic."],
+["Your traffic light turns yellow and you can still stop safely. What do you do?",["Stop","Drive on quickly","Choose freely"],0,"Yellow means stop, unless you can no longer stop safely."],
+["A traffic light flashes yellow. What does it mean?",["Take care; normal priority rules apply","You have priority","Stop"],0,"A flashing yellow light means the light is not regulating traffic."],
+["At a railway crossing the red lights flash and bells ring. What do you do?",["Stop","Cross quickly before the barriers close","Slow down and cross"],0,"Flashing red lights mean a train is coming."],
+["The barriers at a level crossing go up, but the red lights keep flashing. May you cross?",YN,1,"While the red lights flash, you must wait. A second train may come."],
+["A traffic controller raises one arm straight up. What does it mean?",["All traffic must stop","Only traffic in front stops","Speed up"],0,"A raised arm means stop for everyone, except vehicles already on the intersection."],
+["A traffic controller stretches both arms out sideways. What does it mean for traffic facing the chest or back?",["Stop","Go","Turn right"],0,"Traffic facing the controller's front or back must stop."],
+["What is the maximum total mass of a vehicle on a B licence?",null,3500,"A B licence covers vehicles up to 3,500 kg total mass.","kg"],
+["How many passengers (not counting the driver) may you carry with a B licence?",null,8,"A B licence allows up to 8 passengers besides the driver.","passengers"],
+["At what age may you start driving with a coach under 2toDrive?",null,17,"With 2toDrive you can get your licence at 17 and drive with an approved coach until 18.","years"],
+["When may you use your horn in a built-up area?",["Only to prevent danger","To greet someone","When someone drives too slowly"],0,"The horn is for preventing danger."],
+["When should you signal a lane change?",["In good time before moving","While moving","Only when others are near"],0,"Signal early so others know what you will do."],
+["When do you switch off your indicator?",["After the manoeuvre is finished","Before the manoeuvre","Never, it switches off by itself always"],0,"A forgotten indicator misleads others."],
+["Before turning left on a two-way road, where do you position your car?",["Close to the centre line","On the far right","In the oncoming lane"],0,"Position left so traffic behind can pass on the right."],
+["Before turning right, where do you position your car?",["As far right as possible","In the middle","On the left"],0,"This prevents others from passing you on the right."],
+["You must carry your driving licence when driving. True or false?",["True","False"],0,"You must be able to show your licence when asked."],
+["How many years is a car driving licence usually valid?",null,10,"A Dutch car licence is normally valid for 10 years.","years"],
+["May you drive on a cycle path to get past a queue?",YN,1,"Cars may never drive on a cycle path."],
+["May you use the hard shoulder to get past a queue?",YN,1,"The hard shoulder is only for emergencies."],
+["What does a green traffic light mean?",["You may drive if the way is clear","You have priority over everyone","You must drive"],0,"Green allows you to go, but you must still give way to e.g. pedestrians still crossing."],
+["What does a red arrow on a traffic light mean?",["Stop for that direction","Turn in that direction","Caution"],0,"The arrow shows which direction the light applies to."],
+["You come to a closed level crossing barrier. May you drive around it?",YN,1,"Never drive around or under barriers."],
+["May you drive into an intersection when you can't leave it because of queues?",YN,1,"Don't block the intersection. Wait until you can cross it."],
+["Who may give you instructions in traffic?",["Police and authorised traffic controllers","Anyone in a yellow vest","Other drivers"],0,"Follow instructions from police and authorised controllers."],
+["What should you do when a police car signals 'Stop, police' behind you?",["Stop safely at the side of the road","Drive on to the next exit","Speed up"],0,"Follow the instruction and stop in a safe place."],
+["What is required for driving with a trailer behind your car on a B licence?",["The combination must stay within the B limits","Nothing","A truck licence"],0,"Heavy combinations need a BE licence or code 96."],
+["What does keeping right on the road mean on a narrow road with oncoming traffic?",["Move right as far as safely possible","Stop","Stay in the middle"],0,"Give space to oncoming traffic."],
+["May you overtake on the right on a road with one lane in each direction?",["Only a vehicle that is turning left","Always","Never"],0,"Overtaking on the right is only allowed in specific cases."],
+["You see a vehicle with flashing blue lights standing still on the road. What do you do?",["Slow down and pass carefully","Stop","Drive on normally"],0,"Emergency services are working there; give them room."],
+["What does a flashing orange light on a vehicle mean?",["Take care: special vehicle (e.g. road service, slow vehicle)","Give priority","Stop"],0,"Orange flashing lights warn of a slow or working vehicle."],
+["You passed the theory exam. May you now drive a car alone on public roads?",YN,1,"Passing the theory exam does not give you a licence. You still need to pass the practical exam."],
+["How long is a passed CBR theory exam valid?",["18 months","6 months","5 years"],0,"You must pass the practical exam within this time."],
+["What does 'ritsen' (zip merge) mean?",["Merging in turn at the end of a lane","Overtaking on the right","Driving between lanes"],0,"Each car lets one car in, alternately."],
+["What must you do at a 'STOP' line painted on the road with a STOP sign?",["Stop at the line","Stop beyond the line","Slow down only"],0,"Stop at the line, then look and drive when it's safe."],
+["A road has a lane with an arrow pointing left. You want to go straight. May you use that lane?",YN,1,"Arrows on the road are mandatory. Choose the lane for your direction."],
+["May you change lanes on a solid line between lanes?",YN,1,"A continuous line between lanes may not be crossed."],
+["Who must have a valid licence when a learner drives with 2toDrive?",["The coach","Nobody","Only the learner"],0,"The coach must have the right licence and be registered."],
+["You hear a train horn at an unguarded crossing. What do you do?",["Stop and wait","Cross quickly","Ignore it"],0,"A train is coming. Stop."],
+["What does a blue sign with a white 'i' mean?",["Information point","Hospital","Internet"],0,"It shows an information point."]
+]);
+
+QB.add("priority",[
+["You come from an equal side street on the right of a car that wants to turn left into your street. Who goes first?",["You, the other driver has you on the right","The turning car"],0,"You are on its right, so it gives way to you."],
+["At an equal intersection, a car from your right turns right into the street you come from. Must you wait?",["Normally there is no conflict, but stay alert","Yes, always","No, it must give way to you"],0,"Its path doesn't cross yours, but watch what it does."],
+["You come out of a car park and want to turn left. A cyclist comes from your left on the cycle path. Who goes first?",["The cyclist","You, because the cyclist comes from the left"],0,"Leaving a car park, you give way to all traffic."],
+["Who has priority on a roundabout without signs: a cyclist entering or you already on it?",["The cyclist entering","You"],0,"Without signs the right-hand rule applies: entering traffic is on your right."],
+["You leave a roundabout and cross a cycle path that runs around it. The cycle path has priority markings. Who goes first?",["The cyclists","You"],0,"Inside the built-up area cyclists on a roundabout cycle path usually have priority. Follow the markings."],
+["A pedestrian wants to cross where there is no zebra. Must you let them go?",["No obligation, but be careful and courteous","Yes, always","Only children"],0,"There's no priority for pedestrians off a crossing, except for blind people. Still, prevent danger."],
+["You drive on an equal road. A car comes out of an exit on your left. Who goes first?",["You","The car from the exit"],0,"Vehicles leaving an exit give way to everyone."],
+["You drive on a priority road. A car comes from the right out of an equal side road with no signs. Who goes first?",["You","The car from the right"],0,"On a priority road, side roads give way. They normally have shark teeth or a give-way sign."],
+["A tram and a car come from your right at an equal intersection. You go straight. Must you give way to both?",YN,0,"The tram has priority, and the car comes from your right."],
+["You stand at a red light. A traffic controller signals you to drive. What do you do?",["Drive, following the controller","Wait for green","Reverse"],0,"Controllers overrule traffic lights."],
+["Green light for you and for cyclists going straight beside you. You turn right. Who goes first?",["The cyclists","You"],0,"Turning traffic gives way to straight-on traffic."],
+["Your green light shows a green arrow to the right. Can there still be crossing pedestrians or cyclists?",["Possibly, so look carefully","No, an arrow means conflict-free","Only at night"],0,"Not every green arrow is conflict-free. Always check."],
+["A fire engine with blue lights and siren wants to pass but you stand at a red light. What do you do?",["Make room carefully without creating danger","Drive through red at speed","Stay where you are"],0,"Make way as far as you safely can."],
+["A police car without siren or blue lights drives behind you. Must you make way?",YN,1,"Only with blue lights and siren do emergency vehicles have priority."],
+["An ambulance uses blue lights but no siren. Must you give it priority?",["It has priority only with both blue lights and siren, but be cooperative","Yes, always","Never"],0,"Legal priority needs blue lights and siren; still, let it pass if you can."],
+["On a narrow road with parked cars on your side, an oncoming car approaches. Who goes first?",["The oncoming car, because the obstacle is on your side","You","Whoever is faster"],0,"The driver whose side is blocked usually lets the other go first."],
+["At an equal intersection, three cars arrive at once, each having another car on its right. What do they do?",["Make agreements by gestures; one waives priority","The biggest goes first","The fastest goes first"],0,"In a deadlock, someone has to waive their right of way."],
+["A car comes from your right out of an unpaved road. Who goes first?",["You, on the paved road","The car from the right"],0,"The unpaved road gives way, even from the right."],
+["May a car ever use a cycle-and-moped path?",["No","Yes, to overtake"],0,"Cars may not use these paths."],
+]);
+
+QB.add("signs",[
+["What is the meaning of a stop line (white bar across the lane) at traffic lights?",["Stop behind it at red","Parking line","Lane end"],0,"Wait behind the stop line."],
+["A warning triangle with a cyclist means:",["Cyclists may cross or join the road","Cycle path ahead compulsory","No cyclists"],0,"Watch for cyclists crossing."],
+["A warning triangle with a person on a zebra means:",["Pedestrian crossing ahead","Footpath ends","School ahead"],0,"Be ready to give way to pedestrians."],
+["A warning triangle with a road narrowing on both sides means:",["The road narrows ahead","Bridge ahead","Two-way traffic"],0,"Slow down and be ready to let oncoming traffic pass."],
+["A warning triangle with two arrows (up and down) means:",["Two-way traffic ahead","One-way road","Lane change"],0,"After a one-way stretch, expect oncoming traffic."],
+["A warning triangle with a sharp bend to the right means:",["Dangerous bend to the right","Turn right compulsory","Right lane ends"],0,"Slow down before the bend."],
+["A warning triangle with a car and skid marks means:",["Slippery road","Rally route","Car wash"],0,"Adapt your speed; the road can be slippery."],
+["A warning triangle with a tram means:",["Trams cross or share the road","Tram stop","Tram lane compulsory"],0,"Watch for trams; they have priority at equal intersections."],
+["A warning triangle with a worker and shovel means:",["Roadworks ahead","Farm ahead","Pedestrian zone"],0,"Expect workers, narrowing lanes and lower speed."],
+["A warning triangle with a cow means:",["Farm animals may be on the road","Dairy farm shop","Zoo"],0,"Be ready to stop for animals."],
+["A blue square sign with a white car on a ferry means:",["Ferry","Car wash","Harbour parking"],0,"A ferry crossing is ahead."],
+["A sign shows 'Zone 30' on a white rectangle with a red circle. What applies?",["30 km/h on all roads in the zone","30 km/h advised","30 km/h only at school times"],0,"Zone signs apply until the end-of-zone sign."],
+["A sign with a red circle and a number with 't' (e.g. 7.5 t) means:",["Vehicles heavier than that may not enter","Minimum weight","Toll"],0,"It's a weight limit."],
+["A sign with a red circle and a car pulling a trailer means:",["Closed to vehicles with a trailer","Trailers parking","Towing service"],0,"Vehicles with a trailer may not enter."],
+["A sign with a red circle and a bicycle means:",["Closed to cyclists","Cycle path","Bicycle parking"],0,"Cyclists may not enter."],
+["A blue disc with a white pedestrian means:",["Compulsory footpath; no cars","Pedestrian crossing","Pedestrian zone ends"],0,"Only pedestrians may use this path."],
+["A sign with a blue disc, red ring and the text 'zone' with a P crossed out means:",["No-parking zone","Parking zone","Bus zone"],0,"No parking in the whole zone until it ends."],
+["What does a white arrow painted on the road pointing ahead and to the right mean?",["Lane for going straight and right","Lane for turning left","Bus lane"],0,"Road arrows show which directions the lane may be used for."],
+]);
+
+QB.add("parking",[
+["You stop to unload heavy boxes at a shop door. Is that stopping or parking?",["Stopping, if you unload straight away","Parking"],0,"Immediate loading and unloading counts as stopping."],
+["A sign 'P' with a blue plate 'max 2 uur' means:",["Parking for at most 2 hours","Parking from 2 o'clock","Parking costs 2 euro"],0,"Supplementary signs limit the parking time."],
+["A parking place has a sign with a 'P' and 'vergunninghouders'. Who may park?",["Only permit holders","Everyone","Taxis"],0,"Permit parking is reserved for residents with a permit."],
+["Where is it safest to leave your car when you break down outside the built-up area?",["Completely off the road if possible","On the carriageway with lights off","In a bend"],0,"Get the car out of the traffic stream."],
+["May you park in a tunnel?",YN,1,"Stopping or parking in a tunnel is dangerous and forbidden."],
+["You park at a parking meter. When must you pay?",["During the times shown on the meter or sign","Only on weekends","Never"],0,"Check the paid-parking times."],
+["How do you leave your car parked on a slope?",["Handbrake on and in gear (or P for automatic)","Only in neutral","Engine running"],0,"Secure the car so it can't roll."],
+["Is it allowed to park facing the wrong direction on the left side of a two-way road?",YN,1,"On a two-way road you park on the right side."],
+]);
+
+QB.add("motorway",[
+["What should you do when you see a 'file' (queue) warning on a matrix sign?",["Slow down and be ready to stop","Change lanes quickly","Ignore it"],0,"Queue warnings help prevent rear-end collisions."],
+["A matrix sign shows 50 with flashing lights. What does it mean?",["Maximum 50 km/h, slow down","Advice only","Minimum 50"],0,"Matrix speeds in a red circle are legal maximums."],
+["What is the purpose of the hard shoulder?",["Emergencies and breakdowns","Overtaking","Slow vehicles"],0,"Only use it in an emergency."],
+["On a motorway with three lanes, may you overtake on the right?",["Not normally; only in parallel queues","Yes, always","Only trucks"],0,"Overtake on the left; moving faster on the right is fine only in queues."],
+["You see a wrong-way driver on the radio warning. What do you do?",["Keep to the right lane, slow down and don't overtake","Drive in the left lane","Stop on the hard shoulder"],0,"Wrong-way drivers usually drive in their 'right' lane, which is your left lane."],
+["The motorway is closed because of an accident and traffic stands still. May you leave your car?",["Only if it is necessary and safe; stay alert","Yes, walk around","Drive on the hard shoulder"],0,"Stay in your car unless there is danger or police tell you otherwise."],
+["What is a 'plusstrook' on a motorway?",["An extra narrow lane opened in rush hour on the left","Hard shoulder","Truck lane"],0,"It's a temporary lane; use it only when open."],
+["When joining from an acceleration lane, which mirror do you use most?",["Left mirror and shoulder check","Right mirror","Interior mirror only"],0,"Motorway traffic is to your left."],
+["Trucks on the motorway may not overtake at certain times. How is this shown?",["By a no-overtaking-for-trucks sign","By yellow lines","By a red cross"],0,"Signs with a red truck and a car prohibit overtaking by trucks."],
+["How do you exit from the left lane of a three-lane motorway?",["Move to the right lanes in good time","Cross all lanes at the exit","Exit on the left"],0,"Plan ahead and move right early."],
+["What do you do at a motorway intersection (knooppunt)?",["Follow the lane signs for your direction early","Brake suddenly when you see your route","Reverse if you miss it"],0,"Choose your lane early using the overhead signs."]
+]);
+
+QB.add("overtake",[
+["Is it allowed to overtake a cyclist at a pedestrian crossing?",["Only with great care; pedestrians may step out","Always","Never"],0,"Be extra careful near crossings."],
+["May you overtake when your view of oncoming traffic is blocked by a truck ahead?",YN,1,"You need a clear view of the road you will use."],
+["What is the best way to overtake a slow vehicle on a road with a solid line?",["Wait until the line becomes broken","Cross the line quickly","Overtake on the right"],0,"Patience; the line will often change later."],
+["May you overtake a stationary tram from which people are getting off?",["Only at walking pace or not at all; let passengers cross","Yes, at normal speed","Only on the left"],0,"Passengers have to reach the pavement safely."],
+["You overtake a truck on a wet road. What do you expect?",["Spray reducing your view","Better grip","Nothing"],0,"Spray from trucks can blind you briefly."],
+["Someone overtakes you at high speed and there's oncoming traffic. What can you do?",["Slow down to let them back in","Speed up","Block them"],0,"Help prevent an accident."]
+]);
+
+QB.add("people",[
+["What is the best way to pass a cyclist on a narrow road with oncoming traffic?",["Wait behind until there is space","Pass closely","Sound the horn"],0,"Give the cyclist space; wait if necessary."],
+["A disabled person in a wheelchair crosses the road. What do you do?",["Wait patiently until they have crossed","Drive around","Sound the horn"],0,"Give them time and space."],
+["Pedestrians must use the footpath. If there is none, where do they walk?",["On the left side of the road, or on the cycle path","Anywhere","Only on the right"],0,"Where there is no footpath, pedestrians use the cycle path or the side of the road."],
+["Children in the back of your car want to get out on the street side. What do you do?",["Let them out on the pavement side","Let them out quickly","Doesn't matter"],0,"Getting out on the pavement side is safest."],
+["You see a group of cyclists riding on the road although there is a cycle path. What do you do?",["Be patient and pass with care","Drive close behind","Sound the horn"],0,"Stay calm and safe, even if others break rules."],
+["What do you know about elderly drivers or cyclists?",["They may react more slowly","They always ride fast","They never make mistakes"],0,"Give extra space and time."],
+["You drive in a street where many students cycle. What do you expect?",["Cyclists in groups, sometimes unpredictable","No cyclists","Only pedestrians"],0,"Anticipate group behaviour."],
+["A road user on a 'snorfiets' (blue plate) may ride where?",["On the cycle path (unless signs say otherwise)","On the motorway","Only on the footpath"],0,"Snorfietsen (max 25 km/h) usually use cycle paths."],
+["How do you behave near a 'kiss and ride' zone at a school?",["Slow down; children get in and out","Speed up to pass","Park in the middle"],0,"Expect doors opening and children crossing."]
+]);
+
+QB.add("safety",[
+["What should you do if you've had a drink at a party?",["Don't drive; arrange other transport","Drink water and drive","Drive slowly"],0,"Arrange a BOB (designated driver), taxi or public transport."],
+["What is a 'BOB'?",["The designated sober driver","A police check","A type of breath test"],0,"BOB is the person who stays sober and drives."],
+["Can medicine and alcohol together be extra dangerous?",YN,0,"The effects can strengthen each other."],
+["You are very tired after a night shift. What is best?",["Sleep first or arrange other transport","Drink coffee and drive","Drive with the window open"],0,"Fatigue can be as dangerous as alcohol."],
+["What do you do after a minor collision on a busy road if no one is hurt?",["Move the cars aside safely after noting the position","Leave the cars where they are","Drive away"],0,"Prevent new accidents; record the situation first."],
+["Should you carry a warning triangle and use it after a breakdown on a normal road?",["Yes, it's wise to place it to warn others","Never","Only on motorways"],0,"A warning triangle warns approaching traffic. On the motorway, your own safety comes first."],
+["Where do you place a warning triangle on a normal road outside the built-up area?",["Well behind the car, so others see it in time","On the car roof","Right next to the car"],0,"Others need time to react."],
+["Is a safety vest useful after a breakdown?",YN,0,"It makes you visible to others."]
+]);
+
+QB.add("vehicle",[
+["What does a battery warning light while driving usually mean?",["The battery is not being charged","Low fuel","Seatbelt open"],0,"Have it checked soon."],
+["What does the oil pressure warning light mean?",["Stop the engine as soon as safely possible","Fuel low","Brakes worn"],0,"Low oil pressure can quickly damage the engine."],
+["How do you check that your brake lights work?",["Ask someone to look or use a reflection","Look in the interior mirror","Not needed"],0,"Brake lights warn the traffic behind you."],
+["What is 'aquaplaning'?",["Tyres losing contact with the road on a water film","Driving through deep water","A car wash"],0,"Lower speed and good tyres reduce the risk."],
+["What can you do to prevent aquaplaning?",["Drive slower in heavy rain and keep tyres in good condition","Drive faster","Use high beam"],0,"Speed and tread depth matter most."],
+["What is the effect of winter tyres?",["Better grip at low temperatures and snow","Worse grip","No effect"],0,"Winter tyres are not compulsory in NL but help in cold weather."],
+["What should you do if your brakes fail?",["Use the engine brake and handbrake carefully, warn others","Turn off the engine","Steer into a ditch"],0,"Shift down, use the handbrake gently and warn others."],
+["Why is it unwise to coast in neutral downhill?",["You lose engine braking and control","It uses more fuel","It's the same"],0,"Stay in gear for control."],
+["How far ahead should you look while driving in town?",["Far ahead, to anticipate","Only at the car ahead","At the dashboard"],0,"Looking far ahead gives you time to react."],
+["What does cruise control do?",["Keeps a set speed","Brakes automatically always","Steers the car"],0,"You stay responsible for driving."],
+["Why should you keep your windows and mirrors clean?",["For a clear view","For looks","For the APK only"],0,"Dirty glass causes glare and poor view."],
+["What do you do when you are dazzled by oncoming lights?",["Look at the right edge of the road and slow down","Flash your high beam","Close your eyes"],0,"Looking to the right edge reduces glare."]
+]);
+
+QB.add("rules",[
+["May you drive on the left side of the road to avoid potholes?",["Only if safe and you don't hinder oncoming traffic","Always","Never"],0,"Keep right as far as practical."],
+["Who must make sure the car is safe to drive?",["The driver","The owner only","The garage"],0,"The driver is responsible for the car's condition while driving."],
+["Must you use your indicator when leaving a roundabout?",YN,0,"Signal right before you take your exit."],
+["Do you signal when entering a roundabout (when going straight)?",["Not needed; signal right when leaving","Signal left","Hazard lights"],0,"Signal right shortly before your exit."],
+["What is the maximum number of people you may carry in a car?",["The number of seats with seatbelts","As many as fit","5 always"],0,"Each passenger needs a seat (with belt where fitted)."],
+["You get a letter for a traffic fine you think is wrong. What can you do?",["Object (bezwaar) to the authority","Ignore it","Call the police station"],0,"You can object formally."],
+["What do you do when an emergency vehicle comes from behind in a queue?",["Make room to the side if you safely can","Stay exactly where you are","Drive onto the footpath"],0,"Help create space for the emergency vehicle."],
+["Must you have insurance (WA) to drive your car?",YN,0,"Third-party liability insurance is compulsory."],
+["What does 'WA-verzekering' cover?",["Damage you cause to others","Damage to your own car","Fines"],0,"WA covers your liability for damage to others."],
+["Can you drive in the Netherlands with a valid foreign licence?",["Depends on the country and how long you live here","Always forever","Never"],0,"Rules differ for EU and non-EU licences. Check with the RDW."],
+["Is it allowed to drive with your foot resting on the clutch?",["Not wise: it wears the clutch","Required","Only in town"],0,"Rest your foot elsewhere."],
+["What should you do when you are dazzled at a green light?",["Slow down and look carefully","Drive on at speed","Stop in the intersection"],0,"Safety first: reduce speed until you can see."]
+]);
+
+/* ---------- Procedural question families ---------- */
+const cart=(...a)=>a.reduce((acc,b)=>acc.flatMap(x=>b.map(y=>[...x,y])),[[]]);
+
+/* ---- intersection scenes ---- */
+const ARMPOS={S:[170,245,0,[200,250]],N:[130,55,180,[100,50]],E:[245,130,-90,[250,98]],W:[55,170,90,[50,204]]};
+const TEETH={
+ S:[154,163,172,181].map(x=>`${x},198 ${x+8},198 ${x+4},208`),
+ N:[113,122,131,140].map(x=>`${x},102 ${x+8},102 ${x+4},92`),
+ E:[113,122,131,140].map(y=>`198,${y} 198,${y+8} 208,${y+4}`),
+ W:[153,162,171,180].map(y=>`102,${y} 102,${y+8} 92,${y+4}`)};
+const ARMRECT={S:[110,190,80,110],N:[110,0,80,110],E:[190,110,110,80],W:[0,110,110,80]};
+const rotP=(x,y,k)=>{for(let i=0;i<k;i++)[x,y]=[300-y,x];return[x,y]};
+function vehSVG(v,k){
+ const [x0,y0,r0,lp0]=ARMPOS[v.arm],[x,y]=rotP(x0,y0,k),[lx,ly]=rotP(lp0[0],lp0[1],k),r=r0+90*k;
+ const c=v.you?"var(--blue)":({bike:"var(--bike)",moped:"var(--moped)",tram:"var(--tram)"})[v.kind]||"var(--veh)";
+ let body,len=24;
+ if(v.kind==="bike"||v.kind==="moped")body=`<rect x="-3.5" y="-15" width="7" height="30" rx="3.5" fill="${c}"/><circle r="6.5" fill="${c}"/>`;
+ else if(v.kind==="tram"){body=`<rect x="-12" y="-44" width="24" height="88" rx="6" fill="${c}"/><rect x="-9" y="-38" width="18" height="9" rx="2" fill="#fff" opacity=".85"/>`;len=48}
+ else body=`<rect x="-11" y="-19" width="22" height="38" rx="5" fill="${c}"/><rect x="-8" y="-12" width="16" height="8" rx="2" fill="#fff" opacity=".85"/>`;
+ const path=v.turn==="L"?`M0,-${len} V-${len+20} Q0,-${len+34} -14,-${len+34} H-34 M-27,-${len+40} L-35,-${len+34} L-27,-${len+28}`
+  :v.turn==="R"?`M0,-${len} V-${len+20} Q0,-${len+34} 14,-${len+34} H34 M27,-${len+40} L35,-${len+34} L27,-${len+28}`
+  :`M0,-${len} V-${len+24} M-6,-${len+17} L0,-${len+25} L6,-${len+17}`;
+ const arr=`<path d="${path}" stroke="${c}" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+ const lab=v.you?`<circle r="16" fill="var(--surface)" stroke="${c}" stroke-width="2.5"/><text text-anchor="middle" dy="3.5" font-size="9" font-weight="800" fill="var(--ink)" font-family="Overpass,Arial,sans-serif">${STR.you}</text>`
+  :`<circle r="12" fill="var(--surface)" stroke="${c}" stroke-width="2.5"/><text text-anchor="middle" dy="4.5" font-size="13" font-weight="800" fill="var(--ink)" font-family="Overpass,Arial,sans-serif">${v.l}</text>`;
+ return `<g transform="translate(${x} ${y}) rotate(${r})">${body}${arr}</g><g transform="translate(${lx} ${ly})">${lab}</g>`;
+}
+function scene(o){
+ const k=o.rot||0,d='stroke="#fff" stroke-width="2" stroke-dasharray="10 8"';
+ const dash={N:[150,0,150,104],S:[150,196,150,300],W:[0,150,104,150],E:[196,150,300,150]};
+ let g=`<rect width="300" height="300" fill="var(--grass)"/><rect x="110" width="80" height="300" fill="var(--road)"/><rect y="110" width="300" height="80" fill="var(--road)"/>`;
+ (o.unpaved||[]).forEach(a=>{const r=ARMRECT[a];g+=`<rect x="${r[0]}" y="${r[1]}" width="${r[2]}" height="${r[3]}" fill="var(--sand)"/>`});
+ Object.entries(dash).forEach(([a,c])=>{if(!(o.unpaved||[]).includes(a))g+=`<line x1="${c[0]}" y1="${c[1]}" x2="${c[2]}" y2="${c[3]}" ${d}/>`});
+ if(o.rails)g+=`<line x1="0" y1="163" x2="300" y2="163" stroke="var(--rail)" stroke-width="2"/><line x1="0" y1="177" x2="300" y2="177" stroke="var(--rail)" stroke-width="2"/>`;
+ (o.teeth||[]).forEach(a=>TEETH[a].forEach(p=>g+=`<polygon points="${p}" fill="#fff"/>`));
+ if(o.diamond)g+=`<g transform="translate(222 222) rotate(45)"><rect x="-11" y="-11" width="22" height="22" fill="#fff" stroke="#333" stroke-width="1"/><rect x="-7" y="-7" width="14" height="14" fill="#F2B300"/></g>`;
+ let s=`<svg viewBox="0 0 300 300" class="scene" role="img" aria-label="${STR.sceneAria}"><g transform="rotate(${90*k} 150 150)">${g}</g>`;
+ o.v.forEach(v=>s+=vehSVG(v,k));
+ return s+"</svg>";
+}
+const YOU={arm:"S",you:true};
+const KIND=t=>STR.kinds[t];
+
+/* ---- traffic signs ---- */
+const RED="#C8102E",BLU="#1F4FA0",AMB="#F2B300";
+const tri=(inner)=>`<polygon points="60,10 112,102 8,102" fill="#fff" stroke="${RED}" stroke-width="9" stroke-linejoin="round"/>${inner}`;
+const disc=(fill,ring,inner="")=>`<circle cx="60" cy="60" r="${ring?50:56}" fill="${fill}" ${ring?`stroke="${RED}" stroke-width="12"`:""}/>${inner}`;
+const txt=(t,size,fill="#111",y=60)=>`<text x="60" y="${y}" text-anchor="middle" dominant-baseline="central" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="${size}" fill="${fill}">${t}</text>`;
+const arrow=(rot)=>`<g transform="rotate(${rot} 60 60)"><path d="M60,92 V40 M40,58 L60,34 L80,58" stroke="#fff" stroke-width="11" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>`;
+const car=(x,c)=>`<g transform="translate(${x} 62)"><rect x="-13" y="-10" width="26" height="16" rx="4" fill="${c}"/><rect x="-9" y="-17" width="18" height="10" rx="3" fill="${c}"/><circle cx="-8" cy="7" r="3.5" fill="${c}"/><circle cx="8" cy="7" r="3.5" fill="${c}"/></g>`;
+const SIGNS=[
+ ...[30,50,60,70,80,100,120].map(n=>({id:"spd"+n,svg:disc("#fff",1,txt(n,n>99?36:44)),m:STR.sg.speed(n),d:[STR.sg.advice(n),STR.sg.minimum(n)]})),
+ {id:"noentry",svg:disc(RED,0,`<rect x="20" y="50" width="80" height="20" fill="#fff"/>`),...STR.sg.noentry},
+ {id:"closed",svg:disc("#fff",1),...STR.sg.closed},
+ {id:"nopark",svg:disc(BLU,1,`<line x1="25" y1="25" x2="95" y2="95" stroke="${RED}" stroke-width="10"/>`),...STR.sg.nopark},
+ {id:"nostop",svg:disc(BLU,1,`<line x1="25" y1="25" x2="95" y2="95" stroke="${RED}" stroke-width="10"/><line x1="95" y1="25" x2="25" y2="95" stroke="${RED}" stroke-width="10"/>`),...STR.sg.nostop},
+ {id:"prio",svg:`<g transform="rotate(45 60 60)"><rect x="22" y="22" width="76" height="76" fill="#fff" stroke="#444" stroke-width="2"/><rect x="34" y="34" width="52" height="52" fill="${AMB}"/></g>`,...STR.sg.prio},
+ {id:"prioend",svg:`<g transform="rotate(45 60 60)"><rect x="22" y="22" width="76" height="76" fill="#fff" stroke="#444" stroke-width="2"/><rect x="34" y="34" width="52" height="52" fill="${AMB}"/></g><line x1="28" y1="92" x2="92" y2="28" stroke="#111" stroke-width="9"/>`,...STR.sg.prioend},
+ {id:"giveway",svg:`<polygon points="8,16 112,16 60,108" fill="#fff" stroke="${RED}" stroke-width="9" stroke-linejoin="round"/>`,...STR.sg.giveway},
+ {id:"stop",svg:`<polygon points="38,6 82,6 114,38 114,82 82,114 38,114 6,82 6,38" fill="${RED}" stroke="#fff" stroke-width="4"/>${txt("STOP",30,"#fff")}`,...STR.sg.stop},
+ {id:"noovertake",svg:disc("#fff",1,car(42,RED)+car(78,"#111")),...STR.sg.noovertake},
+ {id:"oneway",svg:`<rect x="8" y="22" width="104" height="76" rx="6" fill="${BLU}"/><path d="M60,88 V40 M44,56 L60,36 L76,56" stroke="#fff" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`,...STR.sg.oneway},
+ {id:"mright",svg:disc(BLU,0,arrow(90)),...STR.sg.mright},
+ {id:"mleft",svg:disc(BLU,0,arrow(-90)),...STR.sg.mleft},
+ {id:"mstraight",svg:disc(BLU,0,arrow(0)),...STR.sg.mstraight},
+ {id:"cycle",svg:disc(BLU,0,`<g stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="38" cy="72" r="14"/><circle cx="82" cy="72" r="14"/><path d="M38,72 L54,48 L72,48 L82,72 M54,48 L62,72 L38,72 M50,40 H60 M72,48 L68,38"/></g>`),...STR.sg.cycle},
+ {id:"park",svg:`<rect x="10" y="10" width="100" height="100" rx="8" fill="${BLU}"/>${txt("P",72,"#fff",62)}`,...STR.sg.park},
+ {id:"deadend",svg:`<rect x="10" y="10" width="100" height="100" rx="8" fill="${BLU}"/><rect x="52" y="44" width="16" height="54" fill="#fff"/><rect x="28" y="28" width="64" height="16" fill="${RED}"/>`,...STR.sg.deadend},
+ {id:"wdanger",svg:tri(txt("!",50,"#111",70)),...STR.sg.wdanger},
+ {id:"wcross",svg:tri(`<path d="M42,54 L78,94 M78,54 L42,94" stroke="#111" stroke-width="7" stroke-linecap="round"/>`),...STR.sg.wcross},
+ {id:"wprio",svg:tri(`<path d="M60,44 V96" stroke="#111" stroke-width="11"/><path d="M36,74 H84" stroke="#111" stroke-width="4"/>`),...STR.sg.wprio},
+ {id:"wlights",svg:tri(`<rect x="49" y="40" width="22" height="56" rx="4" fill="#111"/><circle cx="60" cy="51" r="6" fill="${RED}"/><circle cx="60" cy="68" r="6" fill="${AMB}"/><circle cx="60" cy="85" r="6" fill="#1E8A4C"/>`),...STR.sg.wlights},
+ {id:"height",svg:disc("#fff",1,txt("3.5m",26)+`<polygon points="52,26 68,26 60,36" fill="#111"/><polygon points="52,94 68,94 60,84" fill="#111"/>`),...STR.sg.height},
+ {id:"rail",svg:`<g transform="rotate(35 60 60)"><rect x="2" y="51" width="116" height="18" fill="#fff" stroke="${RED}" stroke-width="4"/></g><g transform="rotate(-35 60 60)"><rect x="2" y="51" width="116" height="18" fill="#fff" stroke="${RED}" stroke-width="4"/></g>`,...STR.sg.rail}
+];
+const signSVG=s=>`<svg viewBox="0 0 120 120" class="sign" role="img" aria-label="${STR.signAria}">${s}</svg>`;
+
+/* ---- families ---- */
+const GEN=[
+{id:"g:scene",t:"priority",params:cart(["car","bike","moped"],["E","W"],["none","teethMine","teethTheirs","prioMine","unpavedMine","unpavedTheirs"],[0,1,2,3]),
+ make:([kind,arm,cond,rot])=>{
+  const yes=cond==="teethMine"||cond==="unpavedMine"||(cond==="none"&&arm==="E");
+  const o={rot,v:[YOU,{arm,kind,l:"B"}]};
+  if(cond==="teethMine")o.teeth=["S","N"];if(cond==="teethTheirs")o.teeth=["E","W"];if(cond==="prioMine")o.diamond=1;
+  if(cond==="unpavedMine")o.unpaved=["S"];if(cond==="unpavedTheirs")o.unpaved=[arm];
+  return {svg:scene(o),q:STR.g.sceneQ(STR.g.cond[cond],KIND(kind)),o:STR.yn,a:yes?0:1,e:STR.g.sceneE(cond,arm,KIND(kind))};
+ }},
+{id:"g:tram",t:"priority",params:cart(["E","W"],[false,true],[0,1,2,3]),
+ make:([arm,teeth,rot])=>({svg:scene({rot,rails:1,teeth:teeth?["E","W"]:[],v:[YOU,{arm,kind:"tram",l:"B"}]}),q:STR.g.tramQ(teeth),o:STR.yn,a:teeth?1:0,e:STR.g.tramE(teeth)})},
+{id:"g:three",t:"priority",params:cart([["car","car"],["car","bike"],["bike","car"],["bike","bike"]],["none","teethMine","teethTheirs"],[0,1,2,3]),
+ make:([[kb,kc],cond,rot])=>{
+  const o={rot,v:[YOU,{arm:"E",kind:kb,l:"B"},{arm:"W",kind:kc,l:"C"}]};
+  if(cond==="teethMine")o.teeth=["S","N"];if(cond==="teethTheirs")o.teeth=["E","W"];
+  return {svg:scene(o),q:STR.g.threeQ(STR.g.cond[cond]),o:STR.g.threeO,a:{none:0,teethMine:1,teethTheirs:2}[cond],shuffle:1,e:STR.g.threeE[cond]};
+ }},
+{id:"g:turn",t:"priority",params:cart(["car","bike"],["youLeft","themLeft"],[0,1,2,3]),
+ make:([kind,who,rot])=>{
+  const v=who==="youLeft"?[{...YOU,turn:"L"},{arm:"N",kind,l:"B"}]:[YOU,{arm:"N",kind,l:"B",turn:"L"}];
+  return {svg:scene({rot,v}),q:STR.g.turnQ(who,KIND(kind)),o:STR.yn,a:who==="youLeft"?0:1,e:STR.g.turnE(who)};
+ }},
+{id:"g:sign",t:"signs",params:SIGNS.map(s=>[s]),
+ make:([s])=>({svg:signSVG(s.svg),q:STR.g.signQ,o:[s.m,...s.d],a:0,shuffle:1,e:s.m+"."})},
+{id:"g:dist",t:"vehicle",params:cart([20,30,40,50,60,70,80,90,100,110,120,130],[1,2,3]),
+ make:([v,t])=>({q:STR.g.distQ(v,t),a:Math.round(v/3.6*t),tol:Math.max(2,Math.round(v/3.6*t*.05)),u:"m",e:STR.g.distE(v,t,Math.round(v/3.6*t))})},
+{id:"g:brake",t:"vehicle",params:cart([30,40,50,60],[6,8,10,12,15],[2,3,0.5]),
+ make:([v0,d0,f])=>({q:STR.g.brakeQ(v0,d0,v0*f),a:d0*f*f,tol:0.5,u:"m",e:STR.g.brakeE(f,d0*f*f)})},
+{id:"g:alcohol",t:"safety",params:cart([1,2,3,4,6,7,8,10,12,15],[0.1,0.3,0.4,0.6,0.7,0.8]),
+ make:([y,p])=>{const lim=y<=4?0.2:0.5;return {q:STR.g.alcQ(y,p),o:STR.yn,a:p<lim?0:1,e:STR.g.alcE(y<=4,lim)}}},
+{id:"g:tread",t:"vehicle",params:[1.0,1.2,1.4,1.5,1.8,2.0,2.5,3.0,4.0].map(x=>[x]),
+ make:([x])=>({q:STR.g.treadQ(x),o:STR.yn,a:x>=1.6?0:1,e:STR.g.treadE})},
+{id:"g:fog",t:"vehicle",params:[10,20,30,40,60,80,100,200].map(x=>[x]),
+ make:([x])=>({q:STR.g.fogQ(x),o:STR.yn,a:x<50?0:1,e:STR.g.fogE})},
+{id:"g:gap",t:"vehicle",params:[0.5,1,1.5,2.5,3,4].map(x=>[x]),
+ make:([x])=>({q:STR.g.gapQ(x),o:STR.yn,a:x>=2?0:1,e:STR.g.gapE})},
+{id:"g:park",t:"parking",params:[1,2,3,4,6,7,8,10,15].map(x=>[x]),
+ make:([x])=>({q:STR.g.parkQ(x),o:STR.yn,a:x>5?0:1,e:STR.g.parkE})},
+{id:"g:child",t:"safety",params:[90,100,110,120,125,130,140,145,150,160].map(x=>[x]),
+ make:([x])=>({q:STR.g.childQ(x),o:STR.yn,a:x<135?0:1,e:STR.g.childE})},
+{id:"g:mass",t:"rules",params:[1500,2500,3000,3400,3600,4000,4500,5000].map(x=>[x]),
+ make:([x])=>({q:STR.g.massQ(x),o:STR.yn,a:x<=3500?0:1,e:STR.g.massE})},
+{id:"g:pass",t:"rules",params:[3,4,5,6,7,8,9,10,11,12].map(x=>[x]),
+ make:([x])=>({q:STR.g.passQ(x),o:STR.yn,a:x<=8?0:1,e:STR.g.passE})},
+{id:"g:mwtime",t:"speed",params:[7,8,9,10,11,12,13,14,15,16,17,18,20,21,22,23].map(x=>[x]),
+ make:([h])=>({q:STR.g.mwQ(h),a:h<19?100:130,u:"km/h",e:STR.g.mwE})},
+{id:"g:road",t:"speed",params:STR.g.roads.map(r=>[r]),
+ make:([r])=>({q:STR.g.roadQ(r[0]),a:r[1],u:"km/h",e:r[2]})}
+];
+const genCount=()=>GEN.reduce((s,g)=>s+g.params.length,0);
+
+/* ---------- pool ---------- */
+const EXAM_MIX={priority:8,hazard:7,signs:5,speed:4,parking:4,motorway:4,overtake:3,people:4,safety:4,vehicle:4,rules:3};
+const PASS=35,TARGET=44,DAILY=30;
+const TOPICS=STR.topics,LESSONS=STR.lessons,U=STR.ui;
+const POOL=[...QB.items,...GEN.map(g=>({id:g.id,t:g.t,fam:g}))];
+const byTopic=t=>POOL.filter(p=>p.t===t);
+function inst(p,pi){
+ let q;
+ if(p.fam){const i=pi??Math.floor(Math.random()*p.fam.params.length);q={...p,...p.fam.make(p.fam.params[i]),pi:i}}
+ else q={...p};
+ if(q.o&&(q.shuffle||(q.o.length>2&&q.t!=="hazard"))){
+  const idx=q.o.map((_,i)=>i).sort(()=>Math.random()-.5);
+  q={...q,o:idx.map(i=>q.o[i]),a:idx.indexOf(q.a)};
+ }
+ return q;
+}
+
+/* ---------- state ---------- */
+const KEY="theory-drill-v2";
+const blank=()=>({q:{},t:{},tick:0,relearn:[],lessonAt:{},exams:[],days:{}});
+let S;try{S=Object.assign(blank(),JSON.parse(localStorage.getItem(KEY))||{})}catch(e){S=blank()}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const rec=id=>S.q[id]||(S.q[id]={b:0,s:0,w:0,l:-99});
+const acc=t=>{const a=S.t[t]||[];return a.length?a.reduce((x,y)=>x+y,0)/a.length:null};
+const today=()=>{const d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()};
+function streak(){let n=0;const d=new Date();for(;;){const k=d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();if((S.days[k]||0)>0){n++;d.setDate(d.getDate()-1)}else break}return n}
+function mastery(t){
+ const qs=byTopic(t),cov=qs.filter(p=>S.q[p.id]&&S.q[p.id].b>=1).length/qs.length,a=acc(t);
+ return a==null?0:a*Math.min(1,cov*1.4);
+}
+const readiness=()=>Math.round(Object.keys(TOPICS).reduce((s,t)=>s+mastery(t),0)/Object.keys(TOPICS).length*100);
+function record(q,ok){
+ const r=rec(q.id);r.s++;r.l=S.tick;S.tick++;
+ if(ok)r.b=Math.min(5,r.b+1);else{r.b=0;r.w++;S.relearn=S.relearn.filter(x=>x.id!==q.id);S.relearn.push({id:q.id,pi:q.pi,due:S.tick+3+Math.floor(Math.random()*3)})}
+ (S.t[q.t]=S.t[q.t]||[]).push(ok?1:0);if(S.t[q.t].length>15)S.t[q.t].shift();
+ const d=today();S.days[d]=(S.days[d]||0)+1;
+ save();
+}
+function pick(pool,lastId){
+ const due=S.relearn.find(r=>r.due<=S.tick&&r.id!==lastId&&pool.some(p=>p.id===r.id));
+ if(due){S.relearn=S.relearn.filter(r=>r!==due);return [pool.find(p=>p.id===due.id),due.pi]}
+ let tot=0;const ws=pool.map(p=>{
+  const r=S.q[p.id];const base=!r||!r.s?2.2:[4,2.5,1.4,.8,.4,.2][r.b];
+  const a=acc(p.t);const tf=1+3*(1-(a==null?.5:a));
+  const fresh=p.id===lastId?0:(r&&S.tick-r.l<(p.fam?2:6)?.04:1);
+  const w=base*tf*fresh*(p.fam?4:1);tot+=w;return w});
+ let x=Math.random()*tot;for(let i=0;i<pool.length;i++){x-=ws[i];if(x<=0)return [pool[i]]}
+ return [pool[pool.length-1]];
+}
+const mistakes=()=>POOL.filter(p=>S.q[p.id]&&S.q[p.id].w>0&&S.q[p.id].b<3);
+
+/* ---------- views ---------- */
+const app=document.getElementById("app"),hstat=document.getElementById("hstat");
+let sess=null;
+const cls=v=>v<.5?"lo":v<.8?"mid":"hi";
+const pct=v=>Math.round(v*100)+"%";
+const H=(s)=>{app.innerHTML=s;window.scrollTo(0,0)};
+function home(){
+ sess=null;hstat.textContent="";
+ const rd=readiness(),m=mistakes().length,ans=Object.values(S.q).reduce((s,r)=>s+r.s,0);
+ const last=S.exams[S.exams.length-1],td=S.days[today()]||0,st=streak();
+ const rows=Object.entries(TOPICS).map(([t,n])=>{const v=mastery(t);return `<div class="trow"><span>${n}</span><div class="bar ${cls(v)}"><i style="width:${pct(v)}"></i></div><span class="pct">${pct(v)}</span></div>`}).join("");
+ H(`
+ <section class="panel ready">
+  <div class="gauge">${rd}<small>%</small></div>
+  <div style="min-width:0;flex:1"><div class="lbl">${U.readiness}</div>
+  <div class="muted" style="font-size:.92rem">${ans?U.answers(ans)+(last!=null?U.lastExam(last):"")+". "+U.aim:U.start}</div>
+  <div class="daily"><div class="bar ${td>=DAILY?"hi":""}"><i style="width:${Math.min(100,td/DAILY*100)}%"></i></div><span>${U.today(td,DAILY)}${U.streak(st)}</span></div></div>
+ </section>
+ <section class="modes">
+  <button class="mode primary" data-go="smart"><b>${U.smart}</b><span>${U.smartD}</span></button>
+  <button class="mode" data-go="weak" ${m?"":"disabled"}><b>${U.weak}</b><span>${U.weakD(m)}</span></button>
+  <button class="mode" data-go="exam"><b>${U.exam}</b><span>${U.examD}</span></button>
+  <button class="mode" data-go="scenes"><b>${U.scenes}</b><span>${U.scenesD}</span></button>
+  <button class="mode" data-go="signs"><b>${U.signsM}</b><span>${U.signsD}</span></button>
+  <button class="mode wide" data-go="learn"><b>${U.learn}</b><span>${U.learnD}</span></button>
+ </section>
+ <section class="panel"><div class="row" style="justify-content:space-between;margin-bottom:6px"><h2>${U.topics}</h2><span class="lbl">${U.mastery}</span></div>${rows}</section>
+ <p class="muted small">${U.bank(QB.items.length,genCount())}. ${U.install}</p>
+ <p class="muted small">${U.disclaimer}</p>
+ <div class="row"><button class="btn ghost" id="reset">${U.reset}</button></div>`);
+ app.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
+ const rs=document.getElementById("reset");rs.onclick=()=>{if(rs.dataset.c){S=blank();save();home()}else{rs.dataset.c=1;rs.textContent=U.resetSure;rs.className="btn warn"}};
+}
+function go(m){
+ if(m==="learn")return learn();
+ if(m==="exam")return startExam();
+ let pool=POOL,label=U.smart;
+ if(m==="weak"){pool=mistakes();label=U.weak;if(!pool.length)return home()}
+ if(m==="scenes"){pool=POOL.filter(p=>p.fam&&p.t==="priority");label=U.scenes}
+ if(m==="signs"){pool=POOL.filter(p=>p.t==="signs");label=U.signsM}
+ if(m.startsWith("topic:")){const t=m.slice(6);pool=byTopic(t);label=TOPICS[t]}
+ sess={mode:m,pool,label,n:0,ok:0,missedT:{},last:null};
+ next();
+}
+function next(){
+ if(sess.mode==="weak"){sess.pool=mistakes();if(!sess.pool.length)return summary()}
+ const [p,pi]=pick(sess.pool,sess.last);sess.last=p.id;
+ const again=S.q[p.id]&&S.q[p.id].w>0&&S.q[p.id].b===0;
+ sess.cur=inst(p,pi);render(sess.cur,again);
+}
+function head(){hstat.textContent=sess.exam?U.examProg(sess.i+1):U.counter(sess.ok,sess.n)}
+function render(q,again){
+ head();
+ const opts=q.o?(q.t==="hazard"?`<div class="hz">${q.o.map((o,i)=>`<button class="opt" data-i="${i}">${o}</button>`).join("")}</div>`
+  :`<div class="opts">${q.o.map((o,i)=>`<button class="opt" data-i="${i}"><span class="k">${String.fromCharCode(65+i)}</span><span>${o}</span></button>`).join("")}</div>`)
+  :`<form class="num" id="nf"><input id="numin" inputmode="decimal" autocomplete="off" placeholder="${U.answer}" aria-label="${U.answer}"><span class="muted">${q.u||""}</span><button class="btn">${U.check}</button></form>`;
+ H(`
+ <div class="prog"><span class="lbl">${sess.exam?U.exam:sess.label}</span><button class="btn ghost" id="quit">${sess.exam?U.stopExam:U.finish}</button></div>
+ <section class="panel qpanel">
+  <div class="row"><span class="chip">${TOPICS[q.t]}</span>${again?`<span class="chip again">${U.missed}</span>`:""}</div>
+  ${q.svg||""}
+  <div class="qtext">${q.t==="hazard"?U.whatDo:""}${q.q}</div>
+  ${opts}
+ </section><div id="after"></div>`);
+ document.getElementById("quit").onclick=()=>sess.exam?finishExam():summary();
+ if(q.o)app.querySelectorAll(".opt").forEach(b=>b.onclick=()=>answer(+b.dataset.i));
+ else{const f=document.getElementById("nf"),inp=document.getElementById("numin");f.onsubmit=e=>{e.preventDefault();const v=parseFloat(inp.value.replace(",","."));if(isNaN(v))return;answer(v)}}
+}
+const isRight=(q,v)=>q.o?v===q.a:Math.abs(v-q.a)<=(q.tol||1e-9);
+const fmt=n=>String(n).replace(".",STR.lang==="nl"?",":".");
+function answer(v){
+ const q=sess.cur,ok=isRight(q,v);
+ record(q,ok);
+ if(sess.exam){sess.res.push({q,ok,v});sess.i++;if(sess.i>=sess.qs.length)return finishExam();sess.cur=inst(sess.qs[sess.i]);return render(sess.cur)}
+ sess.n++;if(ok)sess.ok++;else sess.missedT[q.t]=(sess.missedT[q.t]||0)+1;head();
+ if(q.o)app.querySelectorAll(".opt").forEach(b=>{const i=+b.dataset.i;b.disabled=true;if(i===q.a)b.classList.add("ok");else if(i===v)b.classList.add("bad")});
+ else{document.getElementById("numin").disabled=true;document.querySelector("#nf .btn").remove()}
+ const right=q.o?q.o[q.a]:`${fmt(q.a)} ${q.u||""}`;
+ let lesson="";
+ if(!ok){const a=acc(q.t),n=(S.t[q.t]||[]).length;
+  if(n>=3&&a<.6&&S.tick-(S.lessonAt[q.t]??-99)>12){S.lessonAt[q.t]=S.tick;save();
+   lesson=`<div class="lesson"><div class="lbl">${U.quick(TOPICS[q.t])}</div><div class="muted small">${U.quickD}</div><ul>${LESSONS[q.t].map(x=>`<li>${x}</li>`).join("")}</ul></div>`}}
+ document.getElementById("after").innerHTML=`<div class="stack">
+  <div class="fb ${ok?"":"bad"}"><h3>${ok?U.correct:U.wrong(right)}</h3><div>${q.e}</div></div>
+  ${lesson}
+  <div class="row"><button class="btn" id="nx">${U.next}</button>${!ok&&!lesson?`<button class="btn ghost" id="lt">${U.rulesFor(TOPICS[q.t])}</button>`:""}</div></div>`;
+ const nx=document.getElementById("nx");nx.onclick=next;
+ const lt=document.getElementById("lt");if(lt)lt.onclick=()=>{lt.outerHTML=`<div class="lesson" style="width:100%"><div class="lbl">${TOPICS[q.t]}</div><ul>${LESSONS[q.t].map(x=>`<li>${x}</li>`).join("")}</ul></div>`};
+ document.getElementById("after").scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+function summary(){
+ if(!sess||!sess.n)return home();
+ hstat.textContent="";
+ const weak=Object.entries(sess.missedT).sort((a,b)=>b[1]-a[1]);
+ H(`<section class="panel stack">
+  <div class="lbl">${U.done}</div><div class="big">${sess.ok} / ${sess.n}</div>
+  ${weak.length?`<div>${U.mostMissed}${weak.slice(0,3).map(([t,c])=>`<b>${TOPICS[t]}</b> (${c})`).join(", ")}. ${U.moreOften}</div>`:`<div>${U.noMiss}</div>`}
+  <div class="row"><button class="btn" id="again">${U.keep}</button><button class="btn ghost" id="hm">${U.overview}</button></div></section>`);
+ const m=sess.mode;
+ document.getElementById("again").onclick=()=>go(m==="weak"&&!mistakes().length?"smart":m);
+ document.getElementById("hm").onclick=home;
+}
+function learn(){
+ hstat.textContent="";
+ H(`<h1>${U.learnH}</h1><p class="muted" style="margin:0">${U.learnP}</p>
+ <section class="panel">${Object.keys(TOPICS).sort((a,b)=>mastery(a)-mastery(b)).map(t=>{const v=mastery(t);return `<details><summary><span>${TOPICS[t]}</span><div class="bar ${cls(v)}"><i style="width:${pct(v)}"></i></div><span class="pct">${pct(v)}</span></summary><ul>${LESSONS[t].map(x=>`<li>${x}</li>`).join("")}</ul><button class="btn" data-t="${t}">${U.drill(TOPICS[t])}</button></details>`}).join("")}</section>
+ <div><button class="btn ghost" id="hm">${U.back}</button></div>`);
+ app.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>go("topic:"+b.dataset.t));
+ document.getElementById("hm").onclick=home;
+}
+const shuf=a=>a.map(x=>[Math.random(),x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
+function startExam(){
+ let qs=[];
+ for(const[t,n]of Object.entries(EXAM_MIX)){
+  const fams=byTopic(t).filter(p=>p.fam),hand=shuf(byTopic(t).filter(p=>!p.fam));
+  const nf=fams.length?Math.min(Math.ceil(n/3),n):0;
+  const g=Array.from({length:nf},()=>fams[Math.floor(Math.random()*fams.length)]);
+  qs.push(...g,...hand.slice(0,n-nf));
+ }
+ qs=shuf(qs);
+ sess={exam:true,qs,i:0,res:[]};sess.cur=inst(qs[0]);render(sess.cur);
+}
+function finishExam(){
+ const res=sess.res,score=res.filter(r=>r.ok).length,done=res.length;
+ if(done===50){S.exams.push(score);save()}
+ hstat.textContent="";
+ const wrong=res.filter(r=>!r.ok);
+ const verdict=done<50?`<div class="muted">${U.stopped(done)}</div>`:score>=TARGET?`<div class="pass">${U.passMargin}</div>`:score>=PASS?`<div class="pass">${U.passLow(TARGET)}</div>`:`<div class="fail">${U.fail(PASS)}</div>`;
+ const ans=(q,v)=>q.o?q.o[v]:fmt(v)+" "+(q.u||"");
+ H(`<section class="panel stack">
+  <div class="lbl">${U.result}</div><div class="big ${score>=PASS&&done===50?"pass":"fail"}">${score} / ${done||50}</div>${verdict}
+  <div class="row"><button class="btn" id="fx" ${wrong.length?"":"disabled"}>${U.fix}</button><button class="btn ghost" id="hm">${U.overview}</button></div></section>
+ ${wrong.length?`<section class="panel"><h2>${U.review}</h2>${wrong.map(r=>`<div class="rev"><span class="chip">${TOPICS[r.q.t]}</span>${r.q.svg?`<div class="revsvg">${r.q.svg}</div>`:""}<p class="revq">${r.q.q}</p><div>${U.yours}<span class="fail">${ans(r.q,r.v)}</span> · ${U.right}<span class="pass">${ans(r.q,r.q.a)}</span></div><div class="muted" style="margin-top:4px">${r.q.e}</div></div>`).join("")}</section>`:""}`);
+ document.getElementById("hm").onclick=home;
+ const fx=document.getElementById("fx");if(fx)fx.onclick=()=>go("weak");
+ sess=null;
+}
+const hb=document.getElementById("home");hb.onclick=home;hb.onkeydown=e=>{if(e.key==="Enter")home()};
+document.documentElement.lang=STR.lang;
+home();
+if("serviceWorker" in navigator&&location.protocol==="https:"&&!location.hostname.endsWith("claude.ai")&&!location.hostname.includes("claudeusercontent")){
+ navigator.serviceWorker.register("sw.js").catch(()=>{});
+}
+
+</script>
+
+</body></html>

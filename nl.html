@@ -801,7 +801,7 @@ const txt=(t,size,fill="#111",y=60)=>`<text x="60" y="${y}" text-anchor="middle"
 const arrow=(rot)=>`<g transform="rotate(${rot} 60 60)"><path d="M60,92 V40 M40,58 L60,34 L80,58" stroke="#fff" stroke-width="11" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>`;
 const car=(x,c)=>`<g transform="translate(${x} 62)"><rect x="-13" y="-10" width="26" height="16" rx="4" fill="${c}"/><rect x="-9" y="-17" width="18" height="10" rx="3" fill="${c}"/><circle cx="-8" cy="7" r="3.5" fill="${c}"/><circle cx="8" cy="7" r="3.5" fill="${c}"/></g>`;
 const SIGNS=[
- ...[30,50,60,70,80,100,120].map(n=>({id:"spd"+n,svg:disc("#fff",1,txt(n,n>99?36:44)),m:STR.sg.speed(n),d:[STR.sg.advice(n),STR.sg.minimum(n)]})),
+ ...[50,130].map(n=>({id:"spd"+n,m:STR.sg.speed(n),d:[STR.sg.advice(n),STR.sg.minimum(n)]})),
  {id:"noentry",svg:disc(RED,0,`<rect x="20" y="50" width="80" height="20" fill="#fff"/>`),...STR.sg.noentry},
  {id:"closed",svg:disc("#fff",1),...STR.sg.closed},
  {id:"nopark",svg:disc(BLU,1,`<line x1="25" y1="25" x2="95" y2="95" stroke="${RED}" stroke-width="10"/>`),...STR.sg.nopark},
@@ -812,8 +812,7 @@ const SIGNS=[
  {id:"stop",svg:`<polygon points="38,6 82,6 114,38 114,82 82,114 38,114 6,82 6,38" fill="${RED}" stroke="#fff" stroke-width="4"/>${txt("STOP",30,"#fff")}`,...STR.sg.stop},
  {id:"noovertake",svg:disc("#fff",1,car(42,RED)+car(78,"#111")),...STR.sg.noovertake},
  {id:"oneway",svg:`<rect x="8" y="22" width="104" height="76" rx="6" fill="${BLU}"/><path d="M60,88 V40 M44,56 L60,36 L76,56" stroke="#fff" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`,...STR.sg.oneway},
- {id:"mright",svg:disc(BLU,0,arrow(90)),...STR.sg.mright},
- {id:"mleft",svg:disc(BLU,0,arrow(-90)),...STR.sg.mleft},
+ {id:"mright",...STR.sg.mright},
  {id:"mstraight",svg:disc(BLU,0,arrow(0)),...STR.sg.mstraight},
  {id:"cycle",svg:disc(BLU,0,`<g stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="38" cy="72" r="14"/><circle cx="82" cy="72" r="14"/><path d="M38,72 L54,48 L72,48 L82,72 M54,48 L62,72 L38,72 M50,40 H60 M72,48 L68,38"/></g>`),...STR.sg.cycle},
  {id:"park",svg:`<rect x="10" y="10" width="100" height="100" rx="8" fill="${BLU}"/>${txt("P",72,"#fff",62)}`,...STR.sg.park},
@@ -825,6 +824,63 @@ const SIGNS=[
  {id:"height",svg:disc("#fff",1,txt("3.5m",26)+`<polygon points="52,26 68,26 60,36" fill="#111"/><polygon points="52,94 68,94 60,84" fill="#111"/>`),...STR.sg.height},
  {id:"rail",svg:`<g transform="rotate(35 60 60)"><rect x="2" y="51" width="116" height="18" fill="#fff" stroke="${RED}" stroke-width="4"/></g><g transform="rotate(-35 60 60)"><rect x="2" y="51" width="116" height="18" fill="#fff" stroke="${RED}" stroke-width="4"/></g>`,...STR.sg.rail}
 ];
+const OFF={
+"stop": "https://upload.wikimedia.org/wikipedia/commons/6/66/Nederlands_verkeersbord_B7.svg",
+"giveway": "https://upload.wikimedia.org/wikipedia/commons/f/f1/Nederlands_verkeersbord_B6.svg",
+"noentry": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Nederlands_verkeersbord_C2.svg",
+"closed": "https://upload.wikimedia.org/wikipedia/commons/3/31/Nederlands_verkeersbord_C1.svg",
+"oneway": "https://upload.wikimedia.org/wikipedia/commons/f/f5/Nederlands_verkeersbord_C3.svg",
+"mright": "https://upload.wikimedia.org/wikipedia/commons/1/11/Nederlands_verkeersbord_D5.svg",
+"mstraight": "https://upload.wikimedia.org/wikipedia/commons/f/f4/Nederlands_verkeersbord_D4.svg",
+"nopark": "https://upload.wikimedia.org/wikipedia/commons/8/8b/Nederlands_verkeersbord_E1.svg",
+"nostop": "https://upload.wikimedia.org/wikipedia/commons/5/5c/Nederlands_verkeersbord_E2.svg",
+"prio": "https://upload.wikimedia.org/wikipedia/commons/8/8b/Nederlands_verkeersbord_B1.svg",
+"prioend": "https://upload.wikimedia.org/wikipedia/commons/1/1d/Nederlands_verkeersbord_B2.svg",
+"cycle": "https://upload.wikimedia.org/wikipedia/commons/c/cd/Nederlands_verkeersbord_G11.svg",
+"cyclemoped": "https://upload.wikimedia.org/wikipedia/commons/d/da/Nederlands_verkeersbord_G12a.svg",
+"noovertake": "https://upload.wikimedia.org/wikipedia/commons/a/af/Nederlands_verkeersbord_F1.svg",
+"truck": "https://upload.wikimedia.org/wikipedia/commons/f/f9/Nederlands_verkeersbord_C7.svg",
+"height": "https://upload.wikimedia.org/wikipedia/commons/d/dc/Nederlands_verkeersbord_C19.svg",
+"deadend": "https://upload.wikimedia.org/wikipedia/commons/8/8c/Nederlands_verkeersbord_L8.svg",
+"park": "https://upload.wikimedia.org/wikipedia/commons/7/78/Nederlands_verkeersbord_E4.svg",
+"wprio": "https://upload.wikimedia.org/wikipedia/commons/d/da/Nederlands_verkeersbord_B3.svg",
+"wcross": "https://upload.wikimedia.org/wikipedia/commons/e/eb/Nederlands_verkeersbord_J8.svg",
+"roundabout": "https://upload.wikimedia.org/wikipedia/commons/6/6f/Nederlands_verkeersbord_J9.svg",
+"wlights": "https://upload.wikimedia.org/wikipedia/commons/8/8a/Nederlands_verkeersbord_J32.svg",
+"wdanger": "https://upload.wikimedia.org/wikipedia/commons/f/f4/Nederlands_verkeersbord_J37.svg",
+"bump": "https://upload.wikimedia.org/wikipedia/commons/b/b2/Nederlands_verkeersbord_J38.svg",
+"barrier": "https://upload.wikimedia.org/wikipedia/commons/a/ae/Nederlands_verkeersbord_J10.svg",
+"rail": "https://upload.wikimedia.org/wikipedia/commons/d/d7/Nederlands_verkeersbord_J12.svg",
+"autoweg": "https://upload.wikimedia.org/wikipedia/commons/b/b6/Nederlands_verkeersbord_G3.svg",
+"motorway": "https://upload.wikimedia.org/wikipedia/commons/2/2c/Nederlands_verkeersbord_G1.svg",
+"placeEnd": "https://upload.wikimedia.org/wikipedia/commons/d/da/Nederlands_verkeersbord_H2.svg",
+"zone30": "https://upload.wikimedia.org/wikipedia/commons/e/e6/Nederlands_verkeersbord_A1_30_Zone.svg",
+"advisory": "https://upload.wikimedia.org/wikipedia/commons/f/f9/Nederlands_verkeersbord_A4.svg",
+"zebraSign": "https://upload.wikimedia.org/wikipedia/commons/1/1a/Nederlands_verkeersbord_L2.svg",
+"wcyclist": "https://upload.wikimedia.org/wikipedia/commons/8/83/Nederlands_verkeersbord_J24.svg",
+"wzebra": "https://upload.wikimedia.org/wikipedia/commons/7/7e/Nederlands_verkeersbord_J22.svg",
+"wnarrow": "https://upload.wikimedia.org/wikipedia/commons/a/a2/Nederlands_verkeersbord_J17.svg",
+"wtwoway": "https://upload.wikimedia.org/wikipedia/commons/0/01/Nederlands_verkeersbord_J29.svg",
+"wbend": "https://upload.wikimedia.org/wikipedia/commons/8/82/Nederlands_verkeersbord_J2.svg",
+"wskid": "https://upload.wikimedia.org/wikipedia/commons/9/94/Nederlands_verkeersbord_J20.svg",
+"wtram": "https://upload.wikimedia.org/wikipedia/commons/2/25/Nederlands_verkeersbord_J14.svg",
+"weight": "https://upload.wikimedia.org/wikipedia/commons/f/f4/Nederlands_verkeersbord_C21.svg",
+"trailer": "https://upload.wikimedia.org/wikipedia/commons/e/ed/Nederlands_verkeersbord_C10.svg",
+"nobike": "https://upload.wikimedia.org/wikipedia/commons/d/df/Nederlands_verkeersbord_C14.svg",
+"footpath": "https://upload.wikimedia.org/wikipedia/commons/0/0a/Nederlands_verkeersbord_G7.svg",
+"parkZone": "https://upload.wikimedia.org/wikipedia/commons/5/5f/Nederlands_verkeersbord_E1_Zone.svg",
+"erf": "https://upload.wikimedia.org/wikipedia/commons/3/3b/Nederlands_verkeersbord_G5.svg",
+"erfend": "https://upload.wikimedia.org/wikipedia/commons/b/b8/Nederlands_verkeersbord_G6.svg",
+"children": "https://upload.wikimedia.org/wikipedia/commons/8/81/Nederlands_verkeersbord_J21.svg",
+"deer": "https://upload.wikimedia.org/wikipedia/commons/f/f1/Nederlands_verkeersbord_J27.svg",
+"roadworks2": "https://upload.wikimedia.org/wikipedia/commons/2/20/Nederlands_verkeersbord_J16.svg",
+"cow": "https://upload.wikimedia.org/wikipedia/commons/f/ff/Nederlands_verkeersbord_J28.svg",
+"bluezone": "https://upload.wikimedia.org/wikipedia/commons/4/4c/Nederlands_verkeersbord_E10.svg",
+"disabled": "https://upload.wikimedia.org/wikipedia/commons/7/7a/Nederlands_verkeersbord_E6.svg",
+"spd50": "https://upload.wikimedia.org/wikipedia/commons/7/70/Nederlands_verkeersbord_A1.svg",
+"spd130": "https://upload.wikimedia.org/wikipedia/commons/e/e1/Nederlands_verkeersbord_A1_130.svg"
+};
+const pic=k=>OFF[k]?`<img class="sign" src="${OFF[k]}" alt="${STR.signAria}" loading="eager">`:signSVG(PICS[k]);
 const signSVG=s=>`<svg viewBox="0 0 120 120" class="sign" role="img" aria-label="${STR.signAria}">${s}</svg>`;
 
 /* ---- families ---- */
@@ -851,7 +907,7 @@ const GEN=[
   return {svg:scene({rot,v}),q:STR.g.turnQ(who,KIND(kind)),o:STR.yn,a:who==="youLeft"?0:1,e:STR.g.turnE(who)};
  }},
 {id:"g:sign",t:"signs",params:SIGNS.map(s=>[s]),
- make:([s])=>({svg:signSVG(s.svg),q:STR.g.signQ,o:[s.m,...s.d],a:0,shuffle:1,e:s.m+"."})},
+ make:([s])=>({svg:pic(s.id),q:STR.g.signQ,o:[s.m,...s.d],a:0,shuffle:1,e:s.m+"."})},
 {id:"g:dist",t:"vehicle",params:cart([20,30,40,50,60,70,80,90,100,110,120,130],[1,2,3]),
  make:([v,t])=>({q:STR.g.distQ(v,t),a:Math.round(v/3.6*t),tol:Math.max(2,Math.round(v/3.6*t*.05)),u:"m",e:STR.g.distE(v,t,Math.round(v/3.6*t))})},
 {id:"g:brake",t:"vehicle",params:cart([30,40,50,60],[6,8,10,12,15],[2,3,0.5]),
@@ -889,13 +945,6 @@ const road=(inner)=>`<rect x="0" y="0" width="120" height="120" fill="${ASP}"/>$
 const matrix=(inner)=>`<rect x="14" y="14" width="92" height="92" rx="6" fill="#0d0d0d"/>${inner}`;
 const tcar=(x,y,c,s=1)=>`<g transform="translate(${x} ${y}) scale(${s})" fill="${c}"><rect x="-22" y="-6" width="44" height="14" rx="4"/><path d="M-14,-6 L-8,-16 H8 L14,-6 Z"/><circle cx="-12" cy="10" r="5"/><circle cx="12" cy="10" r="5"/></g>`;
 const PICS={
- stop:SIGNS.find(s=>s.id==="stop").svg,giveway:SIGNS.find(s=>s.id==="giveway").svg,noentry:SIGNS.find(s=>s.id==="noentry").svg,
- closed:SIGNS.find(s=>s.id==="closed").svg,oneway:SIGNS.find(s=>s.id==="oneway").svg,mright:SIGNS.find(s=>s.id==="mright").svg,
- nopark:SIGNS.find(s=>s.id==="nopark").svg,nostop:SIGNS.find(s=>s.id==="nostop").svg,prio:SIGNS.find(s=>s.id==="prio").svg,
- prioend:SIGNS.find(s=>s.id==="prioend").svg,cycle:SIGNS.find(s=>s.id==="cycle").svg,noovertake:SIGNS.find(s=>s.id==="noovertake").svg,
- height:SIGNS.find(s=>s.id==="height").svg,deadend:SIGNS.find(s=>s.id==="deadend").svg,park:SIGNS.find(s=>s.id==="park").svg,
- wprio:SIGNS.find(s=>s.id==="wprio").svg,wcross:SIGNS.find(s=>s.id==="wcross").svg,wlights:SIGNS.find(s=>s.id==="wlights").svg,
- wdanger:SIGNS.find(s=>s.id==="wdanger").svg,rail:SIGNS.find(s=>s.id==="rail").svg,
  teeth:road(`<line x1="60" y1="0" x2="60" y2="120" stroke="${WH}" stroke-width="3" stroke-dasharray="12 10"/>`+[10,30,50,70,90].map(x=>`<polygon points="${x},40 ${x+16},40 ${x+8},58" fill="${WH}"/>`).join("")),
  truck:disc("#fff",1,`<g fill="${BLK}"><rect x="30" y="44" width="40" height="28"/><path d="M70,52 H82 L90,62 V72 H70 Z"/><circle cx="42" cy="76" r="6"/><circle cx="80" cy="76" r="6"/></g>`),
  autoweg:sq(BLU,tcar(60,64,WH,1.5)),
@@ -948,17 +997,17 @@ const PICS={
  parkPermit:`<rect x="20" y="4" width="80" height="80" rx="6" fill="${BLU}"/>${txt("P",56,WH,46)}<rect x="8" y="88" width="104" height="28" rx="4" fill="#fff" stroke="#333" stroke-width="2"/><text x="60" y="107" text-anchor="middle" font-family="Arial" font-weight="700" font-size="11" fill="${BLK}">vergunninghouders</text>`
 };
 const PICMAP={
- "speed-3":"autoweg","speed-9":"placeEnd","speed-12":"zone30","speed-13":"zone60","speed-14":"mx70","speed-15":"advisory",
+ "speed-3":"autoweg","speed-9":"placeEnd","speed-12":"zone30","speed-14":"mx70","speed-15":"advisory",
  "priority-15":"giveway","priority-33":"prio","priority-37":"stop",
  "signs-1":"stop","signs-2":"giveway","signs-3":"teeth","signs-4":"noentry","signs-5":"closed","signs-6":"oneway","signs-7":"mright",
  "signs-8":"nopark","signs-9":"nostop","signs-10":"prio","signs-11":"prioend","signs-16":"cycle","signs-17":"cyclemoped","signs-18":"noovertake",
- "signs-19":"truck","signs-20":"height","signs-23":"autoweg","signs-24":"motorway","signs-25":"deadend","signs-26":"park",
+ "signs-19":"truck","signs-20":"height","signs-23":"autoweg","signs-24":"motorway","signs-25":"deadend","signs-26":"park","signs-21":"erf","signs-22":"erfend","signs-27":"children","signs-33":"deer","signs-62":"roadworks2","signs-63":"cow",
  "signs-28":"wprio","signs-29":"wcross","signs-30":"roundabout","signs-31":"wlights","signs-32":"wdanger","signs-34":"bump","signs-35":"barrier","signs-36":"rail",
  "signs-37":"lineBroken","signs-38":"lineSolid","signs-39":"lineDashed","signs-40":"hatched","signs-41":"blocks","signs-42":"yellowSolid","signs-43":"yellowBroken",
  "signs-44":"roadworks","signs-45":"bus","signs-46":"mxCross","signs-47":"mxDiag","signs-48":"mxEnd","signs-50":"ptLight","signs-52":"fietsstraat","signs-53":"zebraSign",
  "signs-54":"stopLine","signs-55":"wcyclist","signs-56":"wzebra","signs-57":"wnarrow","signs-58":"wtwoway","signs-59":"wbend","signs-60":"wskid","signs-61":"wtram",
  "signs-65":"zone30","signs-66":"weight","signs-67":"trailer","signs-68":"nobike","signs-69":"footpath","signs-70":"parkZone","signs-71":"roadArrows",
- "parking-15":"yellowSolid","parking-16":"yellowBroken","parking-18":"bus","parking-22":"hatched","parking-23":"parkPlug","parking-25":"park2h","parking-26":"parkPermit",
+ "parking-7":"bluezone","parking-11":"disabled","parking-15":"yellowSolid","parking-16":"yellowBroken","parking-18":"bus","parking-22":"hatched","parking-23":"parkPlug","parking-25":"park2h","parking-26":"parkPermit",
  "motorway-19":"mxGreen","motorway-27":"mx50","overtake-4":"lineSolid","overtake-8":"noovertake",
  "rules-21":"arrowLight","rules-34":"stop","rules-35":"roadLeft","rules-39":"info"
 };
@@ -973,7 +1022,7 @@ function inst(p,pi){
  let q;
  if(p.fam){const i=pi??Math.floor(Math.random()*p.fam.params.length);q={...p,...p.fam.make(p.fam.params[i]),pi:i}}
  else q={...p};
- if(!q.svg&&PICMAP[q.id])q.svg=signSVG(PICS[PICMAP[q.id]]);
+ if(!q.svg&&PICMAP[q.id])q.svg=pic(PICMAP[q.id]);
  if(q.o&&(q.shuffle||(q.o.length>2&&q.t!=="hazard"))){
   const idx=q.o.map((_,i)=>i).sort(()=>Math.random()-.5);
   q={...q,o:idx.map(i=>q.o[i]),a:idx.indexOf(q.a)};
